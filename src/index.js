@@ -1,14 +1,11 @@
 import * as PIXI from 'pixi.js'
 
-let stage = null;
-let renderer = null;
+let stage = new PIXI.Container()
+let renderer = PIXI.autoDetectRenderer(601, 401)
 
 function initialize(){
-  //Create the renderer and stage
-  renderer = PIXI.autoDetectRenderer(601, 401)
-  renderer.backgroundColor = 0xFFFFFF
 
-  stage = new PIXI.Container()
+  renderer.backgroundColor = 0xFFFFFF
 
   //Add the elements to the html
   document.getElementById('BackgroundBox').appendChild(renderer.view)

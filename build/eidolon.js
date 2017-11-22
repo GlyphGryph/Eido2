@@ -31211,15 +31211,12 @@ var PIXI = _interopRequireWildcard(_pixi);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-var stage = null;
-var renderer = null;
+var stage = new PIXI.Container();
+var renderer = PIXI.autoDetectRenderer(601, 401);
 
 function initialize() {
-  //Create the renderer and stage
-  renderer = PIXI.autoDetectRenderer(601, 401);
-  renderer.backgroundColor = 0xFFFFFF;
 
-  stage = new PIXI.Container();
+  renderer.backgroundColor = 0xFFFFFF;
 
   //Add the elements to the html
   document.getElementById('BackgroundBox').appendChild(renderer.view);
