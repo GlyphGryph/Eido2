@@ -3,6 +3,8 @@ import * as PIXI from 'pixi.js'
 function initialize(){
   //Create the renderer and stage
   let renderer = PIXI.autoDetectRenderer(601, 401)
+  renderer.backgroundColor = 0xFFFFFF
+
   let stage = new PIXI.Container()
 
   //Add the elements to the html

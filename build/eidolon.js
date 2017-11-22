@@ -31214,6 +31214,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function initialize() {
   //Create the renderer and stage
   var renderer = PIXI.autoDetectRenderer(601, 401);
+  renderer.backgroundColor = 0xFFFFFF;
+
   var stage = new PIXI.Container();
 
   //Add the elements to the html
