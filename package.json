@@ -4,7 +4,7 @@
   "description": "A monster capturing and battling game.",
   "main": "app.js",
   "scripts": {
-    "build": "babel src -o build/eidolon.js",
+    "build": "browserify src -t babelify -o build/eidolon.js",
     "start": "http-server"
   },
   "repository": {
@@ -21,6 +21,8 @@
     "babel-cli": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
+    "babelify": "^8.0.0",
+    "browserify": "^14.5.0",
     "http-server": "^0.10.0"
   },
   "dependencies": {

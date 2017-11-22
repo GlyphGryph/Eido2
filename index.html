@@ -6,13 +6,16 @@
   </head>
   <body>
     <div id="BackgroundBox" style="overflow:hidden; position: absolute; left: 0px; top: 0px; width: 600px; height: 400px; background-color: #D3D3D3; border-color: black; border-style: solid; border-width: 2px;">
-      <canvas id="GraphicsBox" width="601px" height="401px" style="overflow:hidden; position: absolute; width: 601px; height: 401px; left: 1px; top: 1px;">Your browser requires Canvas support to play this game.</canvas>
       <div id="EventCatcher" style="overflow:scroll; position: absolute; left: -100px; top: -100px; width: 800px; height: 600px;">
         <div style="height: 4000px; width: 10px;"></div>
       </div>
     </div>
     <script>
       /*
+      <canvas id="GraphicsBox" width="601px" height="401px" style="overflow:hidden; position: absolute; width: 601px; height: 401px; left: 1px; top: 1px;">
+        Your browser requires Canvas support to play this game.
+      </canvas>
+
       // For those of you interested in the Kongregate API, take a look at this later on.
       // For now, skip this commented code block.
 
@@ -22,7 +25,7 @@
         kongregate = window.parent.kongregateAPI.getAPI();
       */
       // Initialize
-      startLoading()
+      initialize()
     </script>
   </body>
 </html>
