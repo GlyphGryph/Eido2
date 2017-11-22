@@ -31211,18 +31211,29 @@ var PIXI = _interopRequireWildcard(_pixi);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
+var stage = null;
+var renderer = null;
+
 function initialize() {
   //Create the renderer and stage
-  var renderer = PIXI.autoDetectRenderer(601, 401);
+  renderer = PIXI.autoDetectRenderer(601, 401);
   renderer.backgroundColor = 0xFFFFFF;
 
-  var stage = new PIXI.Container();
+  stage = new PIXI.Container();
 
   //Add the elements to the html
   document.getElementById('BackgroundBox').appendChild(renderer.view);
-  renderer.render(stage);
 
-  //startLoading()
+  PIXI.loader.add("../assets/ovalrun.gif").load(setup);
+}
+
+function setup() {
+
+  var oval = new PIXI.Sprite(PIXI.loader.resources["../assets/ovalrun.gif"].texture);
+
+  stage.addChild(oval);
+
+  renderer.render(stage);
 }
 
 initialize();
