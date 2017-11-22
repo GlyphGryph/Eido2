@@ -1,4 +1,4 @@
-import PIXI from 'pixi.js'
+import * as PIXI from 'pixi.js'
 var gameInterval;
 var gameCanvas;
 var eventCatcherDiv;
@@ -6,13 +6,13 @@ var eventCatcherDiv;
 function initialize(){
   //Create the renderer and stage
   var renderer = PIXI.autoDetectRenderer(601, 401);
-  var stage = new PIXI.Container();
+  //var stage = new PIXI.Container();
 
   //Add the elements to the html
-  document.getElementById('BackgroundBox').appendChild(renderer.view);
-  renderer.render(stage);
+  //document.getElementById('BackgroundBox').appendChild(renderer.view);
+  //renderer.render(stage);
 
-  startLoading()
+  //startLoading()
 }
 
 function startLoading(){
@@ -54,3 +54,5 @@ function runGame(){
   gameCanvas.getContext("2d").clearRect(0, 0, gameCanvas.width, gameCanvas.height);
   drawTheHero(gameCanvas.getContext("2d"));
 }
+
+initialize()

@@ -40540,13 +40540,13 @@ module.exports = {
 };
 
 },{}],189:[function(require,module,exports){
-'use strict';
+"use strict";
 
-var _pixi = require('pixi.js');
+var _pixi = require("pixi.js");
 
-var _pixi2 = _interopRequireDefault(_pixi);
+var PIXI = _interopRequireWildcard(_pixi);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 var gameInterval;
 var gameCanvas;
@@ -40554,14 +40554,14 @@ var eventCatcherDiv;
 
 function initialize() {
   //Create the renderer and stage
-  var renderer = _pixi2.default.autoDetectRenderer(601, 401);
-  var stage = new _pixi2.default.Container();
+  var renderer = PIXI.autoDetectRenderer(601, 401);
+  //var stage = new PIXI.Container();
 
   //Add the elements to the html
-  document.getElementById('BackgroundBox').appendChild(renderer.view);
-  renderer.render(stage);
+  //document.getElementById('BackgroundBox').appendChild(renderer.view);
+  //renderer.render(stage);
 
-  startLoading();
+  //startLoading()
 }
 
 function startLoading() {
@@ -40603,5 +40603,7 @@ function runGame() {
   gameCanvas.getContext("2d").clearRect(0, 0, gameCanvas.width, gameCanvas.height);
   drawTheHero(gameCanvas.getContext("2d"));
 }
+
+initialize();
 
 },{"pixi.js":140}]},{},[189]);
