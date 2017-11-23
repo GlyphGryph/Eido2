@@ -65,7 +65,7 @@ function setup(){
 }
 
 function startGame(){
-  let gameInterval = setInterval(runGame, 120)
+  let gameInterval = setInterval(runGame, 90)
 }
 
 function runGame(){

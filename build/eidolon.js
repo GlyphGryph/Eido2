@@ -31272,7 +31272,7 @@ function setup() {
 }
 
 function startGame() {
-  var gameInterval = setInterval(runGame, 120);
+  var gameInterval = setInterval(runGame, 90);
 }
 
 function runGame() {
