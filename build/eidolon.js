@@ -31213,6 +31213,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 var stage = new PIXI.Container();
 var renderer = PIXI.autoDetectRenderer(601, 401);
+var spriteManager = {};
 
 function initialize() {
 
@@ -31234,25 +31235,54 @@ function loadProgressHandler(loader, resource) {
 }
 
 function setup() {
-  var ovalRunTiles = [];
+  var ovalRunFrames = [];
   for (var ii = 0; ii < 4; ii++) {
-    var texture = PIXI.loader.resources['ovalRun'].texture;
-    texture.frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
-    ovalRunTiles.push(texture);
+    var frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
+    ovalRunFrames.push(frame);
   }
-  var oval = new PIXI.AnimatedSprite(ovalRunTiles);
+  var ovalTexture = PIXI.loader.resources['ovalRun'].texture;
+  ovalTexture.frame = ovalRunFrames[0];
+  var oval = new PIXI.Sprite(ovalTexture);
   oval.position.set(20, 180);
   stage.addChild(oval);
+  spriteManager.oval = {
+    sprite: oval,
+    frames: ovalRunFrames,
+    currentFrame: 0
+  };
 
-  var ovalShadowTiles = [];
+  var ovalShadowFrames = [];
   for (var _ii = 0; _ii < 4; _ii++) {
-    var _texture = PIXI.loader.resources['ovalShadow'].texture;
-    _texture.frame = new PIXI.Rectangle(_ii * 40, 0, 40, 10);
-    ovalShadowTiles.push(_texture);
+    var _frame = new PIXI.Rectangle(_ii * 40, 0, 40, 10);
+    ovalShadowFrames.push(_frame);
   }
-  var ovalShadow = new PIXI.AnimatedSprite(ovalShadowTiles);
-  ovalShadow.position.set(20, 220);
+  var ovalShadowTexture = PIXI.loader.resources['ovalShadow'].texture;
+  ovalShadowTexture.frame = ovalShadowFrames[0];
+  var ovalShadow = new PIXI.Sprite(ovalShadowTexture);
+  ovalShadow.position.set(20, 210);
   stage.addChild(ovalShadow);
+  spriteManager.ovalShadow = {
+    sprite: ovalShadow,
+    frames: ovalShadowFrames,
+    currentFrame: 0
+  };
+
+  renderer.render(stage);
+  startGame();
+}
+
+function startGame() {
+  var gameInterval = setInterval(runGame, 120);
+}
+
+function runGame() {
+  var oval = spriteManager.oval;
+  oval.currentFrame = (oval.currentFrame + 1) % oval.frames.length;
+  oval.sprite.texture.frame = oval.frames[oval.currentFrame];
+
+  var ovalShadow = spriteManager.ovalShadow;
+  ovalShadow.currentFrame = (ovalShadow.currentFrame + 1) % ovalShadow.frames.length;
+  ovalShadow.sprite.texture.frame = ovalShadow.frames[ovalShadow.currentFrame];
 
   renderer.render(stage);
 }
