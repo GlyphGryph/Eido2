@@ -11,18 +11,30 @@ function initialize(){
   document.getElementById('BackgroundBox').appendChild(renderer.view)
 
   PIXI.loader
-    .add("../assets/ovalrun.gif")
+    .add('ovalRun', '../assets/ovalrun.png')
+    .add('ovalShadow', '../assets/ovalshadow.png')
+    .on("progress", loadProgressHandler)
     .load(setup)
+}
 
+function loadProgressHandler(loader, resource) {
+
+  //Display the file `url` currently being loaded
+  console.log("loading: " + resource.name); 
+
+  //Display the percentage of files currently loaded
+  console.log("progress: " + loader.progress + "%"); 
 }
 
 function setup(){
-
-  let oval = new PIXI.Sprite(
-    PIXI.loader.resources["../assets/ovalrun.gif"].texture
+  const oval = new PIXI.Sprite(
+    PIXI.loader.resources['ovalRun'].texture
   )
-
   stage.addChild(oval)
+  const ovalShadow = new PIXI.Sprite(
+    PIXI.loader.resources['ovalShadow'].texture
+  )
+  stage.addChild(ovalShadow)
 
   renderer.render(stage)
 }
