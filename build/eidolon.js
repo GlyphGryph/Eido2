@@ -31234,9 +31234,24 @@ function loadProgressHandler(loader, resource) {
 }
 
 function setup() {
-  var oval = new PIXI.Sprite(PIXI.loader.resources['ovalRun'].texture);
+  var ovalRunTiles = [];
+  for (var ii = 0; ii < 4; ii++) {
+    var texture = PIXI.loader.resources['ovalRun'].texture;
+    texture.frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
+    ovalRunTiles.push(texture);
+  }
+  var oval = new PIXI.AnimatedSprite(ovalRunTiles);
+  oval.position.set(20, 180);
   stage.addChild(oval);
-  var ovalShadow = new PIXI.Sprite(PIXI.loader.resources['ovalShadow'].texture);
+
+  var ovalShadowTiles = [];
+  for (var _ii = 0; _ii < 4; _ii++) {
+    var _texture = PIXI.loader.resources['ovalShadow'].texture;
+    _texture.frame = new PIXI.Rectangle(_ii * 40, 0, 40, 10);
+    ovalShadowTiles.push(_texture);
+  }
+  var ovalShadow = new PIXI.AnimatedSprite(ovalShadowTiles);
+  ovalShadow.position.set(20, 220);
   stage.addChild(ovalShadow);
 
   renderer.render(stage);

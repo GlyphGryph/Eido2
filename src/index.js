@@ -27,13 +27,24 @@ function loadProgressHandler(loader, resource) {
 }
 
 function setup(){
-  const oval = new PIXI.Sprite(
-    PIXI.loader.resources['ovalRun'].texture
-  )
+  let ovalRunTiles = []
+  for(let ii = 0; ii < 4; ii++){
+    const texture = PIXI.loader.resources['ovalRun'].texture
+    texture.frame = new PIXI.Rectangle(ii * 40, 0, 40, 40)
+    ovalRunTiles.push(texture)
+  }
+  const oval = new PIXI.AnimatedSprite(ovalRunTiles)
+  oval.position.set(20, 180)
   stage.addChild(oval)
-  const ovalShadow = new PIXI.Sprite(
-    PIXI.loader.resources['ovalShadow'].texture
-  )
+
+  let ovalShadowTiles = []
+  for(let ii = 0; ii < 4; ii++){
+    const texture = PIXI.loader.resources['ovalShadow'].texture
+    texture.frame = new PIXI.Rectangle(ii * 40, 0, 40, 10)
+    ovalShadowTiles.push(texture)
+  }
+  const ovalShadow = new PIXI.AnimatedSprite(ovalShadowTiles)
+  ovalShadow.position.set(20, 220)
   stage.addChild(ovalShadow)
 
   renderer.render(stage)
