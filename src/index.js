@@ -12,8 +12,7 @@ function initialize(){
   document.getElementById('BackgroundBox').appendChild(renderer.view)
 
   PIXI.loader
-    .add('ovalRun', '../assets/ovalrun.png')
-    .add('ovalShadow', '../assets/ovalshadow.png')
+    .add("assets/eidolonSpritesheet.json")
     .on("progress", loadProgressHandler)
     .load(setup)
 }
@@ -21,19 +20,20 @@ function initialize(){
 function loadProgressHandler(loader, resource) {
 
   //Display the file `url` currently being loaded
-  console.log("loading: " + resource.name); 
+  console.log("loading: " + resource.name);
 
   //Display the percentage of files currently loaded
-  console.log("progress: " + loader.progress + "%"); 
+  console.log("progress: " + loader.progress + "%");
 }
 
 function setup(){
+  const id = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
   let ovalRunFrames = []
   for(let ii = 0; ii < 4; ii++){
     const frame = new PIXI.Rectangle(ii * 40, 0, 40, 40)
     ovalRunFrames.push(frame)
   }
-  const ovalTexture = PIXI.loader.resources['ovalRun'].texture
+  const ovalTexture = id["ovalrun.png"]
   ovalTexture.frame = ovalRunFrames[0]
   const oval = new PIXI.Sprite(ovalTexture)
   oval.position.set(20, 180)
@@ -49,7 +49,7 @@ function setup(){
     const frame = new PIXI.Rectangle(ii * 40, 0, 40, 10)
     ovalShadowFrames.push(frame)
   }
-  const ovalShadowTexture = PIXI.loader.resources['ovalShadow'].texture
+  const ovalShadowTexture = id["ovalshadow.png"]
   ovalShadowTexture.frame = ovalShadowFrames[0]
   const ovalShadow = new PIXI.Sprite(ovalShadowTexture)
   ovalShadow.position.set(20, 210)

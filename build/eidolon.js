@@ -31222,7 +31222,7 @@ function initialize() {
   //Add the elements to the html
   document.getElementById('BackgroundBox').appendChild(renderer.view);
 
-  PIXI.loader.add('ovalRun', '../assets/ovalrun.png').add('ovalShadow', '../assets/ovalshadow.png').on("progress", loadProgressHandler).load(setup);
+  PIXI.loader.add("assets/eidolonSpritesheet.json").on("progress", loadProgressHandler).load(setup);
 }
 
 function loadProgressHandler(loader, resource) {
@@ -31235,12 +31235,13 @@ function loadProgressHandler(loader, resource) {
 }
 
 function setup() {
+  var id = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
   var ovalRunFrames = [];
   for (var ii = 0; ii < 4; ii++) {
     var frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
     ovalRunFrames.push(frame);
   }
-  var ovalTexture = PIXI.loader.resources['ovalRun'].texture;
+  var ovalTexture = id["ovalrun.png"];
   ovalTexture.frame = ovalRunFrames[0];
   var oval = new PIXI.Sprite(ovalTexture);
   oval.position.set(20, 180);
@@ -31256,7 +31257,7 @@ function setup() {
     var _frame = new PIXI.Rectangle(_ii * 40, 0, 40, 10);
     ovalShadowFrames.push(_frame);
   }
-  var ovalShadowTexture = PIXI.loader.resources['ovalShadow'].texture;
+  var ovalShadowTexture = id["ovalshadow.png"];
   ovalShadowTexture.frame = ovalShadowFrames[0];
   var ovalShadow = new PIXI.Sprite(ovalShadowTexture);
   ovalShadow.position.set(20, 210);

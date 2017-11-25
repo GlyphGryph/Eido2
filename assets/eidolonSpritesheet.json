@@ -1,0 +1,30 @@
+{"frames": {
+
+"ovalrun.png":
+{
+	"frame": {"x":0,"y":0,"w":160,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":160,"h":40},
+	"sourceSize": {"w":160,"h":40},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"ovalshadow.png":
+{
+	"frame": {"x":0,"y":40,"w":160,"h":10},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":160,"h":10},
+	"sourceSize": {"w":160,"h":10},
+	"pivot": {"x":0.5,"y":0.5}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "eidolonSpritesheet.png",
+	"format": "RGBA8888",
+	"size": {"w":160,"h":50},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:038ca792555d4bffa59d5b3e958313e9:8ca0ecf8d7870ca805a775cc7858b085:1004ffaa0283c88858f8a1a1773c5eb0$"
+}
+}
