@@ -31203,9 +31203,9 @@ module.exports = {
 };
 
 },{}],172:[function(require,module,exports){
-'use strict';
+"use strict";
 
-var _pixi = require('pixi.js');
+var _pixi = require("pixi.js");
 
 var PIXI = _interopRequireWildcard(_pixi);
 
@@ -31214,6 +31214,43 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 var stage = new PIXI.Container();
 var renderer = PIXI.autoDetectRenderer(601, 401);
 var spriteManager = {};
+var velocity = 10;
+var playerVX = 0;
+var a = void 0,
+    d = {};
+
+function keyboard(keyCode) {
+  var key = {};
+  key.code = keyCode;
+  key.isDown = false;
+  key.isUp = true;
+  key.press = undefined;
+  key.release = undefined;
+  //The `downHandler`
+  key.downHandler = function (event) {
+    if (event.keyCode === key.code) {
+      if (key.isUp && key.press) key.press();
+      key.isDown = true;
+      key.isUp = false;
+    }
+    event.preventDefault();
+  };
+
+  //The `upHandler`
+  key.upHandler = function (event) {
+    if (event.keyCode === key.code) {
+      if (key.isDown && key.release) key.release();
+      key.isDown = false;
+      key.isUp = true;
+    }
+    event.preventDefault();
+  };
+
+  //Attach event listeners
+  window.addEventListener("keydown", key.downHandler.bind(key), false);
+  window.addEventListener("keyup", key.upHandler.bind(key), false);
+  return key;
+}
 
 function initialize() {
 
@@ -31235,7 +31272,33 @@ function loadProgressHandler(loader, resource) {
 }
 
 function setup() {
+
+  //keyboard handlers
+  a = keyboard(65);
+  d = keyboard(68);
+
+  a.press = function () {
+    playerVX = -1 * velocity;
+  };
+
+  a.release = function () {
+    if (!d.isDown) {
+      playerVX = 0;
+    }
+  };
+
+  d.press = function () {
+    playerVX = velocity;
+  };
+
+  d.release = function () {
+    if (!a.isDown) {
+      playerVX = 0;
+    }
+  };
+
   var id = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
+
   var ovalRunFrames = [];
   for (var ii = 0; ii < 4; ii++) {
     var frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
@@ -31276,14 +31339,32 @@ function startGame() {
   var gameInterval = setInterval(runGame, 90);
 }
 
+function collideWithBounds(sprite) {
+  //clip sprite X coordinate to world bounds
+  console.log("not colliding");
+  if (sprite.x < 0) {
+    console.log("colliding");
+    sprite.x = 0;
+  }
+  if (sprite.x + sprite.width > renderer.width) {
+    console.log("colliding");
+    sprite.x = renderer.width - sprite.width;
+  }
+}
+
 function runGame() {
+
   var oval = spriteManager.oval;
   oval.currentFrame = (oval.currentFrame + 1) % oval.frames.length;
   oval.sprite.texture.frame = oval.frames[oval.currentFrame];
+  oval.sprite.x += playerVX;
+  collideWithBounds(oval.sprite);
 
   var ovalShadow = spriteManager.ovalShadow;
   ovalShadow.currentFrame = (ovalShadow.currentFrame + 1) % ovalShadow.frames.length;
   ovalShadow.sprite.texture.frame = ovalShadow.frames[ovalShadow.currentFrame];
+  ovalShadow.sprite.x += playerVX;
+  collideWithBounds(ovalShadow.sprite);
 
   renderer.render(stage);
 }
