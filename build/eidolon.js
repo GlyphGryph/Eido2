@@ -31349,31 +31349,42 @@ var Gob = exports.Gob = function () {
       console.log('terminated gob ' + this.id);
     }
   }, {
+    key: 'moveTo',
+    value: function moveTo(x, y) {
+      this.x = x;
+      this.y = y;
+      var afterCollisions = collideWithBounds(this);
+      this.x = afterCollisions.x;
+      this.y = afterCollisions.y;
+      this.sprite.x = x;
+      this.sprite.y = y;
+    }
+  }, {
     key: 'update',
     value: function update() {
       this.currentFrame = (this.currentFrame + 1) % this.frames.length;
       this.sprite.texture.frame = this.frames[this.currentFrame];
-      //this.sprite.x += playerVX
-      collideWithBounds(this.sprite);
-
-      console.log('updating gob ' + this.id + '. Position: ' + this.x + '/' + this.y);
     }
   }]);
 
   return Gob;
 }();
 
-var rightWall = 400;
-var leftWall = 0;
+var rightWall = 300;
+var leftWall = 20;
 
-function collideWithBounds(sprite) {
-  //clip sprite X coordinate to world bounds
-  if (sprite.x < leftWall) {
-    sprite.x = leftWall;
+function collideWithBounds(gob) {
+  var result = {
+    x: gob.x,
+    y: gob.y
+    //clip sprite X coordinate to world bounds
+  };if (gob.x < leftWall) {
+    result.x = leftWall;
   }
-  if (sprite.x + sprite.width > rightWall) {
-    sprite.x = rightWall - sprite.width;
+  if (gob.x + gob.sprite.width > rightWall) {
+    result.x = rightWall - gob.sprite.width;
   }
+  return result;
 }
 
 },{"pixi.js":129}],173:[function(require,module,exports){
@@ -31388,11 +31399,13 @@ var _gob = require('./gob');
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 var renderer = PIXI.autoDetectRenderer(601, 401);
-var spriteManager = {};
 var velocity = 10;
 var playerVX = 0;
 var a = void 0,
     d = {};
+var playerStartingX = 100;
+var playerStartingY = 180;
+var playerShadowOffset = 30;
 var gobManager = void 0;
 
 function keyboard(keyCode) {
@@ -31485,9 +31498,9 @@ function setup() {
   var ovalTexture = textures["ovalrun.png"];
 
   gobManager.add(new _gob.Gob({
-    id: 'ovalRun',
-    x: 20,
-    y: 180,
+    id: 'player',
+    x: playerStartingX,
+    y: playerStartingY,
     texture: ovalTexture,
     frames: ovalRunFrames,
     currentFrame: 0
@@ -31501,9 +31514,9 @@ function setup() {
   var ovalShadowTexture = textures["ovalshadow.png"];
 
   gobManager.add(new _gob.Gob({
-    id: 'ovalShadow',
-    x: 20,
-    y: 210,
+    id: 'playerShadow',
+    x: playerStartingX,
+    y: playerStartingY + playerShadowOffset,
     texture: ovalShadowTexture,
     frames: ovalShadowFrames,
     currentFrame: 0
@@ -31517,19 +31530,12 @@ function startGame() {
   var gameInterval = setInterval(runGame, 90);
 }
 
-function collideWithBounds(sprite) {
-  //clip sprite X coordinate to world bounds
-  if (sprite.x < 0) {
-    sprite.x = 0;
-  }
-  if (sprite.x + sprite.width > renderer.width) {
-    sprite.x = renderer.width - sprite.width;
-  }
-}
-
 function runGame() {
   gobManager.update();
-
+  var player = gobManager.get('player');
+  player.moveTo(player.x + playerVX, player.y);
+  var shadow = gobManager.get('playerShadow');
+  shadow.moveTo(player.x, player.y + 30);
   renderer.render(gobManager.stage);
 }
 

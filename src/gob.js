@@ -79,25 +79,38 @@ export class Gob{
     console.log(`terminated gob ${this.id}`)
   }
 
+  moveTo(x, y){
+    this.x = x
+    this.y = y
+    const afterCollisions = collideWithBounds(this)
+    this.x = afterCollisions.x
+    this.y = afterCollisions.y
+    this.sprite.x = x
+    this.sprite.y = y
+  }
+
   update(){
     this.currentFrame = (this.currentFrame + 1) % this.frames.length
     this.sprite.texture.frame = this.frames[this.currentFrame]
-    //this.sprite.x += playerVX
-    collideWithBounds(this.sprite)
   }
 }
 
-let rightWall = 400
-let leftWall = 0
+let rightWall = 300
+let leftWall = 20
 
-function collideWithBounds(sprite){
+function collideWithBounds(gob){
+  const result = {
+    x: gob.x,
+    y: gob.y
+  }
   //clip sprite X coordinate to world bounds
-  if (sprite.x < leftWall){
-    sprite.x = leftWall
+  if (gob.x < leftWall){
+    result.x = leftWall
   }
-  if (sprite.x+sprite.width > rightWall){
-    sprite.x = rightWall - sprite.width
+  if (gob.x + gob.sprite.width > rightWall){
+    result.x = rightWall - gob.sprite.width
   }
+  return result
 }
 
 

@@ -5,6 +5,9 @@ const renderer = PIXI.autoDetectRenderer(601, 401)
 const velocity = 10
 let playerVX = 0
 let a,d = {}
+let playerStartingX = 100
+let playerStartingY = 180
+let playerShadowOffset = 30
 let gobManager
 
 function keyboard(keyCode) {
@@ -106,9 +109,9 @@ function setup(){
 
   gobManager.add(
     new Gob({
-      id: 'ovalRun',
-      x: 20,
-      y: 180,
+      id: 'player',
+      x: playerStartingX,
+      y: playerStartingY,
       texture: ovalTexture,
       frames: ovalRunFrames,
       currentFrame: 0
@@ -124,9 +127,9 @@ function setup(){
 
   gobManager.add(
     new Gob({
-      id: 'ovalShadow',
-      x: 20,
-      y: 210,
+      id: 'playerShadow',
+      x: playerStartingX,
+      y: playerStartingY + playerShadowOffset,
       texture: ovalShadowTexture,
       frames: ovalShadowFrames,
       currentFrame: 0
@@ -143,7 +146,10 @@ function startGame(){
 
 function runGame(){
   gobManager.update()
-
+  const player = gobManager.get('player')
+  player.moveTo(player.x + playerVX, player.y)
+  const shadow = gobManager.get('playerShadow')
+  shadow.moveTo(player.x, player.y+30)
   renderer.render(gobManager.stage)
 }
 
