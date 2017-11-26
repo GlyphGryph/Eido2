@@ -10,6 +10,17 @@ let playerStartingY = 180
 let playerShadowOffset = 30
 let gobManager
 
+let rightWall = 300
+let leftWall = 20
+
+let obstacleTracker = {
+  sinceLastSpawn: 29,
+  nextSpawnTime: 30,
+  ids: [],
+  total: 0
+}
+
+
 function keyboard(keyCode) {
   var key = {};
   key.code = keyCode;
@@ -55,7 +66,8 @@ function initialize(){
   document.getElementById('BackgroundBox').appendChild(renderer.view)
 
   PIXI.loader
-    .add("assets/eidolonSpritesheet.json")
+    .add('spritesheet', "assets/eidolonSpritesheet.json")
+    .add('obstacle', "assets/src/obstacle.png")
     .on("progress", loadProgressHandler)
     .load(setup)
 }
@@ -98,7 +110,7 @@ function setup(){
 
   gobManager = new GobManager()
 
-  const textures = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
+  const textures = PIXI.loader.resources["spritesheet"].textures;
 
   let ovalRunFrames = []
   for(let ii = 0; ii < 4; ii++){
@@ -114,7 +126,9 @@ function setup(){
       y: playerStartingY,
       texture: ovalTexture,
       frames: ovalRunFrames,
-      currentFrame: 0
+      currentFrame: 0,
+      xMax: rightWall,
+      xMin: leftWall
     })
   )
 
@@ -150,6 +164,41 @@ function runGame(){
   player.moveTo(player.x + playerVX, player.y)
   const shadow = gobManager.get('playerShadow')
   shadow.moveTo(player.x, player.y+30)
+
+  if(obstacleTracker.sinceLastSpawn > obstacleTracker.nextSpawnTime){
+    const id = `obstacle${obstacleTracker.total}`
+    console.log(`building obstacle #{id}`)
+    obstacleTracker.ids = [
+      ...obstacleTracker.ids,
+      id
+    ]
+    const texture = PIXI.loader.resources['obstacle'].texture;
+    gobManager.add(
+      new Gob({
+        id,
+        x: 320,
+        y: playerStartingY,
+        texture,
+        frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
+        currentFrame: 0
+      })
+    )
+    obstacleTracker.total += 1
+    obstacleTracker.sinceLastSpawn = 0
+  }
+  obstacleTracker.sinceLastSpawn = obstacleTracker.sinceLastSpawn + 1
+
+  for(const obstacleId of obstacleTracker.ids){
+    let gob = gobManager.get(obstacleId)
+    gob.moveTo(gob.x - 6, gob.y)
+    if(gob.x < 0){
+      gobManager.remove(gob.id)
+      obstacleTracker.ids = obstacleTracker.ids.filter( (trackerId) =>{
+        return trackerId !== obstacleId
+      })
+    }
+  }
+
   renderer.render(gobManager.stage)
 }
 

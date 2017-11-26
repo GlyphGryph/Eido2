@@ -35,7 +35,7 @@ export class GobManager{
       }
     })
     // Make sure this gob is remove from reality, run it's teardown logic first
-    gob.terminate(gob)
+    removedGob.terminate()
     return removedGob
   }
 
@@ -57,7 +57,7 @@ export class GobManager{
 }
 
 export class Gob{
-  constructor({id, x, y, texture, frames, currentFrame}){
+  constructor({id, x, y, texture, frames, currentFrame, xMax, xMin}){
     this.id = id
     this.x = x
     this.y = y
@@ -66,6 +66,13 @@ export class Gob{
     this.frames = frames
     this.currentFrame = currentFrame
     this.sprite.position.set(this.x, this.y)
+    this.xLimit
+    if(xMax){
+      this.xMax = xMax
+    }
+    if(xMin){
+      this.xMin = xMin
+    }
   }
 
   initialize(stage){
@@ -82,9 +89,16 @@ export class Gob{
   moveTo(x, y){
     this.x = x
     this.y = y
-    const afterCollisions = collideWithBounds(this)
-    this.x = afterCollisions.x
-    this.y = afterCollisions.y
+    if(this.xMin){
+      if (this.x < this.xMin){
+        this.x = this.xMin
+      }
+    }
+    if(this.xMax){
+      if (this.x + this.sprite.width > this.xMax){
+        this.x = this.xMax - this.sprite.width
+      }
+    }
     this.sprite.x = x
     this.sprite.y = y
   }
@@ -94,23 +108,3 @@ export class Gob{
     this.sprite.texture.frame = this.frames[this.currentFrame]
   }
 }
-
-let rightWall = 300
-let leftWall = 20
-
-function collideWithBounds(gob){
-  const result = {
-    x: gob.x,
-    y: gob.y
-  }
-  //clip sprite X coordinate to world bounds
-  if (gob.x < leftWall){
-    result.x = leftWall
-  }
-  if (gob.x + gob.sprite.width > rightWall){
-    result.x = rightWall - gob.sprite.width
-  }
-  return result
-}
-
-

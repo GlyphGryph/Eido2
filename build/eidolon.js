@@ -31263,7 +31263,7 @@ var GobManager = exports.GobManager = function () {
         }
       });
       // Make sure this gob is remove from reality, run it's teardown logic first
-      gob.terminate(gob);
+      removedGob.terminate();
       return removedGob;
     }
 
@@ -31290,9 +31290,9 @@ var GobManager = exports.GobManager = function () {
 
       try {
         for (var _iterator = this.gobs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var _gob = _step.value;
+          var gob = _step.value;
 
-          _gob.update();
+          gob.update();
         }
       } catch (err) {
         _didIteratorError = true;
@@ -31321,7 +31321,9 @@ var Gob = exports.Gob = function () {
         y = _ref.y,
         texture = _ref.texture,
         frames = _ref.frames,
-        currentFrame = _ref.currentFrame;
+        currentFrame = _ref.currentFrame,
+        xMax = _ref.xMax,
+        xMin = _ref.xMin;
 
     _classCallCheck(this, Gob);
 
@@ -31333,6 +31335,13 @@ var Gob = exports.Gob = function () {
     this.frames = frames;
     this.currentFrame = currentFrame;
     this.sprite.position.set(this.x, this.y);
+    this.xLimit;
+    if (xMax) {
+      this.xMax = xMax;
+    }
+    if (xMin) {
+      this.xMin = xMin;
+    }
   }
 
   _createClass(Gob, [{
@@ -31353,9 +31362,16 @@ var Gob = exports.Gob = function () {
     value: function moveTo(x, y) {
       this.x = x;
       this.y = y;
-      var afterCollisions = collideWithBounds(this);
-      this.x = afterCollisions.x;
-      this.y = afterCollisions.y;
+      if (this.xMin) {
+        if (this.x < this.xMin) {
+          this.x = this.xMin;
+        }
+      }
+      if (this.xMax) {
+        if (this.x + this.sprite.width > this.xMax) {
+          this.x = this.xMax - this.sprite.width;
+        }
+      }
       this.sprite.x = x;
       this.sprite.y = y;
     }
@@ -31370,23 +31386,6 @@ var Gob = exports.Gob = function () {
   return Gob;
 }();
 
-var rightWall = 300;
-var leftWall = 20;
-
-function collideWithBounds(gob) {
-  var result = {
-    x: gob.x,
-    y: gob.y
-    //clip sprite X coordinate to world bounds
-  };if (gob.x < leftWall) {
-    result.x = leftWall;
-  }
-  if (gob.x + gob.sprite.width > rightWall) {
-    result.x = rightWall - gob.sprite.width;
-  }
-  return result;
-}
-
 },{"pixi.js":129}],173:[function(require,module,exports){
 'use strict';
 
@@ -31398,6 +31397,8 @@ var _gob = require('./gob');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 var renderer = PIXI.autoDetectRenderer(601, 401);
 var velocity = 10;
 var playerVX = 0;
@@ -31407,6 +31408,16 @@ var playerStartingX = 100;
 var playerStartingY = 180;
 var playerShadowOffset = 30;
 var gobManager = void 0;
+
+var rightWall = 300;
+var leftWall = 20;
+
+var obstacleTracker = {
+  sinceLastSpawn: 29,
+  nextSpawnTime: 30,
+  ids: [],
+  total: 0
+};
 
 function keyboard(keyCode) {
   var key = {};
@@ -31448,7 +31459,7 @@ function initialize() {
   //Add the elements to the html
   document.getElementById('BackgroundBox').appendChild(renderer.view);
 
-  PIXI.loader.add("assets/eidolonSpritesheet.json").on("progress", loadProgressHandler).load(setup);
+  PIXI.loader.add('spritesheet', "assets/eidolonSpritesheet.json").add('obstacle', "assets/src/obstacle.png").on("progress", loadProgressHandler).load(setup);
 }
 
 function loadProgressHandler(loader, resource) {
@@ -31488,7 +31499,7 @@ function setup() {
 
   gobManager = new _gob.GobManager();
 
-  var textures = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
+  var textures = PIXI.loader.resources["spritesheet"].textures;
 
   var ovalRunFrames = [];
   for (var ii = 0; ii < 4; ii++) {
@@ -31503,7 +31514,9 @@ function setup() {
     y: playerStartingY,
     texture: ovalTexture,
     frames: ovalRunFrames,
-    currentFrame: 0
+    currentFrame: 0,
+    xMax: rightWall,
+    xMin: leftWall
   }));
 
   var ovalShadowFrames = [];
@@ -31536,6 +31549,61 @@ function runGame() {
   player.moveTo(player.x + playerVX, player.y);
   var shadow = gobManager.get('playerShadow');
   shadow.moveTo(player.x, player.y + 30);
+
+  if (obstacleTracker.sinceLastSpawn > obstacleTracker.nextSpawnTime) {
+    var id = 'obstacle' + obstacleTracker.total;
+    console.log('building obstacle #{id}');
+    obstacleTracker.ids = [].concat(_toConsumableArray(obstacleTracker.ids), [id]);
+    var texture = PIXI.loader.resources['obstacle'].texture;
+    gobManager.add(new _gob.Gob({
+      id: id,
+      x: 320,
+      y: playerStartingY,
+      texture: texture,
+      frames: [new PIXI.Rectangle(0, 0, 40, 40)],
+      currentFrame: 0
+    }));
+    obstacleTracker.total += 1;
+    obstacleTracker.sinceLastSpawn = 0;
+  }
+  obstacleTracker.sinceLastSpawn = obstacleTracker.sinceLastSpawn + 1;
+
+  var _loop = function _loop(obstacleId) {
+    var gob = gobManager.get(obstacleId);
+    gob.moveTo(gob.x - 6, gob.y);
+    if (gob.x < 0) {
+      gobManager.remove(gob.id);
+      obstacleTracker.ids = obstacleTracker.ids.filter(function (trackerId) {
+        return trackerId !== obstacleId;
+      });
+    }
+  };
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = obstacleTracker.ids[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var obstacleId = _step.value;
+
+      _loop(obstacleId);
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
   renderer.render(gobManager.stage);
 }
 
