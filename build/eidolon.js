@@ -31203,21 +31203,197 @@ module.exports = {
 };
 
 },{}],172:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _pixi = require("pixi.js");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Gob = exports.GobManager = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _pixi = require('pixi.js');
 
 var PIXI = _interopRequireWildcard(_pixi);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-var stage = new PIXI.Container();
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var GobManager = exports.GobManager = function () {
+  function GobManager() {
+    _classCallCheck(this, GobManager);
+
+    this.gobs = [];
+    this.stage = new PIXI.Container();
+  }
+
+  // Adds a gob from the manager
+  // Arguments:
+  // gob: A Gob instance.
+  //  Can't have the same id as a gob already in the manager
+
+
+  _createClass(GobManager, [{
+    key: 'add',
+    value: function add(gob) {
+      this.gobs = [].concat(_toConsumableArray(this.gobs), [gob]);
+      // Also make this gob exist. Run it's initialize logic
+      gob.initialize(this.stage);
+      // TODO: Throw error if gob has same id
+      return this;
+    }
+
+    // Removes a gob from the manager
+    // Arguments:
+    // id: Gob id
+
+  }, {
+    key: 'remove',
+    value: function remove(id) {
+      var removedGob = null;
+      this.gobs = this.gobs.filter(function (gob) {
+        if (gob.id === id) {
+          removedGob = gob;
+          return false;
+        } else {
+          return true;
+        }
+      });
+      // Make sure this gob is remove from reality, run it's teardown logic first
+      gob.terminate(gob);
+      return removedGob;
+    }
+
+    // Returns a gob from the manager
+    // Arguments:
+    // id: Gob id
+
+  }, {
+    key: 'get',
+    value: function get(id) {
+      return this.gobs.find(function (gob) {
+        return gob.id === id;
+      });
+    }
+
+    // Runs the update function on all gobs
+
+  }, {
+    key: 'update',
+    value: function update() {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.gobs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var _gob = _step.value;
+
+          _gob.update();
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+  }]);
+
+  return GobManager;
+}();
+
+var Gob = exports.Gob = function () {
+  function Gob(_ref) {
+    var id = _ref.id,
+        x = _ref.x,
+        y = _ref.y,
+        texture = _ref.texture,
+        frames = _ref.frames,
+        currentFrame = _ref.currentFrame;
+
+    _classCallCheck(this, Gob);
+
+    this.id = id;
+    this.x = x;
+    this.y = y;
+    texture.frame = frames[currentFrame];
+    this.sprite = new PIXI.Sprite(texture);
+    this.frames = frames;
+    this.currentFrame = currentFrame;
+    this.sprite.position.set(this.x, this.y);
+  }
+
+  _createClass(Gob, [{
+    key: 'initialize',
+    value: function initialize(stage) {
+      this.stage = stage;
+      stage.addChild(this.sprite);
+      console.log('intialized gob ' + this.id);
+    }
+  }, {
+    key: 'terminate',
+    value: function terminate() {
+      this.stage.removeChild(this.sprite);
+      console.log('terminated gob ' + this.id);
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+      this.sprite.texture.frame = this.frames[this.currentFrame];
+      //this.sprite.x += playerVX
+      collideWithBounds(this.sprite);
+
+      console.log('updating gob ' + this.id + '. Position: ' + this.x + '/' + this.y);
+    }
+  }]);
+
+  return Gob;
+}();
+
+var rightWall = 400;
+var leftWall = 0;
+
+function collideWithBounds(sprite) {
+  //clip sprite X coordinate to world bounds
+  if (sprite.x < leftWall) {
+    sprite.x = leftWall;
+  }
+  if (sprite.x + sprite.width > rightWall) {
+    sprite.x = rightWall - sprite.width;
+  }
+}
+
+},{"pixi.js":129}],173:[function(require,module,exports){
+'use strict';
+
+var _pixi = require('pixi.js');
+
+var PIXI = _interopRequireWildcard(_pixi);
+
+var _gob = require('./gob');
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 var renderer = PIXI.autoDetectRenderer(601, 401);
 var spriteManager = {};
 var velocity = 10;
 var playerVX = 0;
 var a = void 0,
     d = {};
+var gobManager = void 0;
 
 function keyboard(keyCode) {
   var key = {};
@@ -31297,41 +31473,43 @@ function setup() {
     }
   };
 
-  var id = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
+  gobManager = new _gob.GobManager();
+
+  var textures = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
 
   var ovalRunFrames = [];
   for (var ii = 0; ii < 4; ii++) {
     var frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
     ovalRunFrames.push(frame);
   }
-  var ovalTexture = id["ovalrun.png"];
-  ovalTexture.frame = ovalRunFrames[0];
-  var oval = new PIXI.Sprite(ovalTexture);
-  oval.position.set(20, 180);
-  stage.addChild(oval);
-  spriteManager.oval = {
-    sprite: oval,
+  var ovalTexture = textures["ovalrun.png"];
+
+  gobManager.add(new _gob.Gob({
+    id: 'ovalRun',
+    x: 20,
+    y: 180,
+    texture: ovalTexture,
     frames: ovalRunFrames,
     currentFrame: 0
-  };
+  }));
 
   var ovalShadowFrames = [];
   for (var _ii = 0; _ii < 4; _ii++) {
     var _frame = new PIXI.Rectangle(_ii * 40, 0, 40, 10);
     ovalShadowFrames.push(_frame);
   }
-  var ovalShadowTexture = id["ovalshadow.png"];
-  ovalShadowTexture.frame = ovalShadowFrames[0];
-  var ovalShadow = new PIXI.Sprite(ovalShadowTexture);
-  ovalShadow.position.set(20, 210);
-  stage.addChild(ovalShadow);
-  spriteManager.ovalShadow = {
-    sprite: ovalShadow,
+  var ovalShadowTexture = textures["ovalshadow.png"];
+
+  gobManager.add(new _gob.Gob({
+    id: 'ovalShadow',
+    x: 20,
+    y: 210,
+    texture: ovalShadowTexture,
     frames: ovalShadowFrames,
     currentFrame: 0
-  };
+  }));
 
-  renderer.render(stage);
+  renderer.render(gobManager.stage);
   startGame();
 }
 
@@ -31341,34 +31519,20 @@ function startGame() {
 
 function collideWithBounds(sprite) {
   //clip sprite X coordinate to world bounds
-  console.log("not colliding");
   if (sprite.x < 0) {
-    console.log("colliding");
     sprite.x = 0;
   }
   if (sprite.x + sprite.width > renderer.width) {
-    console.log("colliding");
     sprite.x = renderer.width - sprite.width;
   }
 }
 
 function runGame() {
+  gobManager.update();
 
-  var oval = spriteManager.oval;
-  oval.currentFrame = (oval.currentFrame + 1) % oval.frames.length;
-  oval.sprite.texture.frame = oval.frames[oval.currentFrame];
-  oval.sprite.x += playerVX;
-  collideWithBounds(oval.sprite);
-
-  var ovalShadow = spriteManager.ovalShadow;
-  ovalShadow.currentFrame = (ovalShadow.currentFrame + 1) % ovalShadow.frames.length;
-  ovalShadow.sprite.texture.frame = ovalShadow.frames[ovalShadow.currentFrame];
-  ovalShadow.sprite.x += playerVX;
-  collideWithBounds(ovalShadow.sprite);
-
-  renderer.render(stage);
+  renderer.render(gobManager.stage);
 }
 
 initialize();
 
-},{"pixi.js":129}]},{},[172]);
+},{"./gob":172,"pixi.js":129}]},{},[173]);

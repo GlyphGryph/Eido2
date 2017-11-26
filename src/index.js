@@ -1,11 +1,11 @@
 import * as PIXI from 'pixi.js'
+import {Gob, GobManager} from './gob'
 
-const stage = new PIXI.Container()
 const renderer = PIXI.autoDetectRenderer(601, 401)
-const spriteManager = {}
 const velocity = 10
 let playerVX = 0
 let a,d = {}
+let gobManager
 
 function keyboard(keyCode) {
   var key = {};
@@ -92,41 +92,48 @@ function setup(){
     }
   }
 
-  const id = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
+
+  gobManager = new GobManager()
+
+  const textures = PIXI.loader.resources["assets/eidolonSpritesheet.json"].textures;
 
   let ovalRunFrames = []
   for(let ii = 0; ii < 4; ii++){
     const frame = new PIXI.Rectangle(ii * 40, 0, 40, 40)
     ovalRunFrames.push(frame)
   }
-  const ovalTexture = id["ovalrun.png"]
-  ovalTexture.frame = ovalRunFrames[0]
-  const oval = new PIXI.Sprite(ovalTexture)
-  oval.position.set(20, 180)
-  stage.addChild(oval)
-  spriteManager.oval = {
-    sprite: oval,
-    frames: ovalRunFrames,
-    currentFrame: 0
-  }
+  const ovalTexture = textures["ovalrun.png"]
+
+  gobManager.add(
+    new Gob({
+      id: 'ovalRun',
+      x: 20,
+      y: 180,
+      texture: ovalTexture,
+      frames: ovalRunFrames,
+      currentFrame: 0
+    })
+  )
 
   let ovalShadowFrames = []
   for(let ii = 0; ii < 4; ii++){
     const frame = new PIXI.Rectangle(ii * 40, 0, 40, 10)
     ovalShadowFrames.push(frame)
   }
-  const ovalShadowTexture = id["ovalshadow.png"]
-  ovalShadowTexture.frame = ovalShadowFrames[0]
-  const ovalShadow = new PIXI.Sprite(ovalShadowTexture)
-  ovalShadow.position.set(20, 210)
-  stage.addChild(ovalShadow)
-  spriteManager.ovalShadow = {
-    sprite: ovalShadow,
-    frames: ovalShadowFrames,
-    currentFrame: 0
-  }
+  const ovalShadowTexture = textures["ovalshadow.png"]
 
-  renderer.render(stage)
+  gobManager.add(
+    new Gob({
+      id: 'ovalShadow',
+      x: 20,
+      y: 210,
+      texture: ovalShadowTexture,
+      frames: ovalShadowFrames,
+      currentFrame: 0
+    })
+  )
+
+  renderer.render(gobManager.stage)
   startGame()
 }
 
@@ -134,31 +141,10 @@ function startGame(){
   let gameInterval = setInterval(runGame, 90)
 }
 
-function collideWithBounds(sprite){
-  //clip sprite X coordinate to world bounds
-  if (sprite.x < 0){
-    sprite.x = 0
-  }
-  if (sprite.x+sprite.width > renderer.width){
-    sprite.x = renderer.width - sprite.width
-  }
-}
-
 function runGame(){
+  gobManager.update()
 
-  const oval = spriteManager.oval
-  oval.currentFrame = (oval.currentFrame + 1) % oval.frames.length
-  oval.sprite.texture.frame = oval.frames[oval.currentFrame]
-  oval.sprite.x += playerVX
-  collideWithBounds(oval.sprite)
-
-  const ovalShadow = spriteManager.ovalShadow
-  ovalShadow.currentFrame = (ovalShadow.currentFrame + 1) % ovalShadow.frames.length
-  ovalShadow.sprite.texture.frame = ovalShadow.frames[ovalShadow.currentFrame]
-  ovalShadow.sprite.x += playerVX
-  collideWithBounds(ovalShadow.sprite)
-
-  renderer.render(stage)
+  renderer.render(gobManager.stage)
 }
 
 initialize()
