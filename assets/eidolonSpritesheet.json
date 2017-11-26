@@ -1,8 +1,17 @@
 {"frames": {
 
+"figment.png":
+{
+	"frame": {"x":0,"y":0,"w":320,"h":40},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":40},
+	"sourceSize": {"w":320,"h":40},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "ovalrun.png":
 {
-	"frame": {"x":0,"y":0,"w":160,"h":40},
+	"frame": {"x":320,"y":0,"w":160,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":160,"h":40},
@@ -23,8 +32,8 @@
 	"version": "1.0",
 	"image": "eidolonSpritesheet.png",
 	"format": "RGBA8888",
-	"size": {"w":160,"h":50},
+	"size": {"w":480,"h":50},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:038ca792555d4bffa59d5b3e958313e9:8ca0ecf8d7870ca805a775cc7858b085:1004ffaa0283c88858f8a1a1773c5eb0$"
+	"smartupdate": "$TexturePacker:SmartUpdate:e28e0eee02ceed1443cc3377ad3515a7:991c992a05cff8755b217e3d64a199ec:1004ffaa0283c88858f8a1a1773c5eb0$"
 }
 }

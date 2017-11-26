@@ -31503,7 +31503,7 @@ function setup() {
 
   var ovalRunFrames = [];
   for (var ii = 0; ii < 4; ii++) {
-    var frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
+    var frame = new PIXI.Rectangle(320 + ii * 40, 0, 40, 40);
     ovalRunFrames.push(frame);
   }
   var ovalTexture = textures["ovalrun.png"];
@@ -31521,7 +31521,7 @@ function setup() {
 
   var ovalShadowFrames = [];
   for (var _ii = 0; _ii < 4; _ii++) {
-    var _frame = new PIXI.Rectangle(_ii * 40, 0, 40, 10);
+    var _frame = new PIXI.Rectangle(_ii * 40, 40, 40, 10);
     ovalShadowFrames.push(_frame);
   }
   var ovalShadowTexture = textures["ovalshadow.png"];
@@ -31532,6 +31532,22 @@ function setup() {
     y: playerStartingY + playerShadowOffset,
     texture: ovalShadowTexture,
     frames: ovalShadowFrames,
+    currentFrame: 0
+  }));
+
+  var figmentFrames = [];
+  for (var _ii2 = 0; _ii2 < 8; _ii2++) {
+    var _frame2 = new PIXI.Rectangle(_ii2 * 40, 0, 40, 40);
+    figmentFrames.push(_frame2);
+  }
+  var figmentTexture = textures["figment.png"];
+
+  gobManager.add(new _gob.Gob({
+    id: 'figment',
+    x: 500,
+    y: playerStartingY,
+    texture: figmentTexture,
+    frames: figmentFrames,
     currentFrame: 0
   }));
 
@@ -31549,6 +31565,8 @@ function runGame() {
   player.moveTo(player.x + playerVX, player.y);
   var shadow = gobManager.get('playerShadow');
   shadow.moveTo(player.x, player.y + 30);
+  var figment = gobManager.get('figment');
+  figment.moveTo(figment.x, figment.y);
 
   if (obstacleTracker.sinceLastSpawn > obstacleTracker.nextSpawnTime) {
     var id = 'obstacle' + obstacleTracker.total;

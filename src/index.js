@@ -114,7 +114,7 @@ function setup(){
 
   let ovalRunFrames = []
   for(let ii = 0; ii < 4; ii++){
-    const frame = new PIXI.Rectangle(ii * 40, 0, 40, 40)
+    const frame = new PIXI.Rectangle(320 + ii * 40, 0, 40, 40)
     ovalRunFrames.push(frame)
   }
   const ovalTexture = textures["ovalrun.png"]
@@ -134,7 +134,7 @@ function setup(){
 
   let ovalShadowFrames = []
   for(let ii = 0; ii < 4; ii++){
-    const frame = new PIXI.Rectangle(ii * 40, 0, 40, 10)
+    const frame = new PIXI.Rectangle(ii * 40, 40, 40, 10)
     ovalShadowFrames.push(frame)
   }
   const ovalShadowTexture = textures["ovalshadow.png"]
@@ -146,6 +146,24 @@ function setup(){
       y: playerStartingY + playerShadowOffset,
       texture: ovalShadowTexture,
       frames: ovalShadowFrames,
+      currentFrame: 0
+    })
+  )
+
+  let figmentFrames = []
+  for(let ii = 0; ii < 8; ii++){
+    const frame = new PIXI.Rectangle(ii * 40, 0, 40, 40)
+    figmentFrames.push(frame)
+  }
+  const figmentTexture = textures["figment.png"]
+
+  gobManager.add(
+    new Gob({
+      id: 'figment',
+      x: 500,
+      y: playerStartingY,
+      texture: figmentTexture,
+      frames: figmentFrames,
       currentFrame: 0
     })
   )
@@ -164,6 +182,8 @@ function runGame(){
   player.moveTo(player.x + playerVX, player.y)
   const shadow = gobManager.get('playerShadow')
   shadow.moveTo(player.x, player.y+30)
+  const figment = gobManager.get('figment')
+  figment.moveTo(figment.x, figment.y)
 
   if(obstacleTracker.sinceLastSpawn > obstacleTracker.nextSpawnTime){
     const id = `obstacle${obstacleTracker.total}`
