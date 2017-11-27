@@ -169,9 +169,9 @@
         <key>autoAliasEnabled</key>
         <false/>
         <key>trimSpriteNames</key>
-        <false/>
+        <true/>
         <key>prependSmartFolderName</key>
-        <false/>
+        <true/>
         <key>autodetectAnimations</key>
         <true/>
         <key>globalSpriteSettings</key>
@@ -199,51 +199,51 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">figment.png</key>
+            <key type="filename">figment/run/00.png</key>
+            <key type="filename">figment/run/01.png</key>
+            <key type="filename">figment/run/02.png</key>
+            <key type="filename">figment/run/03.png</key>
+            <key type="filename">figment/run/04.png</key>
+            <key type="filename">figment/run/05.png</key>
+            <key type="filename">figment/run/06.png</key>
+            <key type="filename">figment/run/07.png</key>
+            <key type="filename">oval/run/00.png</key>
+            <key type="filename">oval/run/01.png</key>
+            <key type="filename">oval/run/02.png</key>
+            <key type="filename">oval/run/03.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>128,63,256,126</rect>
+                <rect>10,10,20,20</rect>
                 <key>scale9Paddings</key>
-                <rect>128,63,256,126</rect>
+                <rect>10,10,20,20</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">ovalrun.png</key>
+            <key type="filename">oval/run/shadow/00.png</key>
+            <key type="filename">oval/run/shadow/01.png</key>
+            <key type="filename">oval/run/shadow/02.png</key>
+            <key type="filename">oval/run/shadow/03.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>40,10,80,20</rect>
+                <rect>10,3,20,5</rect>
                 <key>scale9Paddings</key>
-                <rect>40,10,80,20</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">ovalshadow.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>40,3,80,5</rect>
-                <key>scale9Paddings</key>
-                <rect>40,3,80,5</rect>
+                <rect>10,3,20,5</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
         </map>
         <key>fileList</key>
         <array>
-            <filename>ovalrun.png</filename>
-            <filename>ovalshadow.png</filename>
-            <filename>figment.png</filename>
+            <filename>figment</filename>
+            <filename>oval</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
