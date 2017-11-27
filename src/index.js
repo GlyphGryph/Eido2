@@ -9,6 +9,9 @@ let playerStartingX = 100
 let playerStartingY = 180
 let playerShadowOffset = 30
 let gobManager
+const stage = new PIXI.Container()
+const backgroundLayer = new PIXI.Container()
+const mainLayer = new PIXI.Container()
 
 let rightWall = 300
 let leftWall = 20
@@ -60,7 +63,8 @@ function keyboard(keyCode) {
 
 function initialize(){
 
-  renderer.backgroundColor = 0xFFFFFF
+  //renderer.backgroundColor = 0xFFFFFF
+  renderer.backgroundColor = 0xFF8888
 
   //Add the elements to the html
   document.getElementById('BackgroundBox').appendChild(renderer.view)
@@ -107,10 +111,13 @@ function setup(){
     }
   }
 
-
+  stage.addChild(backgroundLayer)
+  stage.addChild(mainLayer)
   gobManager = new GobManager()
 
   const textures = PIXI.loader.resources["spritesheet"].textures;
+
+  // Create player
 
   let ovalRunFrames = []
   for(let ii = 0; ii < 4; ii++){
@@ -122,6 +129,7 @@ function setup(){
   gobManager.add(
     new Gob({
       id: 'player',
+      stage: mainLayer,
       x: playerStartingX,
       y: playerStartingY,
       texture: ovalTexture,
@@ -142,6 +150,7 @@ function setup(){
   gobManager.add(
     new Gob({
       id: 'playerShadow',
+      stage: mainLayer,
       x: playerStartingX,
       y: playerStartingY + playerShadowOffset,
       texture: ovalShadowTexture,
@@ -149,7 +158,8 @@ function setup(){
       currentFrame: 0
     })
   )
-
+  
+  // Create figment
   let figmentFrames = []
   for(let ii = 0; ii < 8; ii++){
     const frame = new PIXI.Rectangle(ii * 40, 0, 40, 40)
@@ -160,6 +170,7 @@ function setup(){
   gobManager.add(
     new Gob({
       id: 'figment',
+      stage: mainLayer,
       x: 500,
       y: playerStartingY,
       texture: figmentTexture,
@@ -167,8 +178,8 @@ function setup(){
       currentFrame: 0
     })
   )
-
-  renderer.render(gobManager.stage)
+  
+  renderer.render(stage)
   startGame()
 }
 
@@ -192,10 +203,11 @@ function runGame(){
       ...obstacleTracker.ids,
       id
     ]
-    const texture = PIXI.loader.resources['obstacle'].texture;
+    const texture = PIXI.loader.resources['obstacle'].texture
     gobManager.add(
       new Gob({
         id,
+        stage: backgroundLayer,
         x: 320,
         y: playerStartingY,
         texture,
@@ -219,7 +231,7 @@ function runGame(){
     }
   }
 
-  renderer.render(gobManager.stage)
+  renderer.render(stage)
 }
 
 initialize()

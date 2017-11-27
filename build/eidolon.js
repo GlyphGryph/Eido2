@@ -31227,7 +31227,6 @@ var GobManager = exports.GobManager = function () {
     _classCallCheck(this, GobManager);
 
     this.gobs = [];
-    this.stage = new PIXI.Container();
   }
 
   // Adds a gob from the manager
@@ -31241,7 +31240,7 @@ var GobManager = exports.GobManager = function () {
     value: function add(gob) {
       this.gobs = [].concat(_toConsumableArray(this.gobs), [gob]);
       // Also make this gob exist. Run it's initialize logic
-      gob.initialize(this.stage);
+      gob.initialize();
       // TODO: Throw error if gob has same id
       return this;
     }
@@ -31317,6 +31316,7 @@ var GobManager = exports.GobManager = function () {
 var Gob = exports.Gob = function () {
   function Gob(_ref) {
     var id = _ref.id,
+        stage = _ref.stage,
         x = _ref.x,
         y = _ref.y,
         texture = _ref.texture,
@@ -31328,6 +31328,7 @@ var Gob = exports.Gob = function () {
     _classCallCheck(this, Gob);
 
     this.id = id;
+    this.stage = stage;
     this.x = x;
     this.y = y;
     texture.frame = frames[currentFrame];
@@ -31346,16 +31347,16 @@ var Gob = exports.Gob = function () {
 
   _createClass(Gob, [{
     key: 'initialize',
-    value: function initialize(stage) {
-      this.stage = stage;
-      stage.addChild(this.sprite);
-      console.log('intialized gob ' + this.id);
+    value: function initialize() {
+      console.log('intializing gob ' + this.id);
+      console.log(this);
+      this.stage.addChild(this.sprite);
     }
   }, {
     key: 'terminate',
     value: function terminate() {
+      console.log('terminating gob ' + this.id);
       this.stage.removeChild(this.sprite);
-      console.log('terminated gob ' + this.id);
     }
   }, {
     key: 'moveTo',
@@ -31378,8 +31379,10 @@ var Gob = exports.Gob = function () {
   }, {
     key: 'update',
     value: function update() {
-      this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-      this.sprite.texture.frame = this.frames[this.currentFrame];
+      if (this.frames.length > 0) {
+        this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+        this.sprite.texture.frame = this.frames[this.currentFrame];
+      }
     }
   }]);
 
@@ -31408,6 +31411,9 @@ var playerStartingX = 100;
 var playerStartingY = 180;
 var playerShadowOffset = 30;
 var gobManager = void 0;
+var stage = new PIXI.Container();
+var backgroundLayer = new PIXI.Container();
+var mainLayer = new PIXI.Container();
 
 var rightWall = 300;
 var leftWall = 20;
@@ -31454,7 +31460,8 @@ function keyboard(keyCode) {
 
 function initialize() {
 
-  renderer.backgroundColor = 0xFFFFFF;
+  //renderer.backgroundColor = 0xFFFFFF
+  renderer.backgroundColor = 0xFF8888;
 
   //Add the elements to the html
   document.getElementById('BackgroundBox').appendChild(renderer.view);
@@ -31497,9 +31504,13 @@ function setup() {
     }
   };
 
+  stage.addChild(backgroundLayer);
+  stage.addChild(mainLayer);
   gobManager = new _gob.GobManager();
 
   var textures = PIXI.loader.resources["spritesheet"].textures;
+
+  // Create player
 
   var ovalRunFrames = [];
   for (var ii = 0; ii < 4; ii++) {
@@ -31510,6 +31521,7 @@ function setup() {
 
   gobManager.add(new _gob.Gob({
     id: 'player',
+    stage: mainLayer,
     x: playerStartingX,
     y: playerStartingY,
     texture: ovalTexture,
@@ -31528,6 +31540,7 @@ function setup() {
 
   gobManager.add(new _gob.Gob({
     id: 'playerShadow',
+    stage: mainLayer,
     x: playerStartingX,
     y: playerStartingY + playerShadowOffset,
     texture: ovalShadowTexture,
@@ -31535,6 +31548,7 @@ function setup() {
     currentFrame: 0
   }));
 
+  // Create figment
   var figmentFrames = [];
   for (var _ii2 = 0; _ii2 < 8; _ii2++) {
     var _frame2 = new PIXI.Rectangle(_ii2 * 40, 0, 40, 40);
@@ -31544,6 +31558,7 @@ function setup() {
 
   gobManager.add(new _gob.Gob({
     id: 'figment',
+    stage: mainLayer,
     x: 500,
     y: playerStartingY,
     texture: figmentTexture,
@@ -31551,7 +31566,7 @@ function setup() {
     currentFrame: 0
   }));
 
-  renderer.render(gobManager.stage);
+  renderer.render(stage);
   startGame();
 }
 
@@ -31575,6 +31590,7 @@ function runGame() {
     var texture = PIXI.loader.resources['obstacle'].texture;
     gobManager.add(new _gob.Gob({
       id: id,
+      stage: backgroundLayer,
       x: 320,
       y: playerStartingY,
       texture: texture,
@@ -31622,7 +31638,7 @@ function runGame() {
     }
   }
 
-  renderer.render(gobManager.stage);
+  renderer.render(stage);
 }
 
 initialize();

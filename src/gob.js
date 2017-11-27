@@ -3,7 +3,6 @@ import * as PIXI from 'pixi.js'
 export class GobManager{
   constructor(){
     this.gobs = []
-    this.stage = new PIXI.Container()
   }
   
   // Adds a gob from the manager
@@ -16,7 +15,7 @@ export class GobManager{
       gob
     ]
     // Also make this gob exist. Run it's initialize logic
-    gob.initialize(this.stage)
+    gob.initialize()
     // TODO: Throw error if gob has same id
     return this
   }
@@ -57,8 +56,9 @@ export class GobManager{
 }
 
 export class Gob{
-  constructor({id, x, y, texture, frames, currentFrame, xMax, xMin}){
+  constructor({id, stage, x, y, texture, frames, currentFrame, xMax, xMin}){
     this.id = id
+    this.stage = stage
     this.x = x
     this.y = y
     texture.frame = frames[currentFrame]
@@ -75,15 +75,15 @@ export class Gob{
     }
   }
 
-  initialize(stage){
-    this.stage = stage
-    stage.addChild(this.sprite)
-    console.log(`intialized gob ${this.id}`)
+  initialize(){
+    console.log(`intializing gob ${this.id}`)
+    console.log(this)
+    this.stage.addChild(this.sprite)
   }
 
   terminate(){
+    console.log(`terminating gob ${this.id}`)
     this.stage.removeChild(this.sprite)
-    console.log(`terminated gob ${this.id}`)
   }
 
   moveTo(x, y){
@@ -104,7 +104,9 @@ export class Gob{
   }
 
   update(){
-    this.currentFrame = (this.currentFrame + 1) % this.frames.length
-    this.sprite.texture.frame = this.frames[this.currentFrame]
+    if(this.frames.length > 0){
+      this.currentFrame = (this.currentFrame + 1) % this.frames.length
+      this.sprite.texture.frame = this.frames[this.currentFrame]
+    }
   }
 }
