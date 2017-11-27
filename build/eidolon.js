@@ -31566,6 +31566,24 @@ function setup() {
     currentFrame: 0
   }));
 
+  // Create mask
+  var rectangle = new PIXI.Graphics();
+  rectangle.beginFill(0x66CCFF);
+  rectangle.drawRect(0, 0, 300, 400);
+  rectangle.endFill();
+  rectangle.x = 0;
+  rectangle.y = 0;
+
+  gobManager.add(new _gob.Gob({
+    id: 'objectMask',
+    stage: backgroundLayer,
+    x: 40,
+    y: 0,
+    texture: renderer.generateTexture(rectangle),
+    frames: [new PIXI.Rectangle(0, 0, 300, 400)],
+    currentFrame: 0
+  }));
+
   renderer.render(stage);
   startGame();
 }
@@ -31591,7 +31609,7 @@ function runGame() {
     gobManager.add(new _gob.Gob({
       id: id,
       stage: backgroundLayer,
-      x: 320,
+      x: 340,
       y: playerStartingY,
       texture: texture,
       frames: [new PIXI.Rectangle(0, 0, 40, 40)],
