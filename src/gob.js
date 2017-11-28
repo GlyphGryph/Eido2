@@ -55,6 +55,15 @@ export class GobManager{
   }
 }
 
+// Gobs come in two forms:
+// Texture Mode:
+//  - Pass in a 'texture' spritesheet and a set of 'frames'
+//  - The texture is a regular PIXI texture
+//  - The frames are an array of PIXI rectangles representing part of the texture
+// Atlas Mode:
+//  - Pass in an 'atlas' spritesheet and a set of 'frames'
+//  - The atlas spritesheet is a regular PIXI atlas
+//  - The frames are an array of atlas frame names
 export class Gob{
   constructor({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin}){
     console.log(`Creating gob ${id}`)
