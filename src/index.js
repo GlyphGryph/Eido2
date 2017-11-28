@@ -119,12 +119,8 @@ function setup(){
 
   // Create player
 
-  let ovalRunFrames = []
-  for(let ii = 0; ii < 4; ii++){
-    const frame = new PIXI.Rectangle(320 + ii * 40, 0, 40, 40)
-    ovalRunFrames.push(frame)
-  }
-  const ovalTexture = textures["ovalrun.png"]
+  const ovalRunFrames = [
+  ]
 
   gobManager.add(
     new Gob({
@@ -132,20 +128,18 @@ function setup(){
       stage: mainLayer,
       x: playerStartingX,
       y: playerStartingY,
-      texture: ovalTexture,
-      frames: ovalRunFrames,
+      atlas: PIXI.loader.resources["spritesheet"],
+      frames: [
+        "oval/run/00",
+        "oval/run/01",
+        "oval/run/02",
+        "oval/run/03"
+      ],
       currentFrame: 0,
       xMax: rightWall,
       xMin: leftWall
     })
   )
-
-  let ovalShadowFrames = []
-  for(let ii = 0; ii < 4; ii++){
-    const frame = new PIXI.Rectangle(ii * 40, 40, 40, 10)
-    ovalShadowFrames.push(frame)
-  }
-  const ovalShadowTexture = textures["ovalshadow.png"]
 
   gobManager.add(
     new Gob({
@@ -153,8 +147,13 @@ function setup(){
       stage: mainLayer,
       x: playerStartingX,
       y: playerStartingY + playerShadowOffset,
-      texture: ovalShadowTexture,
-      frames: ovalShadowFrames,
+      atlas: PIXI.loader.resources["spritesheet"],
+      frames: [
+        "oval/run/shadow/00",
+        "oval/run/shadow/01",
+        "oval/run/shadow/02",
+        "oval/run/shadow/03"
+      ],
       currentFrame: 0
     })
   )
@@ -165,7 +164,7 @@ function setup(){
     const frame = new PIXI.Rectangle(ii * 40, 0, 40, 40)
     figmentFrames.push(frame)
   }
-  const figmentTexture = textures["figment.png"]
+  const figmentTexture = textures["figment"]
 
   gobManager.add(
     new Gob({
@@ -173,8 +172,18 @@ function setup(){
       stage: mainLayer,
       x: 500,
       y: playerStartingY,
-      texture: figmentTexture,
-      frames: figmentFrames,
+      atlas: PIXI.loader.resources["spritesheet"],
+      frames: [
+        "figment/run/00",
+        "figment/run/01",
+        "figment/run/02",
+        "figment/run/03",
+        "figment/run/04",
+        "figment/run/05",
+        "figment/run/06",
+        "figment/run/07"
+
+      ],
       currentFrame: 0
     })
   )
@@ -209,6 +218,7 @@ function startGame(){
 
 function runGame(){
   gobManager.update()
+
   const player = gobManager.get('player')
   player.moveTo(player.x + playerVX, player.y)
   const shadow = gobManager.get('playerShadow')

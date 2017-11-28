@@ -56,15 +56,28 @@ export class GobManager{
 }
 
 export class Gob{
-  constructor({id, stage, x, y, texture, frames, currentFrame, xMax, xMin}){
+  constructor({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin}){
+    console.log(`Creating gob ${id}`)
     this.id = id
     this.stage = stage
     this.x = x
     this.y = y
-    texture.frame = frames[currentFrame]
-    this.sprite = new PIXI.Sprite(texture)
+
+    // We have different paths for whether we are passed an atlas or a texture
     this.frames = frames
     this.currentFrame = currentFrame
+    if(atlas){
+      this.hasAtlas = true
+      this.atlas = atlas
+      this.texture = this.atlas.textures[this.frames[this.currentFrame]]
+    } else {
+      // If we don't have an at least, we must have a texture
+      this.hasAtlas = false
+      this.texture = texture
+      this.texture.frame = this.frames[this.currentFrame]
+    }
+
+    this.sprite = new PIXI.Sprite(this.texture)
     this.sprite.position.set(this.x, this.y)
     this.xLimit
     if(xMax){
@@ -106,7 +119,12 @@ export class Gob{
   update(){
     if(this.frames.length > 0){
       this.currentFrame = (this.currentFrame + 1) % this.frames.length
-      this.sprite.texture.frame = this.frames[this.currentFrame]
+
+      if(this.hasAtlas){
+        this.sprite.texture = this.atlas.textures[this.frames[this.currentFrame]]
+      } else {
+        this.sprite.texture.frame = this.frames[this.currentFrame]
+      }
     }
   }
 }

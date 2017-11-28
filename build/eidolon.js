@@ -31319,6 +31319,7 @@ var Gob = exports.Gob = function () {
         stage = _ref.stage,
         x = _ref.x,
         y = _ref.y,
+        atlas = _ref.atlas,
         texture = _ref.texture,
         frames = _ref.frames,
         currentFrame = _ref.currentFrame,
@@ -31327,14 +31328,27 @@ var Gob = exports.Gob = function () {
 
     _classCallCheck(this, Gob);
 
+    console.log('Creating gob ' + id);
     this.id = id;
     this.stage = stage;
     this.x = x;
     this.y = y;
-    texture.frame = frames[currentFrame];
-    this.sprite = new PIXI.Sprite(texture);
+
+    // We have different paths for whether we are passed an atlas or a texture
     this.frames = frames;
     this.currentFrame = currentFrame;
+    if (atlas) {
+      this.hasAtlas = true;
+      this.atlas = atlas;
+      this.texture = this.atlas.textures[this.frames[this.currentFrame]];
+    } else {
+      // If we don't have an at least, we must have a texture
+      this.hasAtlas = false;
+      this.texture = texture;
+      this.texture.frame = this.frames[this.currentFrame];
+    }
+
+    this.sprite = new PIXI.Sprite(this.texture);
     this.sprite.position.set(this.x, this.y);
     this.xLimit;
     if (xMax) {
@@ -31381,7 +31395,12 @@ var Gob = exports.Gob = function () {
     value: function update() {
       if (this.frames.length > 0) {
         this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-        this.sprite.texture.frame = this.frames[this.currentFrame];
+
+        if (this.hasAtlas) {
+          this.sprite.texture = this.atlas.textures[this.frames[this.currentFrame]];
+        } else {
+          this.sprite.texture.frame = this.frames[this.currentFrame];
+        }
       }
     }
   }]);
@@ -31513,56 +31532,44 @@ function setup() {
   // Create player
 
   var ovalRunFrames = [];
-  for (var ii = 0; ii < 4; ii++) {
-    var frame = new PIXI.Rectangle(320 + ii * 40, 0, 40, 40);
-    ovalRunFrames.push(frame);
-  }
-  var ovalTexture = textures["ovalrun.png"];
 
   gobManager.add(new _gob.Gob({
     id: 'player',
     stage: mainLayer,
     x: playerStartingX,
     y: playerStartingY,
-    texture: ovalTexture,
-    frames: ovalRunFrames,
+    atlas: PIXI.loader.resources["spritesheet"],
+    frames: ["oval/run/00", "oval/run/01", "oval/run/02", "oval/run/03"],
     currentFrame: 0,
     xMax: rightWall,
     xMin: leftWall
   }));
-
-  var ovalShadowFrames = [];
-  for (var _ii = 0; _ii < 4; _ii++) {
-    var _frame = new PIXI.Rectangle(_ii * 40, 40, 40, 10);
-    ovalShadowFrames.push(_frame);
-  }
-  var ovalShadowTexture = textures["ovalshadow.png"];
 
   gobManager.add(new _gob.Gob({
     id: 'playerShadow',
     stage: mainLayer,
     x: playerStartingX,
     y: playerStartingY + playerShadowOffset,
-    texture: ovalShadowTexture,
-    frames: ovalShadowFrames,
+    atlas: PIXI.loader.resources["spritesheet"],
+    frames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
     currentFrame: 0
   }));
 
   // Create figment
   var figmentFrames = [];
-  for (var _ii2 = 0; _ii2 < 8; _ii2++) {
-    var _frame2 = new PIXI.Rectangle(_ii2 * 40, 0, 40, 40);
-    figmentFrames.push(_frame2);
+  for (var ii = 0; ii < 8; ii++) {
+    var frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
+    figmentFrames.push(frame);
   }
-  var figmentTexture = textures["figment.png"];
+  var figmentTexture = textures["figment"];
 
   gobManager.add(new _gob.Gob({
     id: 'figment',
     stage: mainLayer,
     x: 500,
     y: playerStartingY,
-    texture: figmentTexture,
-    frames: figmentFrames,
+    atlas: PIXI.loader.resources["spritesheet"],
+    frames: ["figment/run/00", "figment/run/01", "figment/run/02", "figment/run/03", "figment/run/04", "figment/run/05", "figment/run/06", "figment/run/07"],
     currentFrame: 0
   }));
 
@@ -31594,6 +31601,7 @@ function startGame() {
 
 function runGame() {
   gobManager.update();
+
   var player = gobManager.get('player');
   player.moveTo(player.x + playerVX, player.y);
   var shadow = gobManager.get('playerShadow');
