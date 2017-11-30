@@ -2,9 +2,21 @@ import * as PIXI from 'pixi.js'
 import {Gob, GobManager} from './gob'
 
 const renderer = PIXI.autoDetectRenderer(601, 401)
+const fps = 11
 const velocity = 10
+const obstacleVelocity = 6 // obstacle initial velocity
+const obstacleMaxVelocity = 50
+const obstacleSpawnRate = 30
+const obstacleMinSpawnRate = 10
+const obstacleAccRate = 0.2 // obstacle velocity increase per second
+const spiritInitDistance = 100
+let DEBUG = true // toggle by pressing Q
+let debugInfo = ""
+let levelTimer = 0
 let playerVX = 0
-let a,d = {}
+let obstacleVX = obstacleVelocity
+let spiritDistance = spiritInitDistance
+let a,d,q = {}
 let playerStartingX = 100
 let playerStartingY = 180
 let playerShadowOffset = 30
@@ -17,8 +29,8 @@ let rightWall = 300
 let leftWall = 20
 
 let obstacleTracker = {
-  sinceLastSpawn: 29,
-  nextSpawnTime: 30,
+  sinceLastSpawn: obstacleSpawnRate-1,
+  nextSpawnTime: obstacleSpawnRate,
   ids: [],
   total: 0
 }
@@ -90,6 +102,7 @@ function setup(){
   //keyboard handlers
   a = keyboard(65)
   d = keyboard(68)
+  q = keyboard(81)
 
   a.press = function(){
     playerVX = -1*velocity
@@ -109,6 +122,10 @@ function setup(){
     if(!a.isDown){
       playerVX = 0
     }
+  }
+
+  q.press = function(){
+    DEBUG = !DEBUG
   }
 
   stage.addChild(backgroundLayer)
@@ -157,7 +174,7 @@ function setup(){
       currentFrame: 0
     })
   )
-  
+
   // Create figment
   let figmentFrames = []
   for(let ii = 0; ii < 8; ii++){
@@ -208,15 +225,27 @@ function setup(){
     })
   )
 
+  debugInfo = new PIXI.Text('Setup', {
+    fontSize: 15,
+    fill: 0xffffff,
+    stroke: 0x000000,
+    strokeThickness: 3});
+  debugInfo.x = 5;
+  debugInfo.y = 5;
+  stage.addChild(debugInfo)
+
   renderer.render(stage)
   startGame()
 }
 
 function startGame(){
-  let gameInterval = setInterval(runGame, 90)
+  let gameInterval = setInterval(runGame, 1000/fps)
 }
 
 function runGame(){
+
+  levelTimer += 1/fps
+
   gobManager.update()
 
   const player = gobManager.get('player')
@@ -250,9 +279,22 @@ function runGame(){
   }
   obstacleTracker.sinceLastSpawn = obstacleTracker.sinceLastSpawn + 1
 
+  //update dynamic parameters
+  if(obstacleVX < obstacleMaxVelocity){
+    obstacleVX = obstacleVelocity + Math.round(levelTimer * obstacleAccRate)
+  }
+
+  if(obstacleTracker.nextSpawnTime > obstacleMinSpawnRate){
+    obstacleTracker.nextSpawnTime = obstacleSpawnRate - Math.round(levelTimer * obstacleAccRate)
+  }
+
+  if(spiritDistance>0){
+    spiritDistance = spiritInitDistance - Math.round(levelTimer * obstacleAccRate)
+  }
+
   for(const obstacleId of obstacleTracker.ids){
     let gob = gobManager.get(obstacleId)
-    gob.moveTo(gob.x - 6, gob.y)
+    gob.moveTo(gob.x - obstacleVX, gob.y)
     if(gob.x < 0){
       gobManager.remove(gob.id)
       obstacleTracker.ids = obstacleTracker.ids.filter( (trackerId) =>{
@@ -260,6 +302,20 @@ function runGame(){
       })
     }
   }
+
+  if(DEBUG){
+    let debugText = "Debug info (press Q to toggle):\n"
+    debugText += `FPS: ${fps}\n`
+    let lvlTimerDebug = Math.round(levelTimer)
+    debugText += `Game time: ${lvlTimerDebug}s \n`
+    debugText += `Obstacle speed: ${obstacleVX}\n`
+    debugText += `Obstacle spawn rate: ${obstacleTracker.nextSpawnTime}\n`
+    debugText += `Distance: ${spiritDistance}\n`
+    debugInfo.text = debugText
+  } else {
+    debugInfo.text = ""
+  }
+
 
   renderer.render(stage)
 }

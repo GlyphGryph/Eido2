@@ -31313,6 +31313,17 @@ var GobManager = exports.GobManager = function () {
   return GobManager;
 }();
 
+// Gobs come in two forms:
+// Texture Mode:
+//  - Pass in a 'texture' spritesheet and a set of 'frames'
+//  - The texture is a regular PIXI texture
+//  - The frames are an array of PIXI rectangles representing part of the texture
+// Atlas Mode:
+//  - Pass in an 'atlas' spritesheet and a set of 'frames'
+//  - The atlas spritesheet is a regular PIXI atlas
+//  - The frames are an array of atlas frame names
+
+
 var Gob = exports.Gob = function () {
   function Gob(_ref) {
     var id = _ref.id,
@@ -31422,10 +31433,23 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var renderer = PIXI.autoDetectRenderer(601, 401);
+var fps = 11;
 var velocity = 10;
+var obstacleVelocity = 6; // obstacle initial velocity
+var obstacleMaxVelocity = 50;
+var obstacleSpawnRate = 30;
+var obstacleMinSpawnRate = 10;
+var obstacleAccRate = 0.2; // obstacle velocity increase per second
+var spiritInitDistance = 100;
+var DEBUG = true; // toggle by pressing Q
+var debugInfo = "";
+var levelTimer = 0;
 var playerVX = 0;
+var obstacleVX = obstacleVelocity;
+var spiritDistance = spiritInitDistance;
 var a = void 0,
-    d = {};
+    d = void 0,
+    q = {};
 var playerStartingX = 100;
 var playerStartingY = 180;
 var playerShadowOffset = 30;
@@ -31438,8 +31462,8 @@ var rightWall = 300;
 var leftWall = 20;
 
 var obstacleTracker = {
-  sinceLastSpawn: 29,
-  nextSpawnTime: 30,
+  sinceLastSpawn: obstacleSpawnRate - 1,
+  nextSpawnTime: obstacleSpawnRate,
   ids: [],
   total: 0
 };
@@ -31502,6 +31526,7 @@ function setup() {
   //keyboard handlers
   a = keyboard(65);
   d = keyboard(68);
+  q = keyboard(81);
 
   a.press = function () {
     playerVX = -1 * velocity;
@@ -31521,6 +31546,10 @@ function setup() {
     if (!a.isDown) {
       playerVX = 0;
     }
+  };
+
+  q.press = function () {
+    DEBUG = !DEBUG;
   };
 
   stage.addChild(backgroundLayer);
@@ -31591,15 +31620,27 @@ function setup() {
     currentFrame: 0
   }));
 
+  debugInfo = new PIXI.Text('Setup', {
+    fontSize: 15,
+    fill: 0xffffff,
+    stroke: 0x000000,
+    strokeThickness: 3 });
+  debugInfo.x = 5;
+  debugInfo.y = 5;
+  stage.addChild(debugInfo);
+
   renderer.render(stage);
   startGame();
 }
 
 function startGame() {
-  var gameInterval = setInterval(runGame, 90);
+  var gameInterval = setInterval(runGame, 1000 / fps);
 }
 
 function runGame() {
+
+  levelTimer += 1 / fps;
+
   gobManager.update();
 
   var player = gobManager.get('player');
@@ -31628,9 +31669,22 @@ function runGame() {
   }
   obstacleTracker.sinceLastSpawn = obstacleTracker.sinceLastSpawn + 1;
 
+  //update dynamic parameters
+  if (obstacleVX < obstacleMaxVelocity) {
+    obstacleVX = obstacleVelocity + Math.round(levelTimer * obstacleAccRate);
+  }
+
+  if (obstacleTracker.nextSpawnTime > obstacleMinSpawnRate) {
+    obstacleTracker.nextSpawnTime = obstacleSpawnRate - Math.round(levelTimer * obstacleAccRate);
+  }
+
+  if (spiritDistance > 0) {
+    spiritDistance = spiritInitDistance - Math.round(levelTimer * obstacleAccRate);
+  }
+
   var _loop = function _loop(obstacleId) {
     var gob = gobManager.get(obstacleId);
-    gob.moveTo(gob.x - 6, gob.y);
+    gob.moveTo(gob.x - obstacleVX, gob.y);
     if (gob.x < 0) {
       gobManager.remove(gob.id);
       obstacleTracker.ids = obstacleTracker.ids.filter(function (trackerId) {
@@ -31662,6 +31716,19 @@ function runGame() {
         throw _iteratorError;
       }
     }
+  }
+
+  if (DEBUG) {
+    var debugText = "Debug info (press Q to toggle):\n";
+    debugText += 'FPS: ' + fps + '\n';
+    var lvlTimerDebug = Math.round(levelTimer);
+    debugText += 'Game time: ' + lvlTimerDebug + 's \n';
+    debugText += 'Obstacle speed: ' + obstacleVX + '\n';
+    debugText += 'Obstacle spawn rate: ' + obstacleTracker.nextSpawnTime + '\n';
+    debugText += 'Distance: ' + spiritDistance + '\n';
+    debugInfo.text = debugText;
+  } else {
+    debugInfo.text = "";
   }
 
   renderer.render(stage);
