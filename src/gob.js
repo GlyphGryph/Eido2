@@ -52,6 +52,7 @@ export class GobManager{
     for(const gob of this.gobs){
       gob.update()
     }
+    return this
   }
 }
 
@@ -98,13 +99,11 @@ export class Gob{
   }
 
   initialize(){
-    console.log(`intializing gob ${this.id}`)
     console.log(this)
     this.stage.addChild(this.sprite)
   }
 
   terminate(){
-    console.log(`terminating gob ${this.id}`)
     this.stage.removeChild(this.sprite)
   }
 

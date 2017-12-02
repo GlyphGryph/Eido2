@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js'
 import {Gob, GobManager} from './gob'
 import {Level} from './level'
 
-const renderer = PIXI.autoDetectRenderer(601, 401)
+const renderer = new PIXI.WebGLRenderer(601, 401)
 const fps = 11
 const velocity = 10
 let DEBUG = true // toggle by pressing Q
@@ -191,12 +191,24 @@ function setup(){
   )
 
   // Create mask
-  const rectangle = new PIXI.Graphics();
-  rectangle.beginFill(0x66CCFF);
-  rectangle.drawRect(0, 0, 300, 400);
-  rectangle.endFill();
-  rectangle.x = 0;
-  rectangle.y = 0;
+  const rectangle = new PIXI.Graphics()
+  rectangle.beginFill(0xFFFFFF, 1)
+  rectangle.drawRect(0, 0, 300, 400)
+  rectangle.endFill()
+  rectangle.x = 0
+  rectangle.y = 0
+
+  gobManager.add(
+    new Gob({
+      id: 'objectMaskDisplay',
+      stage: backgroundLayer,
+      x: 40,
+      y: 0,
+      texture: renderer.generateTexture(rectangle),
+      frames: [ new PIXI.Rectangle(0, 0, 300, 400) ],
+      currentFrame: 0
+    })
+  )
 
   gobManager.add(
     new Gob({
@@ -210,11 +222,16 @@ function setup(){
     })
   )
 
+  const mask = gobManager.get('objectMask').sprite
+  backgroundLayer.mask = mask
+  console.log(backgroundLayer)
+
   debugInfo = new PIXI.Text('Setup', {
     fontSize: 15,
     fill: 0xffffff,
     stroke: 0x000000,
-    strokeThickness: 3});
+    strokeThickness: 3
+  })
   debugInfo.x = 5;
   debugInfo.y = 5;
   stage.addChild(debugInfo)
@@ -256,7 +273,6 @@ function runGame(){
   // Spawn obstacle
   if((level.lastSpawn + level.spawnRate) < level.time){
     const id = `obstacle${level.totalObstacles}`
-    console.log(`building obstacle #{id}`)
     level.obstacleIds = [
       ...level.obstacleIds,
       id
@@ -276,6 +292,8 @@ function runGame(){
     level.totalObstacles += 1
     level.lastSpawn = level.time
   }
+
+  console.log(backgroundLayer)
   
   // Debug
   if(DEBUG){

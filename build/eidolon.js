@@ -31307,6 +31307,8 @@ var GobManager = exports.GobManager = function () {
           }
         }
       }
+
+      return this;
     }
   }]);
 
@@ -31373,14 +31375,12 @@ var Gob = exports.Gob = function () {
   _createClass(Gob, [{
     key: 'initialize',
     value: function initialize() {
-      console.log('intializing gob ' + this.id);
       console.log(this);
       this.stage.addChild(this.sprite);
     }
   }, {
     key: 'terminate',
     value: function terminate() {
-      console.log('terminating gob ' + this.id);
       this.stage.removeChild(this.sprite);
     }
   }, {
@@ -31495,7 +31495,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var renderer = PIXI.autoDetectRenderer(601, 401);
+var renderer = new PIXI.WebGLRenderer(601, 401);
 var fps = 11;
 var velocity = 10;
 var DEBUG = true; // toggle by pressing Q
@@ -31652,11 +31652,21 @@ function setup() {
 
   // Create mask
   var rectangle = new PIXI.Graphics();
-  rectangle.beginFill(0x66CCFF);
+  rectangle.beginFill(0xFFFFFF, 1);
   rectangle.drawRect(0, 0, 300, 400);
   rectangle.endFill();
   rectangle.x = 0;
   rectangle.y = 0;
+
+  gobManager.add(new _gob.Gob({
+    id: 'objectMaskDisplay',
+    stage: backgroundLayer,
+    x: 40,
+    y: 0,
+    texture: renderer.generateTexture(rectangle),
+    frames: [new PIXI.Rectangle(0, 0, 300, 400)],
+    currentFrame: 0
+  }));
 
   gobManager.add(new _gob.Gob({
     id: 'objectMask',
@@ -31668,11 +31678,16 @@ function setup() {
     currentFrame: 0
   }));
 
+  var mask = gobManager.get('objectMask').sprite;
+  backgroundLayer.mask = mask;
+  console.log(backgroundLayer);
+
   debugInfo = new PIXI.Text('Setup', {
     fontSize: 15,
     fill: 0xffffff,
     stroke: 0x000000,
-    strokeThickness: 3 });
+    strokeThickness: 3
+  });
   debugInfo.x = 5;
   debugInfo.y = 5;
   stage.addChild(debugInfo);
@@ -31741,7 +31756,6 @@ function runGame() {
 
   if (level.lastSpawn + level.spawnRate < level.time) {
     var id = 'obstacle' + level.totalObstacles;
-    console.log('building obstacle #{id}');
     level.obstacleIds = [].concat(_toConsumableArray(level.obstacleIds), [id]);
     var texture = PIXI.loader.resources['obstacle'].texture;
     gobManager.add(new _gob.Gob({
@@ -31756,6 +31770,8 @@ function runGame() {
     level.totalObstacles += 1;
     level.lastSpawn = level.time;
   }
+
+  console.log(backgroundLayer);
 
   // Debug
   if (DEBUG) {
