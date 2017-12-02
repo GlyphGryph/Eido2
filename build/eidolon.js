@@ -31420,6 +31420,67 @@ var Gob = exports.Gob = function () {
 }();
 
 },{"pixi.js":129}],173:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Level = exports.Level = function () {
+  function Level() {
+    _classCallCheck(this, Level);
+
+    // Speed
+    this.initVelocity = 6;
+    this.velocity = this.initVelocity;
+    this.maxVelocity = 50;
+    this.targetVelocity = 10;
+
+    // Spawn
+    this.spawnRate = 30;
+    this.minSpawnRate = 10;
+    this.lastSpawn = 0;
+
+    // Acceleration
+    this.acceleration = 0.4;
+
+    // Distance
+    this.initSpiritDistance = 100;
+    this.spiritDistance = 100;
+
+    // Time
+    this.time = 0;
+
+    // Obstacles
+    this.obstacleIds = [];
+    this.totalObstacles = 0;
+  }
+
+  _createClass(Level, [{
+    key: "update",
+    value: function update(step) {
+      this.time += 1;
+      //update dynamic parameters
+      this.velocity = this.velocity + step * this.acceleration;
+      if (this.velocity > this.axVelocity) {
+        this.velocity = this.maxVelocity;
+      }
+
+      this.spiritDistance = this.spiritDistance - step * (this.velocity - this.targetVelocity) / 10;
+      if (this.spiritDistance < 0) {
+        this.spiritDistance = 0;
+      }
+    }
+  }]);
+
+  return Level;
+}();
+
+},{}],174:[function(require,module,exports){
 'use strict';
 
 var _pixi = require('pixi.js');
@@ -31428,6 +31489,8 @@ var PIXI = _interopRequireWildcard(_pixi);
 
 var _gob = require('./gob');
 
+var _level = require('./level');
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -31435,18 +31498,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 var renderer = PIXI.autoDetectRenderer(601, 401);
 var fps = 11;
 var velocity = 10;
-var obstacleVelocity = 6; // obstacle initial velocity
-var obstacleMaxVelocity = 50;
-var obstacleSpawnRate = 30;
-var obstacleMinSpawnRate = 10;
-var obstacleAccRate = 0.2; // obstacle velocity increase per second
-var spiritInitDistance = 100;
 var DEBUG = true; // toggle by pressing Q
 var debugInfo = "";
-var levelTimer = 0;
 var playerVX = 0;
-var obstacleVX = obstacleVelocity;
-var spiritDistance = spiritInitDistance;
 var a = void 0,
     d = void 0,
     q = {};
@@ -31454,19 +31508,13 @@ var playerStartingX = 100;
 var playerStartingY = 180;
 var playerShadowOffset = 30;
 var gobManager = void 0;
+var level = void 0;
 var stage = new PIXI.Container();
 var backgroundLayer = new PIXI.Container();
 var mainLayer = new PIXI.Container();
 
 var rightWall = 300;
 var leftWall = 20;
-
-var obstacleTracker = {
-  sinceLastSpawn: obstacleSpawnRate - 1,
-  nextSpawnTime: obstacleSpawnRate,
-  ids: [],
-  total: 0
-};
 
 function keyboard(keyCode) {
   var key = {};
@@ -31629,6 +31677,8 @@ function setup() {
   debugInfo.y = 5;
   stage.addChild(debugInfo);
 
+  level = new _level.Level();
+
   renderer.render(stage);
   startGame();
 }
@@ -31638,9 +31688,8 @@ function startGame() {
 }
 
 function runGame() {
-
-  levelTimer += 1 / fps;
-
+  var step = 1 / fps;
+  level.update(step);
   gobManager.update();
 
   var player = gobManager.get('player');
@@ -31650,44 +31699,14 @@ function runGame() {
   var figment = gobManager.get('figment');
   figment.moveTo(figment.x, figment.y);
 
-  if (obstacleTracker.sinceLastSpawn > obstacleTracker.nextSpawnTime) {
-    var id = 'obstacle' + obstacleTracker.total;
-    console.log('building obstacle #{id}');
-    obstacleTracker.ids = [].concat(_toConsumableArray(obstacleTracker.ids), [id]);
-    var texture = PIXI.loader.resources['obstacle'].texture;
-    gobManager.add(new _gob.Gob({
-      id: id,
-      stage: backgroundLayer,
-      x: 340,
-      y: playerStartingY,
-      texture: texture,
-      frames: [new PIXI.Rectangle(0, 0, 40, 40)],
-      currentFrame: 0
-    }));
-    obstacleTracker.total += 1;
-    obstacleTracker.sinceLastSpawn = 0;
-  }
-  obstacleTracker.sinceLastSpawn = obstacleTracker.sinceLastSpawn + 1;
-
-  //update dynamic parameters
-  if (obstacleVX < obstacleMaxVelocity) {
-    obstacleVX = obstacleVelocity + Math.round(levelTimer * obstacleAccRate);
-  }
-
-  if (obstacleTracker.nextSpawnTime > obstacleMinSpawnRate) {
-    obstacleTracker.nextSpawnTime = obstacleSpawnRate - Math.round(levelTimer * obstacleAccRate);
-  }
-
-  if (spiritDistance > 0) {
-    spiritDistance = spiritInitDistance - Math.round(levelTimer * obstacleAccRate);
-  }
+  // Move Obstacles
 
   var _loop = function _loop(obstacleId) {
     var gob = gobManager.get(obstacleId);
-    gob.moveTo(gob.x - obstacleVX, gob.y);
+    gob.moveTo(Math.round(gob.x - level.velocity), gob.y);
     if (gob.x < 0) {
       gobManager.remove(gob.id);
-      obstacleTracker.ids = obstacleTracker.ids.filter(function (trackerId) {
+      level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
         return trackerId !== obstacleId;
       });
     }
@@ -31698,11 +31717,13 @@ function runGame() {
   var _iteratorError = undefined;
 
   try {
-    for (var _iterator = obstacleTracker.ids[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+    for (var _iterator = level.obstacleIds[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
       var obstacleId = _step.value;
 
       _loop(obstacleId);
     }
+
+    // Spawn obstacle
   } catch (err) {
     _didIteratorError = true;
     _iteratorError = err;
@@ -31718,14 +31739,33 @@ function runGame() {
     }
   }
 
+  if (level.lastSpawn + level.spawnRate < level.time) {
+    var id = 'obstacle' + level.totalObstacles;
+    console.log('building obstacle #{id}');
+    level.obstacleIds = [].concat(_toConsumableArray(level.obstacleIds), [id]);
+    var texture = PIXI.loader.resources['obstacle'].texture;
+    gobManager.add(new _gob.Gob({
+      id: id,
+      stage: backgroundLayer,
+      x: 340,
+      y: playerStartingY,
+      texture: texture,
+      frames: [new PIXI.Rectangle(0, 0, 40, 40)],
+      currentFrame: 0
+    }));
+    level.totalObstacles += 1;
+    level.lastSpawn = level.time;
+  }
+
+  // Debug
   if (DEBUG) {
     var debugText = "Debug info (press Q to toggle):\n";
     debugText += 'FPS: ' + fps + '\n';
-    var lvlTimerDebug = Math.round(levelTimer);
-    debugText += 'Game time: ' + lvlTimerDebug + 's \n';
-    debugText += 'Obstacle speed: ' + obstacleVX + '\n';
-    debugText += 'Obstacle spawn rate: ' + obstacleTracker.nextSpawnTime + '\n';
-    debugText += 'Distance: ' + spiritDistance + '\n';
+    debugText += 'Game time: ' + Math.round(level.time) + 's \n';
+    debugText += 'Obstacle speed: ' + Math.round(level.velocity) + '\n';
+    debugText += 'Obstacle spawn rate: ' + Math.round(level.spawnRate) + '\n';
+    debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.time) + '\n';
+    debugText += 'Distance: ' + Math.round(level.spiritDistance) + '\n';
     debugInfo.text = debugText;
   } else {
     debugInfo.text = "";
@@ -31736,4 +31776,4 @@ function runGame() {
 
 initialize();
 
-},{"./gob":172,"pixi.js":129}]},{},[173]);
+},{"./gob":172,"./level":173,"pixi.js":129}]},{},[174]);

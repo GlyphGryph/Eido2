@@ -1,40 +1,25 @@
 import * as PIXI from 'pixi.js'
 import {Gob, GobManager} from './gob'
+import {Level} from './level'
 
 const renderer = PIXI.autoDetectRenderer(601, 401)
 const fps = 11
 const velocity = 10
-const obstacleVelocity = 6 // obstacle initial velocity
-const obstacleMaxVelocity = 50
-const obstacleSpawnRate = 30
-const obstacleMinSpawnRate = 10
-const obstacleAccRate = 0.2 // obstacle velocity increase per second
-const spiritInitDistance = 100
 let DEBUG = true // toggle by pressing Q
 let debugInfo = ""
-let levelTimer = 0
 let playerVX = 0
-let obstacleVX = obstacleVelocity
-let spiritDistance = spiritInitDistance
 let a,d,q = {}
 let playerStartingX = 100
 let playerStartingY = 180
 let playerShadowOffset = 30
 let gobManager
+let level
 const stage = new PIXI.Container()
 const backgroundLayer = new PIXI.Container()
 const mainLayer = new PIXI.Container()
 
 let rightWall = 300
 let leftWall = 20
-
-let obstacleTracker = {
-  sinceLastSpawn: obstacleSpawnRate-1,
-  nextSpawnTime: obstacleSpawnRate,
-  ids: [],
-  total: 0
-}
-
 
 function keyboard(keyCode) {
   var key = {};
@@ -234,6 +219,8 @@ function setup(){
   debugInfo.y = 5;
   stage.addChild(debugInfo)
 
+  level = new Level()
+
   renderer.render(stage)
   startGame()
 }
@@ -243,9 +230,8 @@ function startGame(){
 }
 
 function runGame(){
-
-  levelTimer += 1/fps
-
+  const step = 1/fps
+  level.update(step)
   gobManager.update()
 
   const player = gobManager.get('player')
@@ -254,12 +240,25 @@ function runGame(){
   shadow.moveTo(player.x, player.y+30)
   const figment = gobManager.get('figment')
   figment.moveTo(figment.x, figment.y)
+  
+  // Move Obstacles
+  for(const obstacleId of level.obstacleIds){
+    let gob = gobManager.get(obstacleId)
+    gob.moveTo(Math.round(gob.x - level.velocity), gob.y)
+    if(gob.x < 0){
+      gobManager.remove(gob.id)
+      level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
+        return trackerId !== obstacleId
+      })
+    }
+  }
 
-  if(obstacleTracker.sinceLastSpawn > obstacleTracker.nextSpawnTime){
-    const id = `obstacle${obstacleTracker.total}`
+  // Spawn obstacle
+  if((level.lastSpawn + level.spawnRate) < level.time){
+    const id = `obstacle${level.totalObstacles}`
     console.log(`building obstacle #{id}`)
-    obstacleTracker.ids = [
-      ...obstacleTracker.ids,
+    level.obstacleIds = [
+      ...level.obstacleIds,
       id
     ]
     const texture = PIXI.loader.resources['obstacle'].texture
@@ -274,43 +273,19 @@ function runGame(){
         currentFrame: 0
       })
     )
-    obstacleTracker.total += 1
-    obstacleTracker.sinceLastSpawn = 0
+    level.totalObstacles += 1
+    level.lastSpawn = level.time
   }
-  obstacleTracker.sinceLastSpawn = obstacleTracker.sinceLastSpawn + 1
-
-  //update dynamic parameters
-  if(obstacleVX < obstacleMaxVelocity){
-    obstacleVX = obstacleVelocity + Math.round(levelTimer * obstacleAccRate)
-  }
-
-  if(obstacleTracker.nextSpawnTime > obstacleMinSpawnRate){
-    obstacleTracker.nextSpawnTime = obstacleSpawnRate - Math.round(levelTimer * obstacleAccRate)
-  }
-
-  if(spiritDistance>0){
-    spiritDistance = spiritInitDistance - Math.round(levelTimer * obstacleAccRate)
-  }
-
-  for(const obstacleId of obstacleTracker.ids){
-    let gob = gobManager.get(obstacleId)
-    gob.moveTo(gob.x - obstacleVX, gob.y)
-    if(gob.x < 0){
-      gobManager.remove(gob.id)
-      obstacleTracker.ids = obstacleTracker.ids.filter( (trackerId) =>{
-        return trackerId !== obstacleId
-      })
-    }
-  }
-
+  
+  // Debug
   if(DEBUG){
     let debugText = "Debug info (press Q to toggle):\n"
     debugText += `FPS: ${fps}\n`
-    let lvlTimerDebug = Math.round(levelTimer)
-    debugText += `Game time: ${lvlTimerDebug}s \n`
-    debugText += `Obstacle speed: ${obstacleVX}\n`
-    debugText += `Obstacle spawn rate: ${obstacleTracker.nextSpawnTime}\n`
-    debugText += `Distance: ${spiritDistance}\n`
+    debugText += `Game time: ${Math.round(level.time)}s \n`
+    debugText += `Obstacle speed: ${Math.round(level.velocity)}\n`
+    debugText += `Obstacle spawn rate: ${Math.round(level.spawnRate)}\n`
+    debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.time)}\n`
+    debugText += `Distance: ${Math.round(level.spiritDistance)}\n`
     debugInfo.text = debugText
   } else {
     debugInfo.text = ""
