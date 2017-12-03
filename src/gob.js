@@ -99,7 +99,6 @@ export class Gob{
   }
 
   initialize(){
-    console.log(this)
     this.stage.addChild(this.sprite)
   }
 

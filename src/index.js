@@ -191,24 +191,37 @@ function setup(){
   )
 
   // Create mask
-  const rectangle = new PIXI.Graphics()
-  rectangle.beginFill(0xFFFFFF, 1)
-  rectangle.drawRect(0, 0, 300, 400)
-  rectangle.endFill()
-  rectangle.x = 0
-  rectangle.y = 0
+   var canvas = document.createElement('canvas');
+  canvas.width  = 300;
+  canvas.height = 400;
+  var ctx = canvas.getContext('2d');
+  var gradient1 = ctx.createLinearGradient(0, 0, 75, 0);
+  gradient1.addColorStop(0, "#000000");
+  gradient1.addColorStop(1, "#FFFFFF");
+  ctx.fillStyle = gradient1;
+  ctx.fillRect(0, 0, 150, 400);
 
+  var gradient2 = ctx.createLinearGradient(225, 0, 300, 0);
+  gradient2.addColorStop(0, "#FFFFFF");
+  gradient2.addColorStop(1, "#000000");
+  ctx.fillStyle = gradient2;
+  ctx.fillRect(150, 0, 150, 400);
+  let visibleMaskTexture = PIXI.Texture.fromCanvas(canvas)
+  let maskTexture = PIXI.Texture.fromCanvas(canvas)
+  
+  /*
   gobManager.add(
     new Gob({
       id: 'objectMaskDisplay',
       stage: backgroundLayer,
       x: 40,
       y: 0,
-      texture: renderer.generateTexture(rectangle),
+      texture: visibleMaskTexture,
       frames: [ new PIXI.Rectangle(0, 0, 300, 400) ],
       currentFrame: 0
     })
   )
+  */
 
   gobManager.add(
     new Gob({
@@ -216,7 +229,7 @@ function setup(){
       stage: backgroundLayer,
       x: 40,
       y: 0,
-      texture: renderer.generateTexture(rectangle),
+      texture: maskTexture,
       frames: [ new PIXI.Rectangle(0, 0, 300, 400) ],
       currentFrame: 0
     })
@@ -224,7 +237,6 @@ function setup(){
 
   const mask = gobManager.get('objectMask').sprite
   backgroundLayer.mask = mask
-  console.log(backgroundLayer)
 
   debugInfo = new PIXI.Text('Setup', {
     fontSize: 15,
@@ -293,8 +305,6 @@ function runGame(){
     level.lastSpawn = level.time
   }
 
-  console.log(backgroundLayer)
-  
   // Debug
   if(DEBUG){
     let debugText = "Debug info (press Q to toggle):\n"
