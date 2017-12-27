@@ -13,10 +13,10 @@ export class Level{
 
     // Acceleration
     this.acceleration = 0.4
-    
+
     // Distance
-    this.initSpiritDistance = 100
-    this.spiritDistance = 100
+    this.initSpiritDistance = 200
+    this.spiritDistance = 200
 
     // Time
     this.time = 0

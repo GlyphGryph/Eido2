@@ -31448,8 +31448,8 @@ var Level = exports.Level = function () {
     this.acceleration = 0.4;
 
     // Distance
-    this.initSpiritDistance = 100;
-    this.spiritDistance = 100;
+    this.initSpiritDistance = 200;
+    this.spiritDistance = 200;
 
     // Time
     this.time = 0;
@@ -31725,7 +31725,7 @@ function runGame() {
   var shadow = gobManager.get('playerShadow');
   shadow.moveTo(player.x, player.y + 30);
   var figment = gobManager.get('figment');
-  figment.moveTo(figment.x, figment.y);
+  figment.moveTo(rightWall + level.spiritDistance, figment.y);
 
   // Move Obstacles
 
@@ -31788,7 +31788,7 @@ function runGame() {
   if (DEBUG) {
     var debugText = "Debug info (press Q to toggle):\n";
     debugText += 'FPS: ' + fps + '\n';
-    debugText += 'Game time: ' + Math.round(level.time) + 's \n';
+    debugText += 'Game time: ' + Math.round(level.time / fps) + 's \n';
     debugText += 'Obstacle speed: ' + Math.round(level.velocity) + '\n';
     debugText += 'Obstacle spawn rate: ' + Math.round(level.spawnRate) + '\n';
     debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.time) + '\n';

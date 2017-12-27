@@ -208,7 +208,7 @@ function setup(){
   ctx.fillRect(150, 0, 150, 400);
   let visibleMaskTexture = PIXI.Texture.fromCanvas(canvas)
   let maskTexture = PIXI.Texture.fromCanvas(canvas)
-  
+
   /*
   gobManager.add(
     new Gob({
@@ -268,8 +268,8 @@ function runGame(){
   const shadow = gobManager.get('playerShadow')
   shadow.moveTo(player.x, player.y+30)
   const figment = gobManager.get('figment')
-  figment.moveTo(figment.x, figment.y)
-  
+  figment.moveTo(rightWall + level.spiritDistance, figment.y)
+
   // Move Obstacles
   for(const obstacleId of level.obstacleIds){
     let gob = gobManager.get(obstacleId)
@@ -309,7 +309,7 @@ function runGame(){
   if(DEBUG){
     let debugText = "Debug info (press Q to toggle):\n"
     debugText += `FPS: ${fps}\n`
-    debugText += `Game time: ${Math.round(level.time)}s \n`
+    debugText += `Game time: ${Math.round(level.time/fps)}s \n`
     debugText += `Obstacle speed: ${Math.round(level.velocity)}\n`
     debugText += `Obstacle spawn rate: ${Math.round(level.spawnRate)}\n`
     debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.time)}\n`
