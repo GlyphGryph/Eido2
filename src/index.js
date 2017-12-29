@@ -8,12 +8,13 @@ const velocity = 10
 let DEBUG = true // toggle by pressing Q
 let debugInfo = ""
 let playerVX = 0
-let a,d,q = {}
+let a,d,q,o = {}
 let playerStartingX = 100
 let playerStartingY = 180
 let playerShadowOffset = 30
 let gobManager
 let level
+let attackLaunched = false
 const stage = new PIXI.Container()
 const backgroundLayer = new PIXI.Container()
 const mainLayer = new PIXI.Container()
@@ -88,6 +89,7 @@ function setup(){
   a = keyboard(65)
   d = keyboard(68)
   q = keyboard(81)
+  o = keyboard(79)
 
   a.press = function(){
     playerVX = -1*velocity
@@ -107,6 +109,10 @@ function setup(){
     if(!a.isDown){
       playerVX = 0
     }
+  }
+
+  o.press = function(){
+    attackLaunched = true
   }
 
   q.press = function(){
@@ -318,13 +324,25 @@ function runGame(){
   } else {
     debugInfo.text = ""
   }
-
-  // Collision detection
+  
+  // Obstacle state management
   for(const obstacleId of level.obstacleIds){
     let obstacle = gobManager.get(obstacleId)
-    if(!obstacle.hasHitPlayer && obstacle.checkCollisionWith(player)){
+    // Respond to launched attacks
+    if(attackLaunched && !obstacle.hasBeenDestroyed){
+      obstacle.hasBeenDestroyed = true
+      attackLaunched = false
+      console.log('obstacle destroyed!')
+    }
+    // Collision detection
+    if(
+      !obstacle.hasBeenDestroyed &&
+      !obstacle.hasHitPlayer &&
+      obstacle.checkCollisionWith(player)
+    ){
       obstacle.hasHitPlayer = true
       level.velocity = level.velocity / 2
+      console.log('ouch! obstacle hit')
     }
   }
 

@@ -141,6 +141,16 @@ export class Gob{
     this.previous.x = this.x
     this.previous.y = this.y
   }
+
+  //TODO
+  showOverlay(){
+    this.displayOverlay = true
+  }
+  
+  //TODO
+  hideOverlay(){
+    this.displayOverlay = false
+  }
   
   // These are calculated based on current and previous position
   // This prevents situations where players will skip through fast moving objects
@@ -151,7 +161,9 @@ export class Gob{
     const bottom = Math.max(this.y, this.previous.y) + this.sprite.height
     return {left, right, top, bottom}
   }
-
+  
+  // Returns whether or not this overlaps passed object,
+  // or the space between where they are and where they were last frame
   checkCollisionWith(gob){
     const ourParams = this.getCollisionParameters()
     const theirParams = gob.getCollisionParameters()

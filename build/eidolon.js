@@ -31423,6 +31423,22 @@ var Gob = exports.Gob = function () {
       this.previous.y = this.y;
     }
 
+    //TODO
+
+  }, {
+    key: 'showOverlay',
+    value: function showOverlay() {
+      this.displayOverlay = true;
+    }
+
+    //TODO
+
+  }, {
+    key: 'hideOverlay',
+    value: function hideOverlay() {
+      this.displayOverlay = false;
+    }
+
     // These are calculated based on current and previous position
     // This prevents situations where players will skip through fast moving objects
 
@@ -31435,6 +31451,10 @@ var Gob = exports.Gob = function () {
       var bottom = Math.max(this.y, this.previous.y) + this.sprite.height;
       return { left: left, right: right, top: top, bottom: bottom };
     }
+
+    // Returns whether or not this overlaps passed object,
+    // or the space between where they are and where they were last frame
+
   }, {
     key: 'checkCollisionWith',
     value: function checkCollisionWith(gob) {
@@ -31535,12 +31555,14 @@ var debugInfo = "";
 var playerVX = 0;
 var a = void 0,
     d = void 0,
-    q = {};
+    q = void 0,
+    o = {};
 var playerStartingX = 100;
 var playerStartingY = 180;
 var playerShadowOffset = 30;
 var gobManager = void 0;
 var level = void 0;
+var attackLaunched = false;
 var stage = new PIXI.Container();
 var backgroundLayer = new PIXI.Container();
 var mainLayer = new PIXI.Container();
@@ -31607,6 +31629,7 @@ function setup() {
   a = keyboard(65);
   d = keyboard(68);
   q = keyboard(81);
+  o = keyboard(79);
 
   a.press = function () {
     playerVX = -1 * velocity;
@@ -31626,6 +31649,10 @@ function setup() {
     if (!a.isDown) {
       playerVX = 0;
     }
+  };
+
+  o.press = function () {
+    attackLaunched = true;
   };
 
   q.press = function () {
@@ -31833,7 +31860,7 @@ function runGame() {
     debugInfo.text = "";
   }
 
-  // Collision detection
+  // Obstacle state management
   var _iteratorNormalCompletion2 = true;
   var _didIteratorError2 = false;
   var _iteratorError2 = undefined;
@@ -31843,9 +31870,17 @@ function runGame() {
       var obstacleId = _step2.value;
 
       var _obstacle = gobManager.get(obstacleId);
-      if (!_obstacle.hasHitPlayer && _obstacle.checkCollisionWith(player)) {
+      // Respond to launched attacks
+      if (attackLaunched && !_obstacle.hasBeenDestroyed) {
+        _obstacle.hasBeenDestroyed = true;
+        attackLaunched = false;
+        console.log('obstacle destroyed!');
+      }
+      // Collision detection
+      if (!_obstacle.hasBeenDestroyed && !_obstacle.hasHitPlayer && _obstacle.checkCollisionWith(player)) {
         _obstacle.hasHitPlayer = true;
         level.velocity = level.velocity / 2;
+        console.log('ouch! obstacle hit');
       }
     }
   } catch (err) {
