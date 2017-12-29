@@ -282,7 +282,7 @@ function runGame(){
   }
 
   // Spawn obstacle
-  if((level.lastSpawn + level.spawnRate) < level.time){
+  if(level.distanceTraveled > (level.lastSpawn + level.spawnRate)){
     const id = `obstacle${level.totalObstacles}`
     level.obstacleIds = [
       ...level.obstacleIds,
@@ -302,7 +302,7 @@ function runGame(){
     obstacle.hasBeenDestroyed = false
     gobManager.add(obstacle)
     level.totalObstacles += 1
-    level.lastSpawn = level.time
+    level.lastSpawn = level.distanceTraveled
   }
 
   // Debug
@@ -310,10 +310,10 @@ function runGame(){
     let debugText = "Debug info (press Q to toggle):\n"
     debugText += `FPS: ${fps}\n`
     debugText += `Game time: ${Math.round(level.time/fps)}s \n`
-    debugText += `Obstacle speed: ${Math.round(level.velocity)}\n`
-    debugText += `Obstacle spawn rate: ${Math.round(level.spawnRate)}\n`
-    debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.time)}\n`
-    debugText += `Distance: ${Math.round(level.spiritDistance)}\n`
+    debugText += `Level speed: ${Math.round(level.velocity)}\n`
+    debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.distanceTraveled)}\n`
+    debugText += `Distance traveled: ${Math.round(level.distanceTraveled)}\n`
+    debugText += `Distance from spirit: ${Math.round(level.spiritDistance)}\n`
     debugInfo.text = debugText
   } else {
     debugInfo.text = ""
@@ -321,9 +321,10 @@ function runGame(){
 
   // Collision detection
   for(const obstacleId of level.obstacleIds){
-    let gob = gobManager.get(obstacleId)
-    if(gob.checkCollisionWith(player)){
-      console.log('collision!')
+    let obstacle = gobManager.get(obstacleId)
+    if(!obstacle.hasHitPlayer && obstacle.checkCollisionWith(player)){
+      obstacle.hasHitPlayer = true
+      level.velocity = level.velocity / 2
     }
   }
 

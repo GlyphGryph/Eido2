@@ -31471,8 +31471,7 @@ var Level = exports.Level = function () {
     this.targetVelocity = 10;
 
     // Spawn
-    this.spawnRate = 30;
-    this.minSpawnRate = 10;
+    this.spawnRate = 300;
     this.lastSpawn = 0;
 
     // Acceleration
@@ -31484,6 +31483,7 @@ var Level = exports.Level = function () {
 
     // Time
     this.time = 0;
+    this.distanceTraveled = 0;
 
     // Obstacles
     this.obstacleIds = [];
@@ -31504,6 +31504,8 @@ var Level = exports.Level = function () {
       if (this.spiritDistance < 0) {
         this.spiritDistance = 0;
       }
+
+      this.distanceTraveled += this.velocity;
     }
   }]);
 
@@ -31517,7 +31519,7 @@ var _pixi = require('pixi.js');
 
 var PIXI = _interopRequireWildcard(_pixi);
 
-var _gob2 = require('./gob');
+var _gob = require('./gob');
 
 var _level = require('./level');
 
@@ -31632,7 +31634,7 @@ function setup() {
 
   stage.addChild(backgroundLayer);
   stage.addChild(mainLayer);
-  gobManager = new _gob2.GobManager();
+  gobManager = new _gob.GobManager();
 
   var textures = PIXI.loader.resources["spritesheet"].textures;
 
@@ -31640,7 +31642,7 @@ function setup() {
 
   var ovalRunFrames = [];
 
-  gobManager.add(new _gob2.Gob({
+  gobManager.add(new _gob.Gob({
     id: 'player',
     stage: mainLayer,
     x: playerStartingX,
@@ -31652,7 +31654,7 @@ function setup() {
     xMin: leftWall
   }));
 
-  gobManager.add(new _gob2.Gob({
+  gobManager.add(new _gob.Gob({
     id: 'playerShadow',
     stage: mainLayer,
     x: playerStartingX,
@@ -31670,7 +31672,7 @@ function setup() {
   }
   var figmentTexture = textures["figment"];
 
-  gobManager.add(new _gob2.Gob({
+  gobManager.add(new _gob.Gob({
     id: 'figment',
     stage: mainLayer,
     x: 500,
@@ -31713,7 +31715,7 @@ function setup() {
   )
   */
 
-  gobManager.add(new _gob2.Gob({
+  gobManager.add(new _gob.Gob({
     id: 'objectMask',
     stage: backgroundLayer,
     x: 40,
@@ -31797,11 +31799,11 @@ function runGame() {
     }
   }
 
-  if (level.lastSpawn + level.spawnRate < level.time) {
+  if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     var id = 'obstacle' + level.totalObstacles;
     level.obstacleIds = [].concat(_toConsumableArray(level.obstacleIds), [id]);
     var texture = PIXI.loader.resources['obstacle'].texture;
-    var obstacle = new _gob2.Gob({
+    var obstacle = new _gob.Gob({
       id: id,
       stage: backgroundLayer,
       x: 340,
@@ -31814,7 +31816,7 @@ function runGame() {
     obstacle.hasBeenDestroyed = false;
     gobManager.add(obstacle);
     level.totalObstacles += 1;
-    level.lastSpawn = level.time;
+    level.lastSpawn = level.distanceTraveled;
   }
 
   // Debug
@@ -31822,10 +31824,10 @@ function runGame() {
     var debugText = "Debug info (press Q to toggle):\n";
     debugText += 'FPS: ' + fps + '\n';
     debugText += 'Game time: ' + Math.round(level.time / fps) + 's \n';
-    debugText += 'Obstacle speed: ' + Math.round(level.velocity) + '\n';
-    debugText += 'Obstacle spawn rate: ' + Math.round(level.spawnRate) + '\n';
-    debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.time) + '\n';
-    debugText += 'Distance: ' + Math.round(level.spiritDistance) + '\n';
+    debugText += 'Level speed: ' + Math.round(level.velocity) + '\n';
+    debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.distanceTraveled) + '\n';
+    debugText += 'Distance traveled: ' + Math.round(level.distanceTraveled) + '\n';
+    debugText += 'Distance from spirit: ' + Math.round(level.spiritDistance) + '\n';
     debugInfo.text = debugText;
   } else {
     debugInfo.text = "";
@@ -31840,9 +31842,10 @@ function runGame() {
     for (var _iterator2 = level.obstacleIds[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
       var obstacleId = _step2.value;
 
-      var _gob = gobManager.get(obstacleId);
-      if (_gob.checkCollisionWith(player)) {
-        console.log('collision!');
+      var _obstacle = gobManager.get(obstacleId);
+      if (!_obstacle.hasHitPlayer && _obstacle.checkCollisionWith(player)) {
+        _obstacle.hasHitPlayer = true;
+        level.velocity = level.velocity / 2;
       }
     }
   } catch (err) {

@@ -7,8 +7,7 @@ export class Level{
     this.targetVelocity = 10
 
     // Spawn
-    this.spawnRate = 30
-    this.minSpawnRate = 10
+    this.spawnRate = 300
     this.lastSpawn = 0
 
     // Acceleration
@@ -20,6 +19,7 @@ export class Level{
 
     // Time
     this.time = 0
+    this.distanceTraveled = 0
 
     // Obstacles
     this.obstacleIds = []
@@ -38,5 +38,7 @@ export class Level{
     if(this.spiritDistance < 0){
       this.spiritDistance = 0
     }
+
+    this.distanceTraveled += this.velocity
   }
 }
