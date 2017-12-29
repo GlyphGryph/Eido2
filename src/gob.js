@@ -48,6 +48,7 @@ export class GobManager{
   }
 
   // Runs the update function on all gobs
+  // Note: Updates should happen *after* all manipulations like moveTo are done to a sprite
   update(){
     for(const gob of this.gobs){
       gob.update()
@@ -72,6 +73,9 @@ export class Gob{
     this.stage = stage
     this.x = x
     this.y = y
+    this.previous = {}
+    this.previous.x = this.x
+    this.previous.y = this.y
 
     // We have different paths for whether we are passed an atlas or a texture
     this.frames = frames
@@ -123,6 +127,7 @@ export class Gob{
     this.sprite.y = y
   }
 
+  // This method should always be called on a sprite before immediately before rendering
   update(){
     if(this.frames.length > 0){
       this.currentFrame = (this.currentFrame + 1) % this.frames.length
@@ -133,5 +138,30 @@ export class Gob{
         this.sprite.texture.frame = this.frames[this.currentFrame]
       }
     }
+    this.previous.x = this.x
+    this.previous.y = this.y
+  }
+  
+  // These are calculated based on current and previous position
+  // This prevents situations where players will skip through fast moving objects
+  getCollisionParameters(){
+    const left = Math.min(this.x, this.previous.x)
+    const right = Math.max(this.x, this.previous.x) + this.sprite.width
+    const top = Math.min(this.y, this.previous.y)
+    const bottom = Math.max(this.y, this.previous.y) + this.sprite.height
+    return {left, right, top, bottom}
+  }
+
+  checkCollisionWith(gob){
+    const ourParams = this.getCollisionParameters()
+    const theirParams = gob.getCollisionParameters()
+
+    // Basic rectangular collision detector
+    return (
+      ourParams.left < theirParams.right &&
+      ourParams.right > theirParams.left &&
+      ourParams.top < theirParams.bottom &&
+      ourParams.bottom > theirParams.top
+    )
   }
 }

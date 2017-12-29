@@ -31279,6 +31279,7 @@ var GobManager = exports.GobManager = function () {
     }
 
     // Runs the update function on all gobs
+    // Note: Updates should happen *after* all manipulations like moveTo are done to a sprite
 
   }, {
     key: 'update',
@@ -31346,6 +31347,9 @@ var Gob = exports.Gob = function () {
     this.stage = stage;
     this.x = x;
     this.y = y;
+    this.previous = {};
+    this.previous.x = this.x;
+    this.previous.y = this.y;
 
     // We have different paths for whether we are passed an atlas or a texture
     this.frames = frames;
@@ -31400,6 +31404,9 @@ var Gob = exports.Gob = function () {
       this.sprite.x = x;
       this.sprite.y = y;
     }
+
+    // This method should always be called on a sprite before immediately before rendering
+
   }, {
     key: 'update',
     value: function update() {
@@ -31412,6 +31419,30 @@ var Gob = exports.Gob = function () {
           this.sprite.texture.frame = this.frames[this.currentFrame];
         }
       }
+      this.previous.x = this.x;
+      this.previous.y = this.y;
+    }
+
+    // These are calculated based on current and previous position
+    // This prevents situations where players will skip through fast moving objects
+
+  }, {
+    key: 'getCollisionParameters',
+    value: function getCollisionParameters() {
+      var left = Math.min(this.x, this.previous.x);
+      var right = Math.max(this.x, this.previous.x) + this.sprite.width;
+      var top = Math.min(this.y, this.previous.y);
+      var bottom = Math.max(this.y, this.previous.y) + this.sprite.height;
+      return { left: left, right: right, top: top, bottom: bottom };
+    }
+  }, {
+    key: 'checkCollisionWith',
+    value: function checkCollisionWith(gob) {
+      var ourParams = this.getCollisionParameters();
+      var theirParams = gob.getCollisionParameters();
+
+      // Basic rectangular collision detector
+      return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
     }
   }]);
 
@@ -31486,7 +31517,7 @@ var _pixi = require('pixi.js');
 
 var PIXI = _interopRequireWildcard(_pixi);
 
-var _gob = require('./gob');
+var _gob2 = require('./gob');
 
 var _level = require('./level');
 
@@ -31601,7 +31632,7 @@ function setup() {
 
   stage.addChild(backgroundLayer);
   stage.addChild(mainLayer);
-  gobManager = new _gob.GobManager();
+  gobManager = new _gob2.GobManager();
 
   var textures = PIXI.loader.resources["spritesheet"].textures;
 
@@ -31609,7 +31640,7 @@ function setup() {
 
   var ovalRunFrames = [];
 
-  gobManager.add(new _gob.Gob({
+  gobManager.add(new _gob2.Gob({
     id: 'player',
     stage: mainLayer,
     x: playerStartingX,
@@ -31621,7 +31652,7 @@ function setup() {
     xMin: leftWall
   }));
 
-  gobManager.add(new _gob.Gob({
+  gobManager.add(new _gob2.Gob({
     id: 'playerShadow',
     stage: mainLayer,
     x: playerStartingX,
@@ -31639,7 +31670,7 @@ function setup() {
   }
   var figmentTexture = textures["figment"];
 
-  gobManager.add(new _gob.Gob({
+  gobManager.add(new _gob2.Gob({
     id: 'figment',
     stage: mainLayer,
     x: 500,
@@ -31682,7 +31713,7 @@ function setup() {
   )
   */
 
-  gobManager.add(new _gob.Gob({
+  gobManager.add(new _gob2.Gob({
     id: 'objectMask',
     stage: backgroundLayer,
     x: 40,
@@ -31718,7 +31749,6 @@ function startGame() {
 function runGame() {
   var step = 1 / fps;
   level.update(step);
-  gobManager.update();
 
   var player = gobManager.get('player');
   player.moveTo(player.x + playerVX, player.y);
@@ -31771,7 +31801,7 @@ function runGame() {
     var id = 'obstacle' + level.totalObstacles;
     level.obstacleIds = [].concat(_toConsumableArray(level.obstacleIds), [id]);
     var texture = PIXI.loader.resources['obstacle'].texture;
-    gobManager.add(new _gob.Gob({
+    var obstacle = new _gob2.Gob({
       id: id,
       stage: backgroundLayer,
       x: 340,
@@ -31779,7 +31809,10 @@ function runGame() {
       texture: texture,
       frames: [new PIXI.Rectangle(0, 0, 40, 40)],
       currentFrame: 0
-    }));
+    });
+    obstacle.hasHitPlayer = false;
+    obstacle.hasBeenDestroyed = false;
+    gobManager.add(obstacle);
     level.totalObstacles += 1;
     level.lastSpawn = level.time;
   }
@@ -31798,6 +31831,36 @@ function runGame() {
     debugInfo.text = "";
   }
 
+  // Collision detection
+  var _iteratorNormalCompletion2 = true;
+  var _didIteratorError2 = false;
+  var _iteratorError2 = undefined;
+
+  try {
+    for (var _iterator2 = level.obstacleIds[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+      var obstacleId = _step2.value;
+
+      var _gob = gobManager.get(obstacleId);
+      if (_gob.checkCollisionWith(player)) {
+        console.log('collision!');
+      }
+    }
+  } catch (err) {
+    _didIteratorError2 = true;
+    _iteratorError2 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion2 && _iterator2.return) {
+        _iterator2.return();
+      }
+    } finally {
+      if (_didIteratorError2) {
+        throw _iteratorError2;
+      }
+    }
+  }
+
+  gobManager.update();
   renderer.render(stage);
 }
 

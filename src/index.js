@@ -261,7 +261,6 @@ function startGame(){
 function runGame(){
   const step = 1/fps
   level.update(step)
-  gobManager.update()
 
   const player = gobManager.get('player')
   player.moveTo(player.x + playerVX, player.y)
@@ -290,17 +289,18 @@ function runGame(){
       id
     ]
     const texture = PIXI.loader.resources['obstacle'].texture
-    gobManager.add(
-      new Gob({
-        id,
-        stage: backgroundLayer,
-        x: 340,
-        y: playerStartingY,
-        texture,
-        frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
-        currentFrame: 0
-      })
-    )
+    const obstacle = new Gob({
+      id,
+      stage: backgroundLayer,
+      x: 340,
+      y: playerStartingY,
+      texture,
+      frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
+      currentFrame: 0
+    })
+    obstacle.hasHitPlayer = false
+    obstacle.hasBeenDestroyed = false
+    gobManager.add(obstacle)
     level.totalObstacles += 1
     level.lastSpawn = level.time
   }
@@ -319,7 +319,15 @@ function runGame(){
     debugInfo.text = ""
   }
 
+  // Collision detection
+  for(const obstacleId of level.obstacleIds){
+    let gob = gobManager.get(obstacleId)
+    if(gob.checkCollisionWith(player)){
+      console.log('collision!')
+    }
+  }
 
+  gobManager.update()
   renderer.render(stage)
 }
 
