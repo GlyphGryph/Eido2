@@ -8,13 +8,17 @@ const velocity = 10
 let DEBUG = true // toggle by pressing Q
 let debugInfo = ""
 let playerVX = 0
-let a,d,q,o = {}
+let a,d,q,o,k = {}
 let playerStartingX = 100
 let playerStartingY = 180
 let playerShadowOffset = 30
 let gobManager
 let level
 let attackLaunched = false
+let attackType
+let attackTimer
+let attackRange = 150
+let attackTimeout = 4
 const stage = new PIXI.Container()
 const backgroundLayer = new PIXI.Container()
 const mainLayer = new PIXI.Container()
@@ -90,6 +94,7 @@ function setup(){
   d = keyboard(68)
   q = keyboard(81)
   o = keyboard(79)
+  k = keyboard(75)
 
   a.press = function(){
     playerVX = -1*velocity
@@ -113,6 +118,14 @@ function setup(){
 
   o.press = function(){
     attackLaunched = true
+    attackTimer = attackTimeout
+    attackType = "o"
+  }
+
+  k.press = function(){
+    attackLaunched = true
+    attackTimer = attackTimeout
+    attackType = "k"
   }
 
   q.press = function(){
@@ -165,14 +178,6 @@ function setup(){
       currentFrame: 0
     })
   )
-
-  // Create figment
-  let figmentFrames = []
-  for(let ii = 0; ii < 8; ii++){
-    const frame = new PIXI.Rectangle(ii * 40, 0, 40, 40)
-    figmentFrames.push(frame)
-  }
-  const figmentTexture = textures["figment"]
 
   gobManager.add(
     new Gob({
@@ -279,8 +284,11 @@ function runGame(){
   for(const obstacleId of level.obstacleIds){
     let gob = gobManager.get(obstacleId)
     gob.moveTo(Math.round(gob.x - level.velocity), gob.y)
+    let marker = gobManager.get(`${obstacleId}marker`)
+    marker.moveTo(Math.round(gob.x - level.velocity) + 20, gob.y - 30)
     if(gob.x < 0){
       gobManager.remove(gob.id)
+      gobManager.remove(marker.id)
       level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
         return trackerId !== obstacleId
       })
@@ -289,6 +297,8 @@ function runGame(){
 
   // Spawn obstacle
   if(level.distanceTraveled > (level.lastSpawn + level.spawnRate)){
+    // randomize type
+    const attack = Math.random() > 0.5 ? "k" : "o"
     const id = `obstacle${level.totalObstacles}`
     level.obstacleIds = [
       ...level.obstacleIds,
@@ -304,9 +314,24 @@ function runGame(){
       frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
       currentFrame: 0
     })
+    const markerId = `${id}marker`
+    console.log(markerId)
+    const marker = new Gob({
+      id: markerId,
+      stage: backgroundLayer,
+      x: 360,
+      y: playerStartingY - 30,
+      atlas: PIXI.loader.resources["spritesheet"],
+      frames: [
+        `keys/${attack}`
+      ],
+      currentFrame: 0
+    })
+    obstacle.attackType = attack
     obstacle.hasHitPlayer = false
     obstacle.hasBeenDestroyed = false
     gobManager.add(obstacle)
+    gobManager.add(marker)
     level.totalObstacles += 1
     level.lastSpawn = level.distanceTraveled
   }
@@ -324,14 +349,31 @@ function runGame(){
   } else {
     debugInfo.text = ""
   }
-  
+
+  // time out the attack
+  if(attackTimer > 0){
+    attackTimer--
+  } else {
+    attackLaunched = false
+  }
+
   // Obstacle state management
   for(const obstacleId of level.obstacleIds){
     let obstacle = gobManager.get(obstacleId)
+    let marker = gobManager.get(`${obstacleId}marker`)
     // Respond to launched attacks
-    if(attackLaunched && !obstacle.hasBeenDestroyed){
+    if( (attackLaunched && !obstacle.hasBeenDestroyed) &&
+        (attackType == obstacle.attackType) &&
+        (gobManager.distance(player.id, obstacle.id) <= attackRange) &&
+        !obstacle.hasHitPlayer
+      ){
       obstacle.hasBeenDestroyed = true
       attackLaunched = false
+      gobManager.remove(obstacle.id)
+      gobManager.remove(marker.id)
+      level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
+        return trackerId !== obstacleId
+      })
       console.log('obstacle destroyed!')
     }
     // Collision detection
@@ -342,6 +384,7 @@ function runGame(){
     ){
       obstacle.hasHitPlayer = true
       level.velocity = level.velocity / 2
+      marker.hide()
       console.log('ouch! obstacle hit')
     }
   }

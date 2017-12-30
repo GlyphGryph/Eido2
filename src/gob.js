@@ -4,7 +4,7 @@ export class GobManager{
   constructor(){
     this.gobs = []
   }
-  
+
   // Adds a gob from the manager
   // Arguments:
   // gob: A Gob instance.
@@ -19,7 +19,7 @@ export class GobManager{
     // TODO: Throw error if gob has same id
     return this
   }
-  
+
   // Removes a gob from the manager
   // Arguments:
   // id: Gob id
@@ -54,6 +54,15 @@ export class GobManager{
       gob.update()
     }
     return this
+  }
+
+  // Returns distance between two gobs
+  // Arguments:
+  // gob1, gob2: gob ids
+  distance(gob1id, gob2id){
+    let gob1 = this.get(gob1id)
+    let gob2 = this.get(gob2id)
+    return Math.sqrt( Math.pow(gob2.x-gob1.x, 2) + Math.pow(gob2.y-gob1.y, 2) )
   }
 }
 
@@ -146,12 +155,12 @@ export class Gob{
   showOverlay(){
     this.displayOverlay = true
   }
-  
+
   //TODO
   hideOverlay(){
     this.displayOverlay = false
   }
-  
+
   // These are calculated based on current and previous position
   // This prevents situations where players will skip through fast moving objects
   getCollisionParameters(){
@@ -161,7 +170,7 @@ export class Gob{
     const bottom = Math.max(this.y, this.previous.y) + this.sprite.height
     return {left, right, top, bottom}
   }
-  
+
   // Returns whether or not this overlaps passed object,
   // or the space between where they are and where they were last frame
   checkCollisionWith(gob){
@@ -175,5 +184,13 @@ export class Gob{
       ourParams.top < theirParams.bottom &&
       ourParams.bottom > theirParams.top
     )
+  }
+
+  show(){
+    this.sprite.alpha = 1
+  }
+
+  hide(){
+    this.sprite.alpha = 0
   }
 }

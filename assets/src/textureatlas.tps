@@ -207,6 +207,12 @@
             <key type="filename">figment/run/05.png</key>
             <key type="filename">figment/run/06.png</key>
             <key type="filename">figment/run/07.png</key>
+            <key type="filename">keys/k.png</key>
+            <key type="filename">keys/k_inv.png</key>
+            <key type="filename">keys/o.png</key>
+            <key type="filename">keys/o_inv.png</key>
+            <key type="filename">keys/w.png</key>
+            <key type="filename">keys/w_inv.png</key>
             <key type="filename">oval/run/00.png</key>
             <key type="filename">oval/run/01.png</key>
             <key type="filename">oval/run/02.png</key>
@@ -244,6 +250,7 @@
         <array>
             <filename>figment</filename>
             <filename>oval</filename>
+            <filename>keys</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

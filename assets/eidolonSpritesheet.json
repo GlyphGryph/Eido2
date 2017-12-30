@@ -29,7 +29,7 @@
 },
 "figment/run/03":
 {
-	"frame": {"x":120,"y":0,"w":40,"h":40},
+	"frame": {"x":0,"y":40,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
@@ -38,7 +38,7 @@
 },
 "figment/run/04":
 {
-	"frame": {"x":160,"y":0,"w":40,"h":40},
+	"frame": {"x":40,"y":40,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
@@ -47,7 +47,7 @@
 },
 "figment/run/05":
 {
-	"frame": {"x":200,"y":0,"w":40,"h":40},
+	"frame": {"x":80,"y":40,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
@@ -56,7 +56,7 @@
 },
 "figment/run/06":
 {
-	"frame": {"x":0,"y":40,"w":40,"h":40},
+	"frame": {"x":0,"y":80,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
@@ -65,16 +65,70 @@
 },
 "figment/run/07":
 {
-	"frame": {"x":40,"y":40,"w":40,"h":40},
+	"frame": {"x":40,"y":80,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
 	"sourceSize": {"w":40,"h":40},
 	"pivot": {"x":0.5,"y":0.5}
 },
+"keys/k":
+{
+	"frame": {"x":80,"y":80,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"keys/k_inv":
+{
+	"frame": {"x":100,"y":80,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"keys/o":
+{
+	"frame": {"x":0,"y":120,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"keys/o_inv":
+{
+	"frame": {"x":20,"y":120,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"keys/w":
+{
+	"frame": {"x":40,"y":120,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"keys/w_inv":
+{
+	"frame": {"x":60,"y":120,"w":20,"h":20},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":20,"h":20},
+	"sourceSize": {"w":20,"h":20},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "oval/run/00":
 {
-	"frame": {"x":80,"y":40,"w":40,"h":40},
+	"frame": {"x":80,"y":120,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
@@ -83,7 +137,7 @@
 },
 "oval/run/01":
 {
-	"frame": {"x":120,"y":40,"w":40,"h":40},
+	"frame": {"x":0,"y":160,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
@@ -92,7 +146,7 @@
 },
 "oval/run/02":
 {
-	"frame": {"x":160,"y":40,"w":40,"h":40},
+	"frame": {"x":40,"y":160,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
@@ -101,7 +155,7 @@
 },
 "oval/run/03":
 {
-	"frame": {"x":200,"y":40,"w":40,"h":40},
+	"frame": {"x":80,"y":160,"w":40,"h":40},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":40},
@@ -110,7 +164,7 @@
 },
 "oval/run/shadow/00":
 {
-	"frame": {"x":0,"y":80,"w":40,"h":10},
+	"frame": {"x":0,"y":200,"w":40,"h":10},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":10},
@@ -119,7 +173,7 @@
 },
 "oval/run/shadow/01":
 {
-	"frame": {"x":40,"y":80,"w":40,"h":10},
+	"frame": {"x":40,"y":200,"w":40,"h":10},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":10},
@@ -128,7 +182,7 @@
 },
 "oval/run/shadow/02":
 {
-	"frame": {"x":80,"y":80,"w":40,"h":10},
+	"frame": {"x":80,"y":200,"w":40,"h":10},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":10},
@@ -137,7 +191,7 @@
 },
 "oval/run/shadow/03":
 {
-	"frame": {"x":120,"y":80,"w":40,"h":10},
+	"frame": {"x":0,"y":210,"w":40,"h":10},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":10},
@@ -149,8 +203,8 @@
 	"version": "1.0",
 	"image": "eidolonSpritesheet.png",
 	"format": "RGBA8888",
-	"size": {"w":240,"h":90},
+	"size": {"w":120,"h":220},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:ea6c4e32e74a16441b1604afcb4e331b:aae4cbad067ddfbfb37e211ffc3d1d23:1004ffaa0283c88858f8a1a1773c5eb0$"
+	"smartupdate": "$TexturePacker:SmartUpdate:ddddd8e858056d8896b9802974bbf8a6:fb1c81ee3d1214740d74c8083324db79:1004ffaa0283c88858f8a1a1773c5eb0$"
 }
 }

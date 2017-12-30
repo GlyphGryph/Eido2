@@ -31311,6 +31311,18 @@ var GobManager = exports.GobManager = function () {
 
       return this;
     }
+
+    // Returns distance between two gobs
+    // Arguments:
+    // gob1, gob2: gob ids
+
+  }, {
+    key: 'distance',
+    value: function distance(gob1id, gob2id) {
+      var gob1 = this.get(gob1id);
+      var gob2 = this.get(gob2id);
+      return Math.sqrt(Math.pow(gob2.x - gob1.x, 2) + Math.pow(gob2.y - gob1.y, 2));
+    }
   }]);
 
   return GobManager;
@@ -31464,6 +31476,16 @@ var Gob = exports.Gob = function () {
       // Basic rectangular collision detector
       return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
     }
+  }, {
+    key: 'show',
+    value: function show() {
+      this.sprite.alpha = 1;
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this.sprite.alpha = 0;
+    }
   }]);
 
   return Gob;
@@ -31556,13 +31578,18 @@ var playerVX = 0;
 var a = void 0,
     d = void 0,
     q = void 0,
-    o = {};
+    o = void 0,
+    k = {};
 var playerStartingX = 100;
 var playerStartingY = 180;
 var playerShadowOffset = 30;
 var gobManager = void 0;
 var level = void 0;
 var attackLaunched = false;
+var attackType = void 0;
+var attackTimer = void 0;
+var attackRange = 150;
+var attackTimeout = 4;
 var stage = new PIXI.Container();
 var backgroundLayer = new PIXI.Container();
 var mainLayer = new PIXI.Container();
@@ -31630,6 +31657,7 @@ function setup() {
   d = keyboard(68);
   q = keyboard(81);
   o = keyboard(79);
+  k = keyboard(75);
 
   a.press = function () {
     playerVX = -1 * velocity;
@@ -31653,6 +31681,14 @@ function setup() {
 
   o.press = function () {
     attackLaunched = true;
+    attackTimer = attackTimeout;
+    attackType = "o";
+  };
+
+  k.press = function () {
+    attackLaunched = true;
+    attackTimer = attackTimeout;
+    attackType = "k";
   };
 
   q.press = function () {
@@ -31690,14 +31726,6 @@ function setup() {
     frames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
     currentFrame: 0
   }));
-
-  // Create figment
-  var figmentFrames = [];
-  for (var ii = 0; ii < 8; ii++) {
-    var frame = new PIXI.Rectangle(ii * 40, 0, 40, 40);
-    figmentFrames.push(frame);
-  }
-  var figmentTexture = textures["figment"];
 
   gobManager.add(new _gob.Gob({
     id: 'figment',
@@ -31791,8 +31819,11 @@ function runGame() {
   var _loop = function _loop(obstacleId) {
     var gob = gobManager.get(obstacleId);
     gob.moveTo(Math.round(gob.x - level.velocity), gob.y);
+    var marker = gobManager.get(obstacleId + 'marker');
+    marker.moveTo(Math.round(gob.x - level.velocity) + 20, gob.y - 30);
     if (gob.x < 0) {
       gobManager.remove(gob.id);
+      gobManager.remove(marker.id);
       level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
         return trackerId !== obstacleId;
       });
@@ -31827,6 +31858,8 @@ function runGame() {
   }
 
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
+    // randomize type
+    var attack = Math.random() > 0.5 ? "k" : "o";
     var id = 'obstacle' + level.totalObstacles;
     level.obstacleIds = [].concat(_toConsumableArray(level.obstacleIds), [id]);
     var texture = PIXI.loader.resources['obstacle'].texture;
@@ -31839,9 +31872,22 @@ function runGame() {
       frames: [new PIXI.Rectangle(0, 0, 40, 40)],
       currentFrame: 0
     });
+    var markerId = id + 'marker';
+    console.log(markerId);
+    var _marker = new _gob.Gob({
+      id: markerId,
+      stage: backgroundLayer,
+      x: 360,
+      y: playerStartingY - 30,
+      atlas: PIXI.loader.resources["spritesheet"],
+      frames: ['keys/' + attack],
+      currentFrame: 0
+    });
+    obstacle.attackType = attack;
     obstacle.hasHitPlayer = false;
     obstacle.hasBeenDestroyed = false;
     gobManager.add(obstacle);
+    gobManager.add(_marker);
     level.totalObstacles += 1;
     level.lastSpawn = level.distanceTraveled;
   }
@@ -31860,7 +31906,38 @@ function runGame() {
     debugInfo.text = "";
   }
 
+  // time out the attack
+  if (attackTimer > 0) {
+    attackTimer--;
+  } else {
+    attackLaunched = false;
+  }
+
   // Obstacle state management
+
+  var _loop2 = function _loop2(obstacleId) {
+    var obstacle = gobManager.get(obstacleId);
+    var marker = gobManager.get(obstacleId + 'marker');
+    // Respond to launched attacks
+    if (attackLaunched && !obstacle.hasBeenDestroyed && attackType == obstacle.attackType && gobManager.distance(player.id, obstacle.id) <= attackRange && !obstacle.hasHitPlayer) {
+      obstacle.hasBeenDestroyed = true;
+      attackLaunched = false;
+      gobManager.remove(obstacle.id);
+      gobManager.remove(marker.id);
+      level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
+        return trackerId !== obstacleId;
+      });
+      console.log('obstacle destroyed!');
+    }
+    // Collision detection
+    if (!obstacle.hasBeenDestroyed && !obstacle.hasHitPlayer && obstacle.checkCollisionWith(player)) {
+      obstacle.hasHitPlayer = true;
+      level.velocity = level.velocity / 2;
+      marker.hide();
+      console.log('ouch! obstacle hit');
+    }
+  };
+
   var _iteratorNormalCompletion2 = true;
   var _didIteratorError2 = false;
   var _iteratorError2 = undefined;
@@ -31869,19 +31946,7 @@ function runGame() {
     for (var _iterator2 = level.obstacleIds[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
       var obstacleId = _step2.value;
 
-      var _obstacle = gobManager.get(obstacleId);
-      // Respond to launched attacks
-      if (attackLaunched && !_obstacle.hasBeenDestroyed) {
-        _obstacle.hasBeenDestroyed = true;
-        attackLaunched = false;
-        console.log('obstacle destroyed!');
-      }
-      // Collision detection
-      if (!_obstacle.hasBeenDestroyed && !_obstacle.hasHitPlayer && _obstacle.checkCollisionWith(player)) {
-        _obstacle.hasHitPlayer = true;
-        level.velocity = level.velocity / 2;
-        console.log('ouch! obstacle hit');
-      }
+      _loop2(obstacleId);
     }
   } catch (err) {
     _didIteratorError2 = true;
