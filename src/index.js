@@ -16,7 +16,6 @@ let level
 let attackLaunched = false
 let attackType
 let attackTimer
-let attackRange = 150
 let attackTimeout = 4
 const stage = new PIXI.Container()
 const backgroundLayer = new PIXI.Container()
@@ -248,6 +247,7 @@ function runGame(){
   level.update(step)
 
   const player = gobManager.get('player')
+  player.moveTo(player.x + playerVX, player.y)
   const figment = gobManager.get('figment')
   figment.moveTo(rightWall + level.spiritDistance, figment.y)
 
@@ -311,32 +311,33 @@ function runGame(){
   // Obstacle state management
   for(const obstacleId of level.obstacleIds){
     let obstacle = gobManager.get(obstacleId)
-    // Respond to launched attacks
-    if( (attackLaunched && !obstacle.hasBeenDestroyed) &&
-        (attackType == obstacle.attackType) &&
-        (gobManager.distance(player.id, obstacle.id) <= attackRange) &&
-        !obstacle.hasHitPlayer
+
+    if(obstacle.active){
+      if(obstacle.checkCollisionWith(player)){
+        level.velocity = level.velocity / 2
+        obstacle.deactivate()
+      }else if(
+        attackLaunched &&
+        attackType == obstacle.attackType &&
+        obstacle.checkHitZoneCollision(player)
       ){
-      obstacle.hasBeenDestroyed = true
-      attackLaunched = false
+        obstacle.deactivate()
+      }
+    }
+    
+    // Clean up destroyed obstacles
+    if(!obstacle.active){
+      // TODO: Don't remove, just change the sprite when deactivate
       gobManager.remove(obstacle.id)
       level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
         return trackerId !== obstacleId
       })
       console.log('obstacle destroyed!')
     }
-    // Collision detection
-    if(
-      !obstacle.hasBeenDestroyed &&
-      !obstacle.hasHitPlayer &&
-      obstacle.checkCollisionWith(player)
-    ){
-      obstacle.hasHitPlayer = true
-      level.velocity = level.velocity / 2
-      obstacle.hideMarker()
-      console.log('ouch! obstacle hit')
-    }
   }
+  
+  // Reset attack launched, even if we didn't destroy anything
+  attackLaunched = false
 
   gobManager.update()
   renderer.render(stage)

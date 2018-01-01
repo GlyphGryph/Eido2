@@ -31516,6 +31516,15 @@ var Player = exports.Player = function (_Gob) {
       frames: shadowFrames,
       currentFrame: currentFrame
     });
+    _this.shadow = new Gob({
+      id: "{id}Shadow",
+      stage: stage,
+      x: _this.x + _this.shadowOffset.x,
+      y: _this.y + _this.shadowOffset.y,
+      atlas: atlas,
+      frames: shadowFrames,
+      currentFrame: currentFrame
+    });
     return _this;
   }
 
@@ -31565,8 +31574,8 @@ var Obstacle = exports.Obstacle = function (_Gob2) {
     // The atlas is still needed by marker, though
 
 
-    _this2.hasHitPlayer = false;
-    _this2.hasBeenDestroyed = false;
+    _this2.active = true;
+    _this2.hitZoneWidth = 150;
     _this2.attackType = Math.random() > 0.5 ? "k" : "o";
     _this2.markerOffset = {
       x: 12,
@@ -31606,6 +31615,39 @@ var Obstacle = exports.Obstacle = function (_Gob2) {
     key: "hideMarker",
     value: function hideMarker() {
       this.marker.hide();
+    }
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      this.hideMarker();
+      console.log('ouch! obstacle hit');
+      this.active = false;
+    }
+
+    // These are calculated based on current and previous position
+    // This prevents situations where players will skip through fast moving objects
+
+  }, {
+    key: "getHitZoneCollisionParameters",
+    value: function getHitZoneCollisionParameters() {
+      var normalCollisionParameters = this.getCollisionParameters();
+      var left = normalCollisionParameters.left - this.hitZoneWidth;
+      var right = normalCollisionParameters.left;
+      var top = Math.min(this.y, this.previous.y);
+      var bottom = Math.max(this.y, this.previous.y) + this.sprite.height;
+      return { left: left, right: right, top: top, bottom: bottom };
+    }
+
+    // Returns whether or not a zone in front of this obstacle overlaps passed object,
+
+  }, {
+    key: "checkHitZoneCollision",
+    value: function checkHitZoneCollision(gob) {
+      var ourParams = this.getHitZoneCollisionParameters();
+      var theirParams = gob.getCollisionParameters();
+
+      // Basic rectangular collision detector
+      return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
     }
   }]);
 
@@ -31708,7 +31750,6 @@ var level = void 0;
 var attackLaunched = false;
 var attackType = void 0;
 var attackTimer = void 0;
-var attackRange = 150;
 var attackTimeout = 4;
 var stage = new PIXI.Container();
 var backgroundLayer = new PIXI.Container();
@@ -31905,6 +31946,7 @@ function runGame() {
   level.update(step);
 
   var player = gobManager.get('player');
+  player.moveTo(player.x + playerVX, player.y);
   var figment = gobManager.get('figment');
   figment.moveTo(rightWall + level.spiritDistance, figment.y);
 
@@ -31993,22 +32035,24 @@ function runGame() {
 
   var _loop2 = function _loop2(obstacleId) {
     var obstacle = gobManager.get(obstacleId);
-    // Respond to launched attacks
-    if (attackLaunched && !obstacle.hasBeenDestroyed && attackType == obstacle.attackType && gobManager.distance(player.id, obstacle.id) <= attackRange && !obstacle.hasHitPlayer) {
-      obstacle.hasBeenDestroyed = true;
-      attackLaunched = false;
+
+    if (obstacle.active) {
+      if (obstacle.checkCollisionWith(player)) {
+        level.velocity = level.velocity / 2;
+        obstacle.deactivate();
+      } else if (attackLaunched && attackType == obstacle.attackType && obstacle.checkHitZoneCollision(player)) {
+        obstacle.deactivate();
+      }
+    }
+
+    // Clean up destroyed obstacles
+    if (!obstacle.active) {
+      // TODO: Don't remove, just change the sprite when deactivate
       gobManager.remove(obstacle.id);
       level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
         return trackerId !== obstacleId;
       });
       console.log('obstacle destroyed!');
-    }
-    // Collision detection
-    if (!obstacle.hasBeenDestroyed && !obstacle.hasHitPlayer && obstacle.checkCollisionWith(player)) {
-      obstacle.hasHitPlayer = true;
-      level.velocity = level.velocity / 2;
-      obstacle.hideMarker();
-      console.log('ouch! obstacle hit');
     }
   };
 
@@ -32022,6 +32066,8 @@ function runGame() {
 
       _loop2(obstacleId);
     }
+
+    // Reset attack launched, even if we didn't destroy anything
   } catch (err) {
     _didIteratorError2 = true;
     _iteratorError2 = err;
@@ -32036,6 +32082,8 @@ function runGame() {
       }
     }
   }
+
+  attackLaunched = false;
 
   gobManager.update();
   renderer.render(stage);

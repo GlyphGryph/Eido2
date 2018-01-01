@@ -203,6 +203,15 @@ export class Player extends Gob {
       frames: shadowFrames,
       currentFrame
     })
+    this.shadow = new Gob({
+      id: `{id}Shadow`,
+      stage,
+      x: this.x + this.shadowOffset.x,
+      y: this.y + this.shadowOffset.y,
+      atlas,
+      frames: shadowFrames,
+      currentFrame
+    })
   }
   
   initialize(manager){
@@ -219,8 +228,6 @@ export class Player extends Gob {
     super.moveTo(x, y)
     this.shadow.moveTo(x + this.shadowOffset.x, y + this.shadowOffset.y)
   }
-
-
 }
 
 export class Obstacle extends Gob {
@@ -229,9 +236,9 @@ export class Obstacle extends Gob {
     // They will, and when they do this needs to be added back in
     // The atlas is still needed by marker, though
     super({id, stage, x, y, texture, frames, currentFrame, xMax, xMin})
-
-    this.hasHitPlayer = false
-    this.hasBeenDestroyed = false
+    
+    this.active = true
+    this.hitZoneWidth = 150
     this.attackType = Math.random() > 0.5 ? "k" : "o"
     this.markerOffset = {
       x: 12,
@@ -270,5 +277,36 @@ export class Obstacle extends Gob {
 
   hideMarker(){
     this.marker.hide()
+  }
+  
+  deactivate(){
+    this.hideMarker()
+    console.log('ouch! obstacle hit')
+    this.active = false
+  }
+
+  // These are calculated based on current and previous position
+  // This prevents situations where players will skip through fast moving objects
+  getHitZoneCollisionParameters(){
+    const normalCollisionParameters = this.getCollisionParameters()
+    const left = normalCollisionParameters.left - this.hitZoneWidth
+    const right = normalCollisionParameters.left
+    const top = Math.min(this.y, this.previous.y)
+    const bottom = Math.max(this.y, this.previous.y) + this.sprite.height
+    return {left, right, top, bottom}
+  }
+
+  // Returns whether or not a zone in front of this obstacle overlaps passed object,
+  checkHitZoneCollision(gob){
+    const ourParams = this.getHitZoneCollisionParameters()
+    const theirParams = gob.getCollisionParameters()
+
+    // Basic rectangular collision detector
+    return (
+      ourParams.left < theirParams.right &&
+      ourParams.right > theirParams.left &&
+      ourParams.top < theirParams.bottom &&
+      ourParams.bottom > theirParams.top
+    )
   }
 }
