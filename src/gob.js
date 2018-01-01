@@ -15,7 +15,7 @@ export class GobManager{
       gob
     ]
     // Also make this gob exist. Run it's initialize logic
-    gob.initialize()
+    gob.initialize(this)
     // TODO: Throw error if gob has same id
     return this
   }
@@ -90,12 +90,12 @@ export class Gob{
     this.frames = frames
     this.currentFrame = currentFrame
     if(atlas){
-      this.hasAtlas = true
+      this.useAtlas = true
       this.atlas = atlas
       this.texture = this.atlas.textures[this.frames[this.currentFrame]]
     } else {
-      // If we don't have an at least, we must have a texture
-      this.hasAtlas = false
+      // If we don't have an atlas, we must have a texture
+      this.useAtlas = false
       this.texture = texture
       this.texture.frame = this.frames[this.currentFrame]
     }
@@ -111,7 +111,8 @@ export class Gob{
     }
   }
 
-  initialize(){
+  initialize(manager){
+    this.manager = manager
     this.stage.addChild(this.sprite)
   }
 
@@ -141,7 +142,7 @@ export class Gob{
     if(this.frames.length > 0){
       this.currentFrame = (this.currentFrame + 1) % this.frames.length
 
-      if(this.hasAtlas){
+      if(this.useAtlas){
         this.sprite.texture = this.atlas.textures[this.frames[this.currentFrame]]
       } else {
         this.sprite.texture.frame = this.frames[this.currentFrame]
@@ -149,16 +150,6 @@ export class Gob{
     }
     this.previous.x = this.x
     this.previous.y = this.y
-  }
-
-  //TODO
-  showOverlay(){
-    this.displayOverlay = true
-  }
-
-  //TODO
-  hideOverlay(){
-    this.displayOverlay = false
   }
 
   // These are calculated based on current and previous position
@@ -192,5 +183,92 @@ export class Gob{
 
   hide(){
     this.sprite.alpha = 0
+  }
+}
+
+export class Player extends Gob {
+  constructor({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin, shadowFrames}){
+    super({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin})
+    this.attackRange = 150
+    this.shadowOffset = {
+      x: 0,
+      y: 30
+    }
+    this.shadow = new Gob({
+      id: `{id}Shadow`,
+      stage,
+      x: this.x + this.shadowOffset.x,
+      y: this.y + this.shadowOffset.y,
+      atlas,
+      frames: shadowFrames,
+      currentFrame
+    })
+  }
+  
+  initialize(manager){
+    super.initialize(manager)
+    this.manager.add(this.shadow)
+  }
+
+  terminate(){
+    super.terminate()
+    this.manager.remove(this.shadow.id)
+  }
+
+  moveTo(x, y){
+    super.moveTo(x, y)
+    this.shadow.moveTo(x + this.shadowOffset.x, y + this.shadowOffset.y)
+  }
+
+
+}
+
+export class Obstacle extends Gob {
+  constructor({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin}){
+    // TODO: We currently remove the atlas we pass, because our obstacles don't use it - yet!
+    // They will, and when they do this needs to be added back in
+    // The atlas is still needed by marker, though
+    super({id, stage, x, y, texture, frames, currentFrame, xMax, xMin})
+
+    this.hasHitPlayer = false
+    this.hasBeenDestroyed = false
+    this.attackType = Math.random() > 0.5 ? "k" : "o"
+    this.markerOffset = {
+      x: 12,
+      y: -30
+    }
+    this.marker = new Gob({
+      id: `${id}Marker`,
+      stage,
+      x: this.x + this.markerOffset.x,
+      y: this.y + this.markerOffset.y,
+      atlas,
+      frames: [
+        `keys/${this.attackType}`
+      ],
+      currentFrame
+    })
+  }
+
+  initialize(manager){
+    super.initialize(manager)
+    this.manager.add(this.marker)
+  }
+
+  terminate(){
+    super.terminate()
+    this.manager.remove(this.marker.id)
+  }
+
+  moveTo(x, y){
+    super.moveTo(x, y)
+    this.marker.moveTo(
+      x + this.markerOffset.x,
+      y + this.markerOffset.y
+    )
+  }
+
+  hideMarker(){
+    this.marker.hide()
   }
 }

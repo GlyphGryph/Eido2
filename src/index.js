@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import {Gob, GobManager} from './gob'
+import {Gob, GobManager, Player, Obstacle} from './gob'
 import {Level} from './level'
 
 const renderer = new PIXI.WebGLRenderer(601, 401)
@@ -11,7 +11,6 @@ let playerVX = 0
 let a,d,q,o,k = {}
 let playerStartingX = 100
 let playerStartingY = 280
-let playerShadowOffset = 30
 let gobManager
 let level
 let attackLaunched = false
@@ -144,7 +143,7 @@ function setup(){
   ]
 
   gobManager.add(
-    new Gob({
+    new Player({
       id: 'player',
       stage: mainLayer,
       x: playerStartingX,
@@ -156,26 +155,15 @@ function setup(){
         "oval/run/02",
         "oval/run/03"
       ],
-      currentFrame: 0,
-      xMax: rightWall,
-      xMin: leftWall
-    })
-  )
-
-  gobManager.add(
-    new Gob({
-      id: 'playerShadow',
-      stage: mainLayer,
-      x: playerStartingX,
-      y: playerStartingY + playerShadowOffset,
-      atlas: PIXI.loader.resources["spritesheet"],
-      frames: [
+      shadowFrames: [
         "oval/run/shadow/00",
         "oval/run/shadow/01",
         "oval/run/shadow/02",
         "oval/run/shadow/03"
       ],
-      currentFrame: 0
+      currentFrame: 0,
+      xMax: rightWall,
+      xMin: leftWall
     })
   )
 
@@ -220,20 +208,6 @@ function setup(){
   let visibleMaskTexture = PIXI.Texture.fromCanvas(canvas)
   let maskTexture = PIXI.Texture.fromCanvas(canvas)
 
-  /*
-  gobManager.add(
-    new Gob({
-      id: 'objectMaskDisplay',
-      stage: backgroundLayer,
-      x: 40,
-      y: 0,
-      texture: visibleMaskTexture,
-      frames: [ new PIXI.Rectangle(0, 0, 300, 400) ],
-      currentFrame: 0
-    })
-  )
-  */
-
   gobManager.add(
     new Gob({
       id: 'objectMask',
@@ -274,9 +248,6 @@ function runGame(){
   level.update(step)
 
   const player = gobManager.get('player')
-  player.moveTo(player.x + playerVX, player.y)
-  const shadow = gobManager.get('playerShadow')
-  shadow.moveTo(player.x, player.y+30)
   const figment = gobManager.get('figment')
   figment.moveTo(rightWall + level.spiritDistance, figment.y)
 
@@ -284,11 +255,8 @@ function runGame(){
   for(const obstacleId of level.obstacleIds){
     let gob = gobManager.get(obstacleId)
     gob.moveTo(Math.round(gob.x - level.velocity), gob.y)
-    let marker = gobManager.get(`${obstacleId}marker`)
-    marker.moveTo(Math.round(gob.x - level.velocity) + 20, gob.y - 30)
     if(gob.x < 0){
       gobManager.remove(gob.id)
-      gobManager.remove(marker.id)
       level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
         return trackerId !== obstacleId
       })
@@ -298,40 +266,23 @@ function runGame(){
   // Spawn obstacle
   if(level.distanceTraveled > (level.lastSpawn + level.spawnRate)){
     // randomize type
-    const attack = Math.random() > 0.5 ? "k" : "o"
     const id = `obstacle${level.totalObstacles}`
     level.obstacleIds = [
       ...level.obstacleIds,
       id
     ]
     const texture = PIXI.loader.resources['obstacle'].texture
-    const obstacle = new Gob({
+    const obstacle = new Obstacle({
       id,
       stage: backgroundLayer,
       x: 340,
       y: playerStartingY,
+      atlas: PIXI.loader.resources["spritesheet"],
       texture,
       frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
       currentFrame: 0
     })
-    const markerId = `${id}marker`
-    console.log(markerId)
-    const marker = new Gob({
-      id: markerId,
-      stage: backgroundLayer,
-      x: 360,
-      y: playerStartingY - 30,
-      atlas: PIXI.loader.resources["spritesheet"],
-      frames: [
-        `keys/${attack}`
-      ],
-      currentFrame: 0
-    })
-    obstacle.attackType = attack
-    obstacle.hasHitPlayer = false
-    obstacle.hasBeenDestroyed = false
     gobManager.add(obstacle)
-    gobManager.add(marker)
     level.totalObstacles += 1
     level.lastSpawn = level.distanceTraveled
   }
@@ -360,7 +311,6 @@ function runGame(){
   // Obstacle state management
   for(const obstacleId of level.obstacleIds){
     let obstacle = gobManager.get(obstacleId)
-    let marker = gobManager.get(`${obstacleId}marker`)
     // Respond to launched attacks
     if( (attackLaunched && !obstacle.hasBeenDestroyed) &&
         (attackType == obstacle.attackType) &&
@@ -370,7 +320,6 @@ function runGame(){
       obstacle.hasBeenDestroyed = true
       attackLaunched = false
       gobManager.remove(obstacle.id)
-      gobManager.remove(marker.id)
       level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
         return trackerId !== obstacleId
       })
@@ -384,7 +333,7 @@ function runGame(){
     ){
       obstacle.hasHitPlayer = true
       level.velocity = level.velocity / 2
-      marker.hide()
+      obstacle.hideMarker()
       console.log('ouch! obstacle hit')
     }
   }

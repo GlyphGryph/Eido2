@@ -31203,20 +31203,26 @@ module.exports = {
 };
 
 },{}],172:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Gob = exports.GobManager = undefined;
+exports.Obstacle = exports.Player = exports.Gob = exports.GobManager = undefined;
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pixi = require('pixi.js');
+var _pixi = require("pixi.js");
 
 var PIXI = _interopRequireWildcard(_pixi);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -31236,11 +31242,11 @@ var GobManager = exports.GobManager = function () {
 
 
   _createClass(GobManager, [{
-    key: 'add',
+    key: "add",
     value: function add(gob) {
       this.gobs = [].concat(_toConsumableArray(this.gobs), [gob]);
       // Also make this gob exist. Run it's initialize logic
-      gob.initialize();
+      gob.initialize(this);
       // TODO: Throw error if gob has same id
       return this;
     }
@@ -31250,7 +31256,7 @@ var GobManager = exports.GobManager = function () {
     // id: Gob id
 
   }, {
-    key: 'remove',
+    key: "remove",
     value: function remove(id) {
       var removedGob = null;
       this.gobs = this.gobs.filter(function (gob) {
@@ -31271,7 +31277,7 @@ var GobManager = exports.GobManager = function () {
     // id: Gob id
 
   }, {
-    key: 'get',
+    key: "get",
     value: function get(id) {
       return this.gobs.find(function (gob) {
         return gob.id === id;
@@ -31282,7 +31288,7 @@ var GobManager = exports.GobManager = function () {
     // Note: Updates should happen *after* all manipulations like moveTo are done to a sprite
 
   }, {
-    key: 'update',
+    key: "update",
     value: function update() {
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -31317,7 +31323,7 @@ var GobManager = exports.GobManager = function () {
     // gob1, gob2: gob ids
 
   }, {
-    key: 'distance',
+    key: "distance",
     value: function distance(gob1id, gob2id) {
       var gob1 = this.get(gob1id);
       var gob2 = this.get(gob2id);
@@ -31354,7 +31360,7 @@ var Gob = exports.Gob = function () {
 
     _classCallCheck(this, Gob);
 
-    console.log('Creating gob ' + id);
+    console.log("Creating gob " + id);
     this.id = id;
     this.stage = stage;
     this.x = x;
@@ -31367,12 +31373,12 @@ var Gob = exports.Gob = function () {
     this.frames = frames;
     this.currentFrame = currentFrame;
     if (atlas) {
-      this.hasAtlas = true;
+      this.useAtlas = true;
       this.atlas = atlas;
       this.texture = this.atlas.textures[this.frames[this.currentFrame]];
     } else {
-      // If we don't have an at least, we must have a texture
-      this.hasAtlas = false;
+      // If we don't have an atlas, we must have a texture
+      this.useAtlas = false;
       this.texture = texture;
       this.texture.frame = this.frames[this.currentFrame];
     }
@@ -31389,17 +31395,18 @@ var Gob = exports.Gob = function () {
   }
 
   _createClass(Gob, [{
-    key: 'initialize',
-    value: function initialize() {
+    key: "initialize",
+    value: function initialize(manager) {
+      this.manager = manager;
       this.stage.addChild(this.sprite);
     }
   }, {
-    key: 'terminate',
+    key: "terminate",
     value: function terminate() {
       this.stage.removeChild(this.sprite);
     }
   }, {
-    key: 'moveTo',
+    key: "moveTo",
     value: function moveTo(x, y) {
       this.x = x;
       this.y = y;
@@ -31420,12 +31427,12 @@ var Gob = exports.Gob = function () {
     // This method should always be called on a sprite before immediately before rendering
 
   }, {
-    key: 'update',
+    key: "update",
     value: function update() {
       if (this.frames.length > 0) {
         this.currentFrame = (this.currentFrame + 1) % this.frames.length;
 
-        if (this.hasAtlas) {
+        if (this.useAtlas) {
           this.sprite.texture = this.atlas.textures[this.frames[this.currentFrame]];
         } else {
           this.sprite.texture.frame = this.frames[this.currentFrame];
@@ -31435,27 +31442,11 @@ var Gob = exports.Gob = function () {
       this.previous.y = this.y;
     }
 
-    //TODO
-
-  }, {
-    key: 'showOverlay',
-    value: function showOverlay() {
-      this.displayOverlay = true;
-    }
-
-    //TODO
-
-  }, {
-    key: 'hideOverlay',
-    value: function hideOverlay() {
-      this.displayOverlay = false;
-    }
-
     // These are calculated based on current and previous position
     // This prevents situations where players will skip through fast moving objects
 
   }, {
-    key: 'getCollisionParameters',
+    key: "getCollisionParameters",
     value: function getCollisionParameters() {
       var left = Math.min(this.x, this.previous.x);
       var right = Math.max(this.x, this.previous.x) + this.sprite.width;
@@ -31468,7 +31459,7 @@ var Gob = exports.Gob = function () {
     // or the space between where they are and where they were last frame
 
   }, {
-    key: 'checkCollisionWith',
+    key: "checkCollisionWith",
     value: function checkCollisionWith(gob) {
       var ourParams = this.getCollisionParameters();
       var theirParams = gob.getCollisionParameters();
@@ -31477,12 +31468,12 @@ var Gob = exports.Gob = function () {
       return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
     }
   }, {
-    key: 'show',
+    key: "show",
     value: function show() {
       this.sprite.alpha = 1;
     }
   }, {
-    key: 'hide',
+    key: "hide",
     value: function hide() {
       this.sprite.alpha = 0;
     }
@@ -31490,6 +31481,136 @@ var Gob = exports.Gob = function () {
 
   return Gob;
 }();
+
+var Player = exports.Player = function (_Gob) {
+  _inherits(Player, _Gob);
+
+  function Player(_ref2) {
+    var id = _ref2.id,
+        stage = _ref2.stage,
+        x = _ref2.x,
+        y = _ref2.y,
+        atlas = _ref2.atlas,
+        texture = _ref2.texture,
+        frames = _ref2.frames,
+        currentFrame = _ref2.currentFrame,
+        xMax = _ref2.xMax,
+        xMin = _ref2.xMin,
+        shadowFrames = _ref2.shadowFrames;
+
+    _classCallCheck(this, Player);
+
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, { id: id, stage: stage, x: x, y: y, atlas: atlas, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
+
+    _this.attackRange = 150;
+    _this.shadowOffset = {
+      x: 0,
+      y: 30
+    };
+    _this.shadow = new Gob({
+      id: "{id}Shadow",
+      stage: stage,
+      x: _this.x + _this.shadowOffset.x,
+      y: _this.y + _this.shadowOffset.y,
+      atlas: atlas,
+      frames: shadowFrames,
+      currentFrame: currentFrame
+    });
+    return _this;
+  }
+
+  _createClass(Player, [{
+    key: "initialize",
+    value: function initialize(manager) {
+      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "initialize", this).call(this, manager);
+      this.manager.add(this.shadow);
+    }
+  }, {
+    key: "terminate",
+    value: function terminate() {
+      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "terminate", this).call(this);
+      this.manager.remove(this.shadow.id);
+    }
+  }, {
+    key: "moveTo",
+    value: function moveTo(x, y) {
+      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "moveTo", this).call(this, x, y);
+      this.shadow.moveTo(x + this.shadowOffset.x, y + this.shadowOffset.y);
+    }
+  }]);
+
+  return Player;
+}(Gob);
+
+var Obstacle = exports.Obstacle = function (_Gob2) {
+  _inherits(Obstacle, _Gob2);
+
+  function Obstacle(_ref3) {
+    var id = _ref3.id,
+        stage = _ref3.stage,
+        x = _ref3.x,
+        y = _ref3.y,
+        atlas = _ref3.atlas,
+        texture = _ref3.texture,
+        frames = _ref3.frames,
+        currentFrame = _ref3.currentFrame,
+        xMax = _ref3.xMax,
+        xMin = _ref3.xMin;
+
+    _classCallCheck(this, Obstacle);
+
+    var _this2 = _possibleConstructorReturn(this, (Obstacle.__proto__ || Object.getPrototypeOf(Obstacle)).call(this, { id: id, stage: stage, x: x, y: y, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
+    // TODO: We currently remove the atlas we pass, because our obstacles don't use it - yet!
+    // They will, and when they do this needs to be added back in
+    // The atlas is still needed by marker, though
+
+
+    _this2.hasHitPlayer = false;
+    _this2.hasBeenDestroyed = false;
+    _this2.attackType = Math.random() > 0.5 ? "k" : "o";
+    _this2.markerOffset = {
+      x: 12,
+      y: -30
+    };
+    _this2.marker = new Gob({
+      id: id + "Marker",
+      stage: stage,
+      x: _this2.x + _this2.markerOffset.x,
+      y: _this2.y + _this2.markerOffset.y,
+      atlas: atlas,
+      frames: ["keys/" + _this2.attackType],
+      currentFrame: currentFrame
+    });
+    return _this2;
+  }
+
+  _createClass(Obstacle, [{
+    key: "initialize",
+    value: function initialize(manager) {
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "initialize", this).call(this, manager);
+      this.manager.add(this.marker);
+    }
+  }, {
+    key: "terminate",
+    value: function terminate() {
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "terminate", this).call(this);
+      this.manager.remove(this.marker.id);
+    }
+  }, {
+    key: "moveTo",
+    value: function moveTo(x, y) {
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "moveTo", this).call(this, x, y);
+      this.marker.moveTo(x + this.markerOffset.x, y + this.markerOffset.y);
+    }
+  }, {
+    key: "hideMarker",
+    value: function hideMarker() {
+      this.marker.hide();
+    }
+  }]);
+
+  return Obstacle;
+}(Gob);
 
 },{"pixi.js":129}],173:[function(require,module,exports){
 "use strict";
@@ -31582,7 +31703,6 @@ var a = void 0,
     k = {};
 var playerStartingX = 100;
 var playerStartingY = 280;
-var playerShadowOffset = 30;
 var gobManager = void 0;
 var level = void 0;
 var attackLaunched = false;
@@ -31705,26 +31825,17 @@ function setup() {
 
   var ovalRunFrames = [];
 
-  gobManager.add(new _gob.Gob({
+  gobManager.add(new _gob.Player({
     id: 'player',
     stage: mainLayer,
     x: playerStartingX,
     y: playerStartingY,
     atlas: PIXI.loader.resources["spritesheet"],
     frames: ["oval/run/00", "oval/run/01", "oval/run/02", "oval/run/03"],
+    shadowFrames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
     currentFrame: 0,
     xMax: rightWall,
     xMin: leftWall
-  }));
-
-  gobManager.add(new _gob.Gob({
-    id: 'playerShadow',
-    stage: mainLayer,
-    x: playerStartingX,
-    y: playerStartingY + playerShadowOffset,
-    atlas: PIXI.loader.resources["spritesheet"],
-    frames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
-    currentFrame: 0
   }));
 
   gobManager.add(new _gob.Gob({
@@ -31755,20 +31866,6 @@ function setup() {
   ctx.fillRect(150, 0, 150, 400);
   var visibleMaskTexture = PIXI.Texture.fromCanvas(canvas);
   var maskTexture = PIXI.Texture.fromCanvas(canvas);
-
-  /*
-  gobManager.add(
-    new Gob({
-      id: 'objectMaskDisplay',
-      stage: backgroundLayer,
-      x: 40,
-      y: 0,
-      texture: visibleMaskTexture,
-      frames: [ new PIXI.Rectangle(0, 0, 300, 400) ],
-      currentFrame: 0
-    })
-  )
-  */
 
   gobManager.add(new _gob.Gob({
     id: 'objectMask',
@@ -31808,9 +31905,6 @@ function runGame() {
   level.update(step);
 
   var player = gobManager.get('player');
-  player.moveTo(player.x + playerVX, player.y);
-  var shadow = gobManager.get('playerShadow');
-  shadow.moveTo(player.x, player.y + 30);
   var figment = gobManager.get('figment');
   figment.moveTo(rightWall + level.spiritDistance, figment.y);
 
@@ -31819,11 +31913,8 @@ function runGame() {
   var _loop = function _loop(obstacleId) {
     var gob = gobManager.get(obstacleId);
     gob.moveTo(Math.round(gob.x - level.velocity), gob.y);
-    var marker = gobManager.get(obstacleId + 'marker');
-    marker.moveTo(Math.round(gob.x - level.velocity) + 20, gob.y - 30);
     if (gob.x < 0) {
       gobManager.remove(gob.id);
-      gobManager.remove(marker.id);
       level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
         return trackerId !== obstacleId;
       });
@@ -31859,35 +31950,20 @@ function runGame() {
 
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     // randomize type
-    var attack = Math.random() > 0.5 ? "k" : "o";
     var id = 'obstacle' + level.totalObstacles;
     level.obstacleIds = [].concat(_toConsumableArray(level.obstacleIds), [id]);
     var texture = PIXI.loader.resources['obstacle'].texture;
-    var obstacle = new _gob.Gob({
+    var obstacle = new _gob.Obstacle({
       id: id,
       stage: backgroundLayer,
       x: 340,
       y: playerStartingY,
+      atlas: PIXI.loader.resources["spritesheet"],
       texture: texture,
       frames: [new PIXI.Rectangle(0, 0, 40, 40)],
       currentFrame: 0
     });
-    var markerId = id + 'marker';
-    console.log(markerId);
-    var _marker = new _gob.Gob({
-      id: markerId,
-      stage: backgroundLayer,
-      x: 360,
-      y: playerStartingY - 30,
-      atlas: PIXI.loader.resources["spritesheet"],
-      frames: ['keys/' + attack],
-      currentFrame: 0
-    });
-    obstacle.attackType = attack;
-    obstacle.hasHitPlayer = false;
-    obstacle.hasBeenDestroyed = false;
     gobManager.add(obstacle);
-    gobManager.add(_marker);
     level.totalObstacles += 1;
     level.lastSpawn = level.distanceTraveled;
   }
@@ -31917,13 +31993,11 @@ function runGame() {
 
   var _loop2 = function _loop2(obstacleId) {
     var obstacle = gobManager.get(obstacleId);
-    var marker = gobManager.get(obstacleId + 'marker');
     // Respond to launched attacks
     if (attackLaunched && !obstacle.hasBeenDestroyed && attackType == obstacle.attackType && gobManager.distance(player.id, obstacle.id) <= attackRange && !obstacle.hasHitPlayer) {
       obstacle.hasBeenDestroyed = true;
       attackLaunched = false;
       gobManager.remove(obstacle.id);
-      gobManager.remove(marker.id);
       level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
         return trackerId !== obstacleId;
       });
@@ -31933,7 +32007,7 @@ function runGame() {
     if (!obstacle.hasBeenDestroyed && !obstacle.hasHitPlayer && obstacle.checkCollisionWith(player)) {
       obstacle.hasHitPlayer = true;
       level.velocity = level.velocity / 2;
-      marker.hide();
+      obstacle.hideMarker();
       console.log('ouch! obstacle hit');
     }
   };
