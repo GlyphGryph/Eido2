@@ -307,7 +307,8 @@ function runGame(){
   } else {
     attackLaunched = false
   }
-
+  
+  let playerCanHitObstacle = false
   // Obstacle state management
   for(const obstacleId of level.obstacleIds){
     let obstacle = gobManager.get(obstacleId)
@@ -322,6 +323,8 @@ function runGame(){
         obstacle.checkHitZoneCollision(player)
       ){
         obstacle.deactivate()
+      }else if(obstacle.checkHitZoneCollision(player)){
+        playerCanHitObstacle = true
       }
     }
     
@@ -334,6 +337,12 @@ function runGame(){
       })
       console.log('obstacle destroyed!')
     }
+  }
+
+  if(playerCanHitObstacle){
+    player.showReadyMarker()
+  } else {
+    player.hideReadyMarker()
   }
   
   // Reset attack launched, even if we didn't destroy anything

@@ -85,6 +85,7 @@ export class Gob{
     this.previous = {}
     this.previous.x = this.x
     this.previous.y = this.y
+    this.buffer = 0
 
     // We have different paths for whether we are passed an atlas or a texture
     this.frames = frames
@@ -155,10 +156,12 @@ export class Gob{
   // These are calculated based on current and previous position
   // This prevents situations where players will skip through fast moving objects
   getCollisionParameters(){
-    const left = Math.min(this.x, this.previous.x)
-    const right = Math.max(this.x, this.previous.x) + this.sprite.width
-    const top = Math.min(this.y, this.previous.y)
-    const bottom = Math.max(this.y, this.previous.y) + this.sprite.height
+    // Buffers are for objects that we want to overlap a bit before colliding
+    // Weird shit will probably happen if the object is smaller than 2x its buffer, don't do that
+    const left = Math.min(this.x, this.previous.x) + this.buffer
+    const right = Math.max(this.x, this.previous.x) + this.sprite.width - this.buffer
+    const top = Math.min(this.y, this.previous.y) + this.buffer
+    const bottom = Math.max(this.y, this.previous.y) + this.sprite.height - this.buffer
     return {left, right, top, bottom}
   }
 
@@ -189,7 +192,6 @@ export class Gob{
 export class Player extends Gob {
   constructor({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin, shadowFrames}){
     super({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin})
-    this.attackRange = 150
     this.shadowOffset = {
       x: 0,
       y: 30
@@ -203,15 +205,13 @@ export class Player extends Gob {
       frames: shadowFrames,
       currentFrame
     })
-    this.shadow = new Gob({
-      id: `{id}Shadow`,
-      stage,
-      x: this.x + this.shadowOffset.x,
-      y: this.y + this.shadowOffset.y,
-      atlas,
-      frames: shadowFrames,
-      currentFrame
-    })
+    this.readyMarkerOffset = {
+      x: 20,
+      y: -30
+    }
+    this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
+    this.readyMarkerVisible = false
+    this.buffer = 10
   }
   
   initialize(manager){
@@ -224,9 +224,25 @@ export class Player extends Gob {
     this.manager.remove(this.shadow.id)
   }
 
+  showReadyMarker(){
+    if(!this.readyMarkerVisible){
+      this.readyMarkerVisible = true
+      this.stage.addChild(this.readyMarkerText)
+    }
+  }
+
+  hideReadyMarker(){
+    if(this.readyMarkerVisible){
+      this.readyMarkerVisible = false
+      this.stage.removeChild(this.readyMarkerText)
+    }
+  }
+
   moveTo(x, y){
     super.moveTo(x, y)
     this.shadow.moveTo(x + this.shadowOffset.x, y + this.shadowOffset.y)
+    this.readyMarkerText.position.x = x + this.readyMarkerOffset.x;
+    this.readyMarkerText.position.y = y + this.readyMarkerOffset.y;
   }
 }
 
@@ -238,7 +254,7 @@ export class Obstacle extends Gob {
     super({id, stage, x, y, texture, frames, currentFrame, xMax, xMin})
     
     this.active = true
-    this.hitZoneWidth = 150
+    this.hitZoneWidth = 100
     this.attackType = Math.random() > 0.5 ? "k" : "o"
     this.markerOffset = {
       x: 12,
