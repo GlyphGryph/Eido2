@@ -31755,20 +31755,29 @@ var fps = 11;
 var velocity = 10;
 var DEBUG = true; // toggle by pressing Q
 var debugInfo = "";
-var playerVX = 0;
-var a = void 0,
-    d = void 0,
+var playerVelocityX = 0;
+var playerVelocityY = 0.0;
+var left = void 0,
+    right = void 0,
+    up = void 0,
     q = void 0,
     o = void 0,
     k = {};
+var groundLevel = 280;
 var playerStartingX = 100;
-var playerStartingY = 280;
 var gobManager = void 0;
 var level = void 0;
 var attackLaunched = false;
 var attackType = void 0;
 var attackTimer = void 0;
 var attackTimeout = 4;
+var jumping = false;
+var isGrounded = true;
+var fallSpeed = 15;
+var weight = 3;
+var initialJumpSpeed = -10.0;
+var maxJumpDuration = 3;
+var jumpDuration = 0;
 var stage = new PIXI.Container();
 var backgroundLayer = new PIXI.Container();
 var mainLayer = new PIXI.Container();
@@ -31832,30 +31841,44 @@ function loadProgressHandler(loader, resource) {
 function setup() {
 
   //keyboard handlers
-  a = keyboard(65);
-  d = keyboard(68);
+  left = keyboard(65);
+  right = keyboard(68);
+  up = keyboard(87);
   q = keyboard(81);
   o = keyboard(79);
   k = keyboard(75);
 
-  a.press = function () {
-    playerVX = -1 * velocity;
+  left.press = function () {
+    playerVelocityX = -1 * velocity;
   };
 
-  a.release = function () {
-    if (!d.isDown) {
-      playerVX = 0;
+  left.release = function () {
+    if (!right.isDown) {
+      playerVelocityX = 0;
     }
   };
 
-  d.press = function () {
-    playerVX = velocity;
+  right.press = function () {
+    playerVelocityX = velocity;
   };
 
-  d.release = function () {
-    if (!a.isDown) {
-      playerVX = 0;
+  right.release = function () {
+    if (!left.isDown) {
+      playerVelocityX = 0;
     }
+  };
+
+  up.press = function () {
+    if (isGrounded) {
+      jumping = true;
+      playerVelocityY = initialJumpSpeed;
+      jumpDuration = 0;
+      isGrounded = false;
+    }
+  };
+
+  up.release = function () {
+    jumping = false;
   };
 
   o.press = function () {
@@ -31888,7 +31911,7 @@ function setup() {
     id: 'player',
     stage: mainLayer,
     x: playerStartingX,
-    y: playerStartingY,
+    y: groundLevel,
     atlas: PIXI.loader.resources["spritesheet"],
     frames: ["oval/run/00", "oval/run/01", "oval/run/02", "oval/run/03"],
     shadowFrames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
@@ -31901,7 +31924,7 @@ function setup() {
     id: 'figment',
     stage: mainLayer,
     x: 500,
-    y: playerStartingY,
+    y: groundLevel,
     atlas: PIXI.loader.resources["spritesheet"],
     frames: ["figment/run/00", "figment/run/01", "figment/run/02", "figment/run/03", "figment/run/04", "figment/run/05", "figment/run/06", "figment/run/07"],
     currentFrame: 0
@@ -31964,7 +31987,32 @@ function runGame() {
   level.update(step);
 
   var player = gobManager.get('player');
-  player.moveTo(player.x + playerVX, player.y);
+
+  // Player Movement
+  player.moveTo(player.x + playerVelocityX, player.y);
+  // If the player is jumping...
+  if (jumping) {
+    playerVelocityY = initialJumpSpeed;
+    player.moveTo(player.x, player.y + playerVelocityY);
+    if (jumpDuration >= maxJumpDuration) {
+      jumping = false;
+    }
+    jumpDuration += 1;
+  }
+
+  // If the player is not in contact with the ground, then fall...
+  if (player.y < groundLevel) {
+    if (playerVelocityY > fallSpeed) {
+      playerVelocityY = fallSpeed;
+    }
+    console.log('moving vertically');
+    player.moveTo(player.x, player.y + playerVelocityY);
+    playerVelocityY += weight;
+  }
+  // If player still isn't in contac
+  isGrounded = player.y >= groundLevel;
+
+  // Figment Update
   var figment = gobManager.get('figment');
   figment.moveTo(rightWall + level.spiritDistance, figment.y);
 
@@ -32017,7 +32065,7 @@ function runGame() {
       id: id,
       stage: backgroundLayer,
       x: 340,
-      y: playerStartingY,
+      y: groundLevel,
       atlas: PIXI.loader.resources["spritesheet"],
       texture: texture,
       frames: [new PIXI.Rectangle(0, 0, 40, 40)],
@@ -32032,6 +32080,9 @@ function runGame() {
   if (DEBUG) {
     var debugText = "Debug info (press Q to toggle):\n";
     debugText += 'FPS: ' + fps + '\n';
+    debugText += 'Position: ' + player.x + '/' + player.y + ' \n';
+    debugText += 'Is jumping?: ' + jumping + ' | Is grounded? ' + isGrounded + ' | jumpDuration: ' + jumpDuration + '\n';
+    debugText += 'Vertical velocity: ' + Math.round(playerVelocityY) + '\n';
     debugText += 'Game time: ' + Math.round(level.time / fps) + 's \n';
     debugText += 'Level speed: ' + Math.round(level.velocity) + '\n';
     debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.distanceTraveled) + '\n';

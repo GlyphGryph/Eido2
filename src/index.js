@@ -7,16 +7,24 @@ const fps = 11
 const velocity = 10
 let DEBUG = true // toggle by pressing Q
 let debugInfo = ""
-let playerVX = 0
-let a,d,q,o,k = {}
+let playerVelocityX = 0
+let playerVelocityY = 0.0
+let left,right,up,q,o,k = {}
+let groundLevel = 280
 let playerStartingX = 100
-let playerStartingY = 280
 let gobManager
 let level
 let attackLaunched = false
 let attackType
 let attackTimer
 let attackTimeout = 4
+let jumping = false
+let isGrounded = true
+const fallSpeed = 15
+const weight = 3
+const initialJumpSpeed = -10.0
+const maxJumpDuration = 3
+let jumpDuration = 0
 const stage = new PIXI.Container()
 const backgroundLayer = new PIXI.Container()
 const mainLayer = new PIXI.Container()
@@ -88,30 +96,44 @@ function loadProgressHandler(loader, resource) {
 function setup(){
 
   //keyboard handlers
-  a = keyboard(65)
-  d = keyboard(68)
+  left = keyboard(65)
+  right = keyboard(68)
+  up = keyboard(87)
   q = keyboard(81)
   o = keyboard(79)
   k = keyboard(75)
 
-  a.press = function(){
-    playerVX = -1*velocity
+  left.press = function(){
+    playerVelocityX = -1*velocity
   }
 
-  a.release = function(){
-    if(!d.isDown){
-      playerVX = 0
+  left.release = function(){
+    if(!right.isDown){
+      playerVelocityX = 0
     }
   }
 
-  d.press = function(){
-    playerVX = velocity
+  right.press = function(){
+    playerVelocityX = velocity
   }
 
-  d.release = function(){
-    if(!a.isDown){
-      playerVX = 0
+  right.release = function(){
+    if(!left.isDown){
+      playerVelocityX = 0
     }
+  }
+
+  up.press = function(){
+    if(isGrounded){
+      jumping = true
+      playerVelocityY = initialJumpSpeed
+      jumpDuration = 0
+      isGrounded = false
+    }
+  }
+
+  up.release = function(){
+    jumping = false
   }
 
   o.press = function(){
@@ -146,7 +168,7 @@ function setup(){
       id: 'player',
       stage: mainLayer,
       x: playerStartingX,
-      y: playerStartingY,
+      y: groundLevel,
       atlas: PIXI.loader.resources["spritesheet"],
       frames: [
         "oval/run/00",
@@ -171,7 +193,7 @@ function setup(){
       id: 'figment',
       stage: mainLayer,
       x: 500,
-      y: playerStartingY,
+      y: groundLevel,
       atlas: PIXI.loader.resources["spritesheet"],
       frames: [
         "figment/run/00",
@@ -247,7 +269,32 @@ function runGame(){
   level.update(step)
 
   const player = gobManager.get('player')
-  player.moveTo(player.x + playerVX, player.y)
+
+  // Player Movement
+  player.moveTo(player.x + playerVelocityX, player.y)
+  // If the player is jumping...
+  if(jumping){
+    playerVelocityY = initialJumpSpeed
+    player.moveTo(player.x, player.y + playerVelocityY)
+    if(jumpDuration >= maxJumpDuration){
+      jumping = false
+    }
+    jumpDuration += 1
+  }
+
+  // If the player is not in contact with the ground, then fall...
+  if(player.y < groundLevel){
+    if(playerVelocityY > fallSpeed){
+      playerVelocityY = fallSpeed
+    }
+    console.log('moving vertically')
+    player.moveTo(player.x, player.y + playerVelocityY)
+    playerVelocityY += weight
+  }
+  // If player still isn't in contac
+  isGrounded = player.y >= groundLevel
+
+  // Figment Update
   const figment = gobManager.get('figment')
   figment.moveTo(rightWall + level.spiritDistance, figment.y)
 
@@ -276,7 +323,7 @@ function runGame(){
       id,
       stage: backgroundLayer,
       x: 340,
-      y: playerStartingY,
+      y: groundLevel,
       atlas: PIXI.loader.resources["spritesheet"],
       texture,
       frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
@@ -291,6 +338,9 @@ function runGame(){
   if(DEBUG){
     let debugText = "Debug info (press Q to toggle):\n"
     debugText += `FPS: ${fps}\n`
+    debugText += `Position: ${player.x}/${player.y} \n`
+    debugText += `Is jumping?: ${jumping} | Is grounded? ${isGrounded} | jumpDuration: ${jumpDuration}\n`
+    debugText += `Vertical velocity: ${Math.round(playerVelocityY)}\n`
     debugText += `Game time: ${Math.round(level.time/fps)}s \n`
     debugText += `Level speed: ${Math.round(level.velocity)}\n`
     debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.distanceTraveled)}\n`
