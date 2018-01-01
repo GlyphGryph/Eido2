@@ -10,7 +10,7 @@ let debugInfo = ""
 let playerVX = 0
 let a,d,q,o,k = {}
 let playerStartingX = 100
-let playerStartingY = 180
+let playerStartingY = 280
 let playerShadowOffset = 30
 let gobManager
 let level
