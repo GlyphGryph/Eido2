@@ -31505,26 +31505,13 @@ var Player = exports.Player = function (_Gob) {
 
     var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, { id: id, stage: stage, x: x, y: y, atlas: atlas, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
 
-    _this.shadowOffset = {
-      x: 0,
-      y: 30
-    };
-    _this.shadow = new Gob({
-      id: '{id}Shadow',
-      stage: stage,
-      x: _this.x + _this.shadowOffset.x,
-      y: _this.y + _this.shadowOffset.y,
-      atlas: atlas,
-      frames: shadowFrames,
-      currentFrame: currentFrame
-    });
+    _this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
+    _this.readyMarkerVisible = false;
+    _this.buffer = 10;
     _this.readyMarkerOffset = {
       x: 20,
       y: -30
     };
-    _this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
-    _this.readyMarkerVisible = false;
-    _this.buffer = 10;
     return _this;
   }
 
@@ -31532,13 +31519,11 @@ var Player = exports.Player = function (_Gob) {
     key: 'initialize',
     value: function initialize(manager) {
       _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'initialize', this).call(this, manager);
-      this.manager.add(this.shadow);
     }
   }, {
     key: 'terminate',
     value: function terminate() {
       _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'terminate', this).call(this);
-      this.manager.remove(this.shadow.id);
     }
   }, {
     key: 'showReadyMarker',
@@ -31560,7 +31545,6 @@ var Player = exports.Player = function (_Gob) {
     key: 'moveTo',
     value: function moveTo(x, y) {
       _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'moveTo', this).call(this, x, y);
-      this.shadow.moveTo(x + this.shadowOffset.x, y + this.shadowOffset.y);
       this.readyMarkerText.position.x = x + this.readyMarkerOffset.x;
       this.readyMarkerText.position.y = y + this.readyMarkerOffset.y;
     }
@@ -31773,6 +31757,10 @@ var attackTimer = void 0;
 var attackTimeout = 4;
 var jumping = false;
 var isGrounded = true;
+var shadowBaseOffset = {
+  x: -2,
+  y: 30
+};
 var fallSpeed = 15;
 var weight = 3;
 var initialJumpSpeed = -10.0;
@@ -31901,23 +31889,29 @@ function setup() {
   stage.addChild(mainLayer);
   gobManager = new _gob.GobManager();
 
-  var textures = PIXI.loader.resources["spritesheet"].textures;
+  var atlas = PIXI.loader.resources["spritesheet"];
 
   // Create player
-
-  var ovalRunFrames = [];
-
   gobManager.add(new _gob.Player({
     id: 'player',
     stage: mainLayer,
     x: playerStartingX,
     y: groundLevel,
-    atlas: PIXI.loader.resources["spritesheet"],
+    atlas: atlas,
     frames: ["oval/run/00", "oval/run/01", "oval/run/02", "oval/run/03"],
-    shadowFrames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
     currentFrame: 0,
     xMax: rightWall,
     xMin: leftWall
+  }));
+
+  gobManager.add(new _gob.Gob({
+    id: 'playerShadow',
+    stage: stage,
+    x: playerStartingX + shadowBaseOffset.x,
+    y: groundLevel + shadowBaseOffset.y,
+    atlas: atlas,
+    frames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
+    currentFrame: 0
   }));
 
   gobManager.add(new _gob.Gob({
@@ -31925,7 +31919,7 @@ function setup() {
     stage: mainLayer,
     x: 500,
     y: groundLevel,
-    atlas: PIXI.loader.resources["spritesheet"],
+    atlas: atlas,
     frames: ["figment/run/00", "figment/run/01", "figment/run/02", "figment/run/03", "figment/run/04", "figment/run/05", "figment/run/06", "figment/run/07"],
     currentFrame: 0
   }));
@@ -32009,8 +32003,19 @@ function runGame() {
     player.moveTo(player.x, player.y + playerVelocityY);
     playerVelocityY += weight;
   }
+  if (player.y > groundLevel) {
+    player.moveTo(player.x, groundLevel);
+  }
   // If player still isn't in contac
   isGrounded = player.y >= groundLevel;
+  // Update shadow to match player
+  var shadow = gobManager.get('playerShadow');
+  var playerDistanceFromGround = groundLevel - player.y;
+  var shadowOffset = {
+    x: shadowBaseOffset.x - playerDistanceFromGround / 4,
+    y: shadowBaseOffset.y
+  };
+  shadow.moveTo(player.x + shadowOffset.x, groundLevel + shadowOffset.y);
 
   // Figment Update
   var figment = gobManager.get('figment');

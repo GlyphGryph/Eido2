@@ -20,6 +20,10 @@ let attackTimer
 let attackTimeout = 4
 let jumping = false
 let isGrounded = true
+let shadowBaseOffset = {
+  x: -2,
+  y: 30,
+}
 const fallSpeed = 15
 const weight = 3
 const initialJumpSpeed = -10.0
@@ -156,31 +160,21 @@ function setup(){
   stage.addChild(mainLayer)
   gobManager = new GobManager()
 
-  const textures = PIXI.loader.resources["spritesheet"].textures;
+  const atlas = PIXI.loader.resources["spritesheet"]
 
   // Create player
-
-  const ovalRunFrames = [
-  ]
-
   gobManager.add(
     new Player({
       id: 'player',
       stage: mainLayer,
       x: playerStartingX,
       y: groundLevel,
-      atlas: PIXI.loader.resources["spritesheet"],
+      atlas,
       frames: [
         "oval/run/00",
         "oval/run/01",
         "oval/run/02",
         "oval/run/03"
-      ],
-      shadowFrames: [
-        "oval/run/shadow/00",
-        "oval/run/shadow/01",
-        "oval/run/shadow/02",
-        "oval/run/shadow/03"
       ],
       currentFrame: 0,
       xMax: rightWall,
@@ -190,11 +184,29 @@ function setup(){
 
   gobManager.add(
     new Gob({
+      id: `playerShadow`,
+      stage,
+      x: playerStartingX + shadowBaseOffset.x,
+      y: groundLevel + shadowBaseOffset.y,
+      atlas,
+      frames: [
+        "oval/run/shadow/00",
+        "oval/run/shadow/01",
+        "oval/run/shadow/02",
+        "oval/run/shadow/03"
+      ],
+      currentFrame: 0,
+    })
+  )
+
+
+  gobManager.add(
+    new Gob({
       id: 'figment',
       stage: mainLayer,
       x: 500,
       y: groundLevel,
-      atlas: PIXI.loader.resources["spritesheet"],
+      atlas,
       frames: [
         "figment/run/00",
         "figment/run/01",
@@ -291,8 +303,19 @@ function runGame(){
     player.moveTo(player.x, player.y + playerVelocityY)
     playerVelocityY += weight
   }
+  if(player.y > groundLevel){
+    player.moveTo(player.x, groundLevel)
+  }
   // If player still isn't in contac
   isGrounded = player.y >= groundLevel
+  // Update shadow to match player
+  const shadow = gobManager.get('playerShadow')
+  const playerDistanceFromGround = groundLevel - player.y
+  let shadowOffset = {
+    x: shadowBaseOffset.x - playerDistanceFromGround/4,
+    y: shadowBaseOffset.y,
+  }
+  shadow.moveTo(player.x + shadowOffset.x, groundLevel + shadowOffset.y)
 
   // Figment Update
   const figment = gobManager.get('figment')

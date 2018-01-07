@@ -192,36 +192,21 @@ export class Gob{
 export class Player extends Gob {
   constructor({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin, shadowFrames}){
     super({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin})
-    this.shadowOffset = {
-      x: 0,
-      y: 30
-    }
-    this.shadow = new Gob({
-      id: `{id}Shadow`,
-      stage,
-      x: this.x + this.shadowOffset.x,
-      y: this.y + this.shadowOffset.y,
-      atlas,
-      frames: shadowFrames,
-      currentFrame
-    })
+    this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
+    this.readyMarkerVisible = false
+    this.buffer = 10
     this.readyMarkerOffset = {
       x: 20,
       y: -30
     }
-    this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
-    this.readyMarkerVisible = false
-    this.buffer = 10
   }
   
   initialize(manager){
     super.initialize(manager)
-    this.manager.add(this.shadow)
   }
 
   terminate(){
     super.terminate()
-    this.manager.remove(this.shadow.id)
   }
 
   showReadyMarker(){
@@ -240,7 +225,6 @@ export class Player extends Gob {
 
   moveTo(x, y){
     super.moveTo(x, y)
-    this.shadow.moveTo(x + this.shadowOffset.x, y + this.shadowOffset.y)
     this.readyMarkerText.position.x = x + this.readyMarkerOffset.x;
     this.readyMarkerText.position.y = y + this.readyMarkerOffset.y;
   }
