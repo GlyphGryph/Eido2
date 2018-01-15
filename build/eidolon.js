@@ -31208,9 +31208,6 @@ module.exports = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Obstacle = exports.Player = exports.Gob = exports.GobManager = undefined;
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -31220,119 +31217,7 @@ var PIXI = _interopRequireWildcard(_pixi);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var GobManager = exports.GobManager = function () {
-  function GobManager() {
-    _classCallCheck(this, GobManager);
-
-    this.gobs = [];
-  }
-
-  // Adds a gob from the manager
-  // Arguments:
-  // gob: A Gob instance.
-  //  Can't have the same id as a gob already in the manager
-
-
-  _createClass(GobManager, [{
-    key: 'add',
-    value: function add(gob) {
-      this.gobs = [].concat(_toConsumableArray(this.gobs), [gob]);
-      // Also make this gob exist. Run it's initialize logic
-      gob.initialize(this);
-      // TODO: Throw error if gob has same id
-      return this;
-    }
-
-    // Removes a gob from the manager
-    // Arguments:
-    // id: Gob id
-
-  }, {
-    key: 'remove',
-    value: function remove(id) {
-      var removedGob = null;
-      this.gobs = this.gobs.filter(function (gob) {
-        if (gob.id === id) {
-          removedGob = gob;
-          return false;
-        } else {
-          return true;
-        }
-      });
-      // Make sure this gob is remove from reality, run it's teardown logic first
-      removedGob.terminate();
-      return removedGob;
-    }
-
-    // Returns a gob from the manager
-    // Arguments:
-    // id: Gob id
-
-  }, {
-    key: 'get',
-    value: function get(id) {
-      return this.gobs.find(function (gob) {
-        return gob.id === id;
-      });
-    }
-
-    // Runs the update function on all gobs
-    // Note: Updates should happen *after* all manipulations like moveTo are done to a sprite
-
-  }, {
-    key: 'update',
-    value: function update() {
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.gobs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var gob = _step.value;
-
-          gob.update();
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      return this;
-    }
-
-    // Returns distance between two gobs
-    // Arguments:
-    // gob1, gob2: gob ids
-
-  }, {
-    key: 'distance',
-    value: function distance(gob1id, gob2id) {
-      var gob1 = this.get(gob1id);
-      var gob2 = this.get(gob2id);
-      return Math.sqrt(Math.pow(gob2.x - gob1.x, 2) + Math.pow(gob2.y - gob1.y, 2));
-    }
-  }]);
-
-  return GobManager;
-}();
 
 // Gobs come in two forms:
 // Texture Mode:
@@ -31343,9 +31228,7 @@ var GobManager = exports.GobManager = function () {
 //  - Pass in an 'atlas' spritesheet and a set of 'frames'
 //  - The atlas spritesheet is a regular PIXI atlas
 //  - The frames are an array of atlas frame names
-
-
-var Gob = exports.Gob = function () {
+var Gob = function () {
   function Gob(_ref) {
     var id = _ref.id,
         stage = _ref.stage,
@@ -31485,21 +31368,340 @@ var Gob = exports.Gob = function () {
   return Gob;
 }();
 
-var Player = exports.Player = function (_Gob) {
+exports.default = Gob;
+
+},{"pixi.js":129}],173:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var GobManager = function () {
+  function GobManager() {
+    _classCallCheck(this, GobManager);
+
+    this.gobs = [];
+  }
+
+  // Adds a gob from the manager
+  // Arguments:
+  // gob: A Gob instance.
+  //  Can't have the same id as a gob already in the manager
+
+
+  _createClass(GobManager, [{
+    key: "add",
+    value: function add(gob) {
+      this.gobs = [].concat(_toConsumableArray(this.gobs), [gob]);
+      // Also make this gob exist. Run it's initialize logic
+      gob.initialize(this);
+      // TODO: Throw error if gob has same id
+      return this;
+    }
+
+    // Removes a gob from the manager
+    // Arguments:
+    // id: Gob id
+
+  }, {
+    key: "remove",
+    value: function remove(id) {
+      var removedGob = null;
+      this.gobs = this.gobs.filter(function (gob) {
+        if (gob.id === id) {
+          removedGob = gob;
+          return false;
+        } else {
+          return true;
+        }
+      });
+      // Make sure this gob is remove from reality, run it's teardown logic first
+      removedGob.terminate();
+      return removedGob;
+    }
+
+    // Returns a gob from the manager
+    // Arguments:
+    // id: Gob id
+
+  }, {
+    key: "get",
+    value: function get(id) {
+      return this.gobs.find(function (gob) {
+        return gob.id === id;
+      });
+    }
+
+    // Runs the update function on all gobs
+    // Note: Updates should happen *after* all manipulations like moveTo are done to a sprite
+
+  }, {
+    key: "update",
+    value: function update() {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.gobs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var gob = _step.value;
+
+          gob.update();
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return this;
+    }
+
+    // Returns distance between two gobs
+    // Arguments:
+    // gob1, gob2: gob ids
+
+  }, {
+    key: "distance",
+    value: function distance(gob1id, gob2id) {
+      var gob1 = this.get(gob1id);
+      var gob2 = this.get(gob2id);
+      return Math.sqrt(Math.pow(gob2.x - gob1.x, 2) + Math.pow(gob2.y - gob1.y, 2));
+    }
+  }]);
+
+  return GobManager;
+}();
+
+exports.default = GobManager;
+
+},{}],174:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _gobManager = require('./gobManager');
+
+Object.defineProperty(exports, 'GobManager', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_gobManager).default;
+  }
+});
+
+var _gob = require('./gob');
+
+Object.defineProperty(exports, 'Gob', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_gob).default;
+  }
+});
+
+var _player = require('./player');
+
+Object.defineProperty(exports, 'Player', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_player).default;
+  }
+});
+
+var _obstacle = require('./obstacle');
+
+Object.defineProperty(exports, 'Obstacle', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_obstacle).default;
+  }
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+},{"./gob":172,"./gobManager":173,"./obstacle":175,"./player":176}],175:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _gob = require("./gob");
+
+var _gob2 = _interopRequireDefault(_gob);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Obstacle = function (_Gob) {
+  _inherits(Obstacle, _Gob);
+
+  function Obstacle(_ref) {
+    var id = _ref.id,
+        stage = _ref.stage,
+        x = _ref.x,
+        y = _ref.y,
+        atlas = _ref.atlas,
+        texture = _ref.texture,
+        frames = _ref.frames,
+        currentFrame = _ref.currentFrame,
+        xMax = _ref.xMax,
+        xMin = _ref.xMin;
+
+    _classCallCheck(this, Obstacle);
+
+    var _this = _possibleConstructorReturn(this, (Obstacle.__proto__ || Object.getPrototypeOf(Obstacle)).call(this, { id: id, stage: stage, x: x, y: y, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
+    // TODO: We currently remove the atlas we pass, because our obstacles don't use it - yet!
+    // They will, and when they do this needs to be added back in
+    // The atlas is still needed by marker, though
+
+
+    _this.active = true;
+    _this.hitZoneWidth = 100;
+    _this.attackType = Math.random() > 0.5 ? "k" : "o";
+    _this.markerOffset = {
+      x: 12,
+      y: -30
+    };
+    _this.marker = new _gob2.default({
+      id: id + "Marker",
+      stage: stage,
+      x: _this.x + _this.markerOffset.x,
+      y: _this.y + _this.markerOffset.y,
+      atlas: atlas,
+      frames: ["keys/" + _this.attackType],
+      currentFrame: currentFrame
+    });
+    return _this;
+  }
+
+  _createClass(Obstacle, [{
+    key: "initialize",
+    value: function initialize(manager) {
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "initialize", this).call(this, manager);
+      this.manager.add(this.marker);
+    }
+  }, {
+    key: "terminate",
+    value: function terminate() {
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "terminate", this).call(this);
+      this.manager.remove(this.marker.id);
+    }
+  }, {
+    key: "moveTo",
+    value: function moveTo(x, y) {
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "moveTo", this).call(this, x, y);
+      this.marker.moveTo(x + this.markerOffset.x, y + this.markerOffset.y);
+    }
+  }, {
+    key: "hideMarker",
+    value: function hideMarker() {
+      this.marker.hide();
+    }
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      this.hideMarker();
+      console.log('ouch! obstacle hit');
+      this.active = false;
+    }
+
+    // These are calculated based on current and previous position
+    // This prevents situations where players will skip through fast moving objects
+
+  }, {
+    key: "getHitZoneCollisionParameters",
+    value: function getHitZoneCollisionParameters() {
+      var normalCollisionParameters = this.getCollisionParameters();
+      var left = normalCollisionParameters.left - this.hitZoneWidth;
+      var right = normalCollisionParameters.left;
+      var top = Math.min(this.y, this.previous.y);
+      var bottom = Math.max(this.y, this.previous.y) + this.sprite.height;
+      return { left: left, right: right, top: top, bottom: bottom };
+    }
+
+    // Returns whether or not a zone in front of this obstacle overlaps passed object,
+
+  }, {
+    key: "checkHitZoneCollision",
+    value: function checkHitZoneCollision(gob) {
+      var ourParams = this.getHitZoneCollisionParameters();
+      var theirParams = gob.getCollisionParameters();
+
+      // Basic rectangular collision detector
+      return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
+    }
+  }]);
+
+  return Obstacle;
+}(_gob2.default);
+
+exports.default = Obstacle;
+
+},{"./gob":172}],176:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _gob = require('./gob');
+
+var _gob2 = _interopRequireDefault(_gob);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Player = function (_Gob) {
   _inherits(Player, _Gob);
 
-  function Player(_ref2) {
-    var id = _ref2.id,
-        stage = _ref2.stage,
-        x = _ref2.x,
-        y = _ref2.y,
-        atlas = _ref2.atlas,
-        texture = _ref2.texture,
-        frames = _ref2.frames,
-        currentFrame = _ref2.currentFrame,
-        xMax = _ref2.xMax,
-        xMin = _ref2.xMin,
-        shadowFrames = _ref2.shadowFrames;
+  function Player(_ref) {
+    var id = _ref.id,
+        stage = _ref.stage,
+        x = _ref.x,
+        y = _ref.y,
+        atlas = _ref.atlas,
+        texture = _ref.texture,
+        frames = _ref.frames,
+        currentFrame = _ref.currentFrame,
+        xMax = _ref.xMax,
+        xMin = _ref.xMin,
+        shadowFrames = _ref.shadowFrames;
 
     _classCallCheck(this, Player);
 
@@ -31551,112 +31753,11 @@ var Player = exports.Player = function (_Gob) {
   }]);
 
   return Player;
-}(Gob);
+}(_gob2.default);
 
-var Obstacle = exports.Obstacle = function (_Gob2) {
-  _inherits(Obstacle, _Gob2);
+exports.default = Player;
 
-  function Obstacle(_ref3) {
-    var id = _ref3.id,
-        stage = _ref3.stage,
-        x = _ref3.x,
-        y = _ref3.y,
-        atlas = _ref3.atlas,
-        texture = _ref3.texture,
-        frames = _ref3.frames,
-        currentFrame = _ref3.currentFrame,
-        xMax = _ref3.xMax,
-        xMin = _ref3.xMin;
-
-    _classCallCheck(this, Obstacle);
-
-    var _this2 = _possibleConstructorReturn(this, (Obstacle.__proto__ || Object.getPrototypeOf(Obstacle)).call(this, { id: id, stage: stage, x: x, y: y, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
-    // TODO: We currently remove the atlas we pass, because our obstacles don't use it - yet!
-    // They will, and when they do this needs to be added back in
-    // The atlas is still needed by marker, though
-
-
-    _this2.active = true;
-    _this2.hitZoneWidth = 100;
-    _this2.attackType = Math.random() > 0.5 ? "k" : "o";
-    _this2.markerOffset = {
-      x: 12,
-      y: -30
-    };
-    _this2.marker = new Gob({
-      id: id + 'Marker',
-      stage: stage,
-      x: _this2.x + _this2.markerOffset.x,
-      y: _this2.y + _this2.markerOffset.y,
-      atlas: atlas,
-      frames: ['keys/' + _this2.attackType],
-      currentFrame: currentFrame
-    });
-    return _this2;
-  }
-
-  _createClass(Obstacle, [{
-    key: 'initialize',
-    value: function initialize(manager) {
-      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'initialize', this).call(this, manager);
-      this.manager.add(this.marker);
-    }
-  }, {
-    key: 'terminate',
-    value: function terminate() {
-      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'terminate', this).call(this);
-      this.manager.remove(this.marker.id);
-    }
-  }, {
-    key: 'moveTo',
-    value: function moveTo(x, y) {
-      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'moveTo', this).call(this, x, y);
-      this.marker.moveTo(x + this.markerOffset.x, y + this.markerOffset.y);
-    }
-  }, {
-    key: 'hideMarker',
-    value: function hideMarker() {
-      this.marker.hide();
-    }
-  }, {
-    key: 'deactivate',
-    value: function deactivate() {
-      this.hideMarker();
-      console.log('ouch! obstacle hit');
-      this.active = false;
-    }
-
-    // These are calculated based on current and previous position
-    // This prevents situations where players will skip through fast moving objects
-
-  }, {
-    key: 'getHitZoneCollisionParameters',
-    value: function getHitZoneCollisionParameters() {
-      var normalCollisionParameters = this.getCollisionParameters();
-      var left = normalCollisionParameters.left - this.hitZoneWidth;
-      var right = normalCollisionParameters.left;
-      var top = Math.min(this.y, this.previous.y);
-      var bottom = Math.max(this.y, this.previous.y) + this.sprite.height;
-      return { left: left, right: right, top: top, bottom: bottom };
-    }
-
-    // Returns whether or not a zone in front of this obstacle overlaps passed object,
-
-  }, {
-    key: 'checkHitZoneCollision',
-    value: function checkHitZoneCollision(gob) {
-      var ourParams = this.getHitZoneCollisionParameters();
-      var theirParams = gob.getCollisionParameters();
-
-      // Basic rectangular collision detector
-      return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
-    }
-  }]);
-
-  return Obstacle;
-}(Gob);
-
-},{"pixi.js":129}],173:[function(require,module,exports){
+},{"./gob":172}],177:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31719,7 +31820,7 @@ var Level = exports.Level = function () {
   return Level;
 }();
 
-},{}],174:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 'use strict';
 
 var _pixi = require('pixi.js');
@@ -32173,4 +32274,4 @@ function runGame() {
 
 initialize();
 
-},{"./gob":172,"./level":173,"pixi.js":129}]},{},[174]);
+},{"./gob":174,"./level":177,"pixi.js":129}]},{},[178]);
