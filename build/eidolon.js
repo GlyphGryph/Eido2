@@ -31547,6 +31547,24 @@ var GobManager = function () {
       }));
       this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
     }
+  }, {
+    key: 'createRoughacle',
+    value: function createRoughacle() {
+      var id = 'obstacle' + this.nextObstacleId + '-roughacle';
+      this.nextObstacleId += 1;
+      var texture = this.loader.resources['obstacle'].texture;
+      this.add(new _.Obstacle({
+        id: id,
+        stage: this.backgroundLayer,
+        x: 340,
+        y: this.level.groundLevel + 90,
+        atlas: this.spritesheet,
+        texture: texture,
+        frames: [new PIXI.Rectangle(0, 0, 40, 40)],
+        currentFrame: 0
+      }));
+      this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
+    }
 
     // Returns distance between two gobs
     // Arguments:
@@ -32212,6 +32230,7 @@ function runGame() {
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     // randomize type
     gobManager.createObstacle();
+    gobManager.createRoughacle();
     level.lastSpawn = level.distanceTraveled;
   }
 

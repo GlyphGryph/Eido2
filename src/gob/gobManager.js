@@ -155,6 +155,28 @@ export default class GobManager{
     ]
   }
 
+  createRoughacle(){
+    const id = `obstacle${this.nextObstacleId}-roughacle`
+    this.nextObstacleId += 1
+    const texture = this.loader.resources['obstacle'].texture
+    this.add(
+      new Obstacle({
+        id,
+        stage: this.backgroundLayer,
+        x: 340,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        texture,
+        frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
+        currentFrame: 0
+      })
+    )
+    this.level.obstacleIds = [
+      ...this.level.obstacleIds,
+      id
+    ]
+  }
+
   // Returns distance between two gobs
   // Arguments:
   // gob1, gob2: gob ids

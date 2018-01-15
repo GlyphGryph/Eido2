@@ -280,6 +280,7 @@ function runGame(){
   if(level.distanceTraveled > (level.lastSpawn + level.spawnRate)){
     // randomize type
     gobManager.createObstacle()
+    gobManager.createRoughacle()
     level.lastSpawn = level.distanceTraveled
   }
 
