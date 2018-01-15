@@ -10,8 +10,6 @@ let debugInfo = ""
 let playerVelocityX = 0
 let playerVelocityY = 0.0
 let left,right,up,q,o,k = {}
-let groundLevel = 280
-let playerStartingX = 100
 let gobManager
 let level
 let attackLaunched = false
@@ -20,10 +18,7 @@ let attackTimer
 let attackTimeout = 4
 let jumping = false
 let isGrounded = true
-let shadowBaseOffset = {
-  x: -2,
-  y: 30,
-}
+
 const fallSpeed = 15
 const weight = 3
 const initialJumpSpeed = -10.0
@@ -32,9 +27,6 @@ let jumpDuration = 0
 const stage = new PIXI.Container()
 const backgroundLayer = new PIXI.Container()
 const mainLayer = new PIXI.Container()
-
-let rightWall = 300
-let leftWall = 20
 
 function keyboard(keyCode) {
   var key = {};
@@ -158,69 +150,22 @@ function setup(){
 
   stage.addChild(backgroundLayer)
   stage.addChild(mainLayer)
-  gobManager = new GobManager()
-
   const atlas = PIXI.loader.resources["spritesheet"]
+  level = new Level()
+
+  gobManager = new GobManager({
+    mainLayer,
+    backgroundLayer,
+    loader: PIXI.loader,
+    level
+  })
+
 
   // Create player
-  gobManager.add(
-    new Player({
-      id: 'player',
-      stage: mainLayer,
-      x: playerStartingX,
-      y: groundLevel,
-      atlas,
-      frames: [
-        "oval/run/00",
-        "oval/run/01",
-        "oval/run/02",
-        "oval/run/03"
-      ],
-      currentFrame: 0,
-      xMax: rightWall,
-      xMin: leftWall
-    })
-  )
+  gobManager.createPlayer()
 
-  gobManager.add(
-    new Gob({
-      id: `playerShadow`,
-      stage,
-      x: playerStartingX + shadowBaseOffset.x,
-      y: groundLevel + shadowBaseOffset.y,
-      atlas,
-      frames: [
-        "oval/run/shadow/00",
-        "oval/run/shadow/01",
-        "oval/run/shadow/02",
-        "oval/run/shadow/03"
-      ],
-      currentFrame: 0,
-    })
-  )
-
-
-  gobManager.add(
-    new Gob({
-      id: 'figment',
-      stage: mainLayer,
-      x: 500,
-      y: groundLevel,
-      atlas,
-      frames: [
-        "figment/run/00",
-        "figment/run/01",
-        "figment/run/02",
-        "figment/run/03",
-        "figment/run/04",
-        "figment/run/05",
-        "figment/run/06",
-        "figment/run/07"
-
-      ],
-      currentFrame: 0
-    })
-  )
+  // Create figment
+  gobManager.createFigment()
 
   // Create mask
    var canvas = document.createElement('canvas');
@@ -266,8 +211,6 @@ function setup(){
   debugInfo.y = 5;
   stage.addChild(debugInfo)
 
-  level = new Level()
-
   renderer.render(stage)
   startGame()
 }
@@ -295,7 +238,7 @@ function runGame(){
   }
 
   // If the player is not in contact with the ground, then fall...
-  if(player.y < groundLevel){
+  if(player.y < level.groundLevel){
     if(playerVelocityY > fallSpeed){
       playerVelocityY = fallSpeed
     }
@@ -303,23 +246,23 @@ function runGame(){
     player.moveTo(player.x, player.y + playerVelocityY)
     playerVelocityY += weight
   }
-  if(player.y > groundLevel){
-    player.moveTo(player.x, groundLevel)
+  if(player.y > level.groundLevel){
+    player.moveTo(player.x, level.groundLevel)
   }
   // If player still isn't in contac
-  isGrounded = player.y >= groundLevel
+  isGrounded = player.y >= level.groundLevel
   // Update shadow to match player
   const shadow = gobManager.get('playerShadow')
-  const playerDistanceFromGround = groundLevel - player.y
+  const playerDistanceFromGround = level.groundLevel - player.y
   let shadowOffset = {
-    x: shadowBaseOffset.x - playerDistanceFromGround/4,
-    y: shadowBaseOffset.y,
+    x: shadow.baseOffset.x - playerDistanceFromGround/4,
+    y: shadow.baseOffset.y,
   }
-  shadow.moveTo(player.x + shadowOffset.x, groundLevel + shadowOffset.y)
+  shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y)
 
   // Figment Update
   const figment = gobManager.get('figment')
-  figment.moveTo(rightWall + level.spiritDistance, figment.y)
+  figment.moveTo(level.rightWall + level.spiritDistance, figment.y)
 
   // Move Obstacles
   for(const obstacleId of level.obstacleIds){
@@ -336,24 +279,7 @@ function runGame(){
   // Spawn obstacle
   if(level.distanceTraveled > (level.lastSpawn + level.spawnRate)){
     // randomize type
-    const id = `obstacle${level.totalObstacles}`
-    level.obstacleIds = [
-      ...level.obstacleIds,
-      id
-    ]
-    const texture = PIXI.loader.resources['obstacle'].texture
-    const obstacle = new Obstacle({
-      id,
-      stage: backgroundLayer,
-      x: 340,
-      y: groundLevel,
-      atlas: PIXI.loader.resources["spritesheet"],
-      texture,
-      frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
-      currentFrame: 0
-    })
-    gobManager.add(obstacle)
-    level.totalObstacles += 1
+    gobManager.createObstacle()
     level.lastSpawn = level.distanceTraveled
   }
 

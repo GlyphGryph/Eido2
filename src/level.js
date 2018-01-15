@@ -24,6 +24,11 @@ export class Level{
     // Obstacles
     this.obstacleIds = []
     this.totalObstacles = 0
+
+    // 
+    this.groundLevel = 280
+    this.rightWall = 300
+    this.leftWall = 20
   }
 
   update(step){

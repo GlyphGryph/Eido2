@@ -31371,7 +31371,7 @@ var Gob = function () {
 exports.default = Gob;
 
 },{"pixi.js":129}],173:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -31379,15 +31379,29 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _ = require('.');
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var GobManager = function () {
-  function GobManager() {
+  function GobManager(_ref) {
+    var mainLayer = _ref.mainLayer,
+        backgroundLayer = _ref.backgroundLayer,
+        loader = _ref.loader,
+        level = _ref.level;
+
     _classCallCheck(this, GobManager);
 
+    this.mainLayer = mainLayer;
+    this.backgroundLayer = backgroundLayer;
+    this.loader = loader;
+    this.spritesheet = loader.resources["spritesheet"];
+    this.level = level;
     this.gobs = [];
+    this.playerStartingX = 100;
+    this.nextObstacleId = 0;
   }
 
   // Adds a gob from the manager
@@ -31397,7 +31411,7 @@ var GobManager = function () {
 
 
   _createClass(GobManager, [{
-    key: "add",
+    key: 'add',
     value: function add(gob) {
       this.gobs = [].concat(_toConsumableArray(this.gobs), [gob]);
       // Also make this gob exist. Run it's initialize logic
@@ -31411,7 +31425,7 @@ var GobManager = function () {
     // id: Gob id
 
   }, {
-    key: "remove",
+    key: 'remove',
     value: function remove(id) {
       var removedGob = null;
       this.gobs = this.gobs.filter(function (gob) {
@@ -31432,7 +31446,7 @@ var GobManager = function () {
     // id: Gob id
 
   }, {
-    key: "get",
+    key: 'get',
     value: function get(id) {
       return this.gobs.find(function (gob) {
         return gob.id === id;
@@ -31443,7 +31457,7 @@ var GobManager = function () {
     // Note: Updates should happen *after* all manipulations like moveTo are done to a sprite
 
   }, {
-    key: "update",
+    key: 'update',
     value: function update() {
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -31472,13 +31486,74 @@ var GobManager = function () {
 
       return this;
     }
+  }, {
+    key: 'createPlayer',
+    value: function createPlayer() {
+      this.add(new _.Player({
+        id: 'player',
+        stage: this.mainLayer,
+        x: this.playerStartingX,
+        y: this.level.groundLevel,
+        atlas: this.spritesheet,
+        frames: ["oval/run/00", "oval/run/01", "oval/run/02", "oval/run/03"],
+        currentFrame: 0,
+        xMax: this.level.rightWall,
+        xMin: this.level.leftWall
+      }));
+      var shadowBaseOffset = {
+        x: -2,
+        y: 30
+      };
+      var shadow = new _.Gob({
+        id: 'playerShadow',
+        stage: this.mainLayer,
+        x: this.playerStartingX + shadowBaseOffset.x,
+        y: this.level.groundLevel + shadowBaseOffset.y,
+        atlas: this.spritesheet,
+        frames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
+        currentFrame: 0
+      });
+      shadow.baseOffset = shadowBaseOffset;
+      this.add(shadow);
+    }
+  }, {
+    key: 'createFigment',
+    value: function createFigment() {
+      this.add(new _.Gob({
+        id: 'figment',
+        stage: this.mainLayer,
+        x: 500,
+        y: this.level.groundLevel,
+        atlas: this.spritesheet,
+        frames: ["figment/run/00", "figment/run/01", "figment/run/02", "figment/run/03", "figment/run/04", "figment/run/05", "figment/run/06", "figment/run/07"],
+        currentFrame: 0
+      }));
+    }
+  }, {
+    key: 'createObstacle',
+    value: function createObstacle() {
+      var id = 'obstacle' + this.nextObstacleId;
+      this.nextObstacleId += 1;
+      var texture = this.loader.resources['obstacle'].texture;
+      this.add(new _.Obstacle({
+        id: id,
+        stage: this.backgroundLayer,
+        x: 340,
+        y: this.level.groundLevel,
+        atlas: this.spritesheet,
+        texture: texture,
+        frames: [new PIXI.Rectangle(0, 0, 40, 40)],
+        currentFrame: 0
+      }));
+      this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
+    }
 
     // Returns distance between two gobs
     // Arguments:
     // gob1, gob2: gob ids
 
   }, {
-    key: "distance",
+    key: 'distance',
     value: function distance(gob1id, gob2id) {
       var gob1 = this.get(gob1id);
       var gob2 = this.get(gob2id);
@@ -31491,7 +31566,7 @@ var GobManager = function () {
 
 exports.default = GobManager;
 
-},{}],174:[function(require,module,exports){
+},{".":174}],174:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -31796,6 +31871,11 @@ var Level = exports.Level = function () {
     // Obstacles
     this.obstacleIds = [];
     this.totalObstacles = 0;
+
+    // 
+    this.groundLevel = 280;
+    this.rightWall = 300;
+    this.leftWall = 20;
   }
 
   _createClass(Level, [{
@@ -31833,8 +31913,6 @@ var _level = require('./level');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 var renderer = new PIXI.WebGLRenderer(601, 401);
 var fps = 11;
 var velocity = 10;
@@ -31848,8 +31926,6 @@ var left = void 0,
     q = void 0,
     o = void 0,
     k = {};
-var groundLevel = 280;
-var playerStartingX = 100;
 var gobManager = void 0;
 var level = void 0;
 var attackLaunched = false;
@@ -31858,10 +31934,7 @@ var attackTimer = void 0;
 var attackTimeout = 4;
 var jumping = false;
 var isGrounded = true;
-var shadowBaseOffset = {
-  x: -2,
-  y: 30
-};
+
 var fallSpeed = 15;
 var weight = 3;
 var initialJumpSpeed = -10.0;
@@ -31870,9 +31943,6 @@ var jumpDuration = 0;
 var stage = new PIXI.Container();
 var backgroundLayer = new PIXI.Container();
 var mainLayer = new PIXI.Container();
-
-var rightWall = 300;
-var leftWall = 20;
 
 function keyboard(keyCode) {
   var key = {};
@@ -31988,42 +32058,21 @@ function setup() {
 
   stage.addChild(backgroundLayer);
   stage.addChild(mainLayer);
-  gobManager = new _gob.GobManager();
-
   var atlas = PIXI.loader.resources["spritesheet"];
+  level = new _level.Level();
+
+  gobManager = new _gob.GobManager({
+    mainLayer: mainLayer,
+    backgroundLayer: backgroundLayer,
+    loader: PIXI.loader,
+    level: level
+  });
 
   // Create player
-  gobManager.add(new _gob.Player({
-    id: 'player',
-    stage: mainLayer,
-    x: playerStartingX,
-    y: groundLevel,
-    atlas: atlas,
-    frames: ["oval/run/00", "oval/run/01", "oval/run/02", "oval/run/03"],
-    currentFrame: 0,
-    xMax: rightWall,
-    xMin: leftWall
-  }));
+  gobManager.createPlayer();
 
-  gobManager.add(new _gob.Gob({
-    id: 'playerShadow',
-    stage: stage,
-    x: playerStartingX + shadowBaseOffset.x,
-    y: groundLevel + shadowBaseOffset.y,
-    atlas: atlas,
-    frames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
-    currentFrame: 0
-  }));
-
-  gobManager.add(new _gob.Gob({
-    id: 'figment',
-    stage: mainLayer,
-    x: 500,
-    y: groundLevel,
-    atlas: atlas,
-    frames: ["figment/run/00", "figment/run/01", "figment/run/02", "figment/run/03", "figment/run/04", "figment/run/05", "figment/run/06", "figment/run/07"],
-    currentFrame: 0
-  }));
+  // Create figment
+  gobManager.createFigment();
 
   // Create mask
   var canvas = document.createElement('canvas');
@@ -32067,8 +32116,6 @@ function setup() {
   debugInfo.y = 5;
   stage.addChild(debugInfo);
 
-  level = new _level.Level();
-
   renderer.render(stage);
   startGame();
 }
@@ -32096,7 +32143,7 @@ function runGame() {
   }
 
   // If the player is not in contact with the ground, then fall...
-  if (player.y < groundLevel) {
+  if (player.y < level.groundLevel) {
     if (playerVelocityY > fallSpeed) {
       playerVelocityY = fallSpeed;
     }
@@ -32104,23 +32151,23 @@ function runGame() {
     player.moveTo(player.x, player.y + playerVelocityY);
     playerVelocityY += weight;
   }
-  if (player.y > groundLevel) {
-    player.moveTo(player.x, groundLevel);
+  if (player.y > level.groundLevel) {
+    player.moveTo(player.x, level.groundLevel);
   }
   // If player still isn't in contac
-  isGrounded = player.y >= groundLevel;
+  isGrounded = player.y >= level.groundLevel;
   // Update shadow to match player
   var shadow = gobManager.get('playerShadow');
-  var playerDistanceFromGround = groundLevel - player.y;
+  var playerDistanceFromGround = level.groundLevel - player.y;
   var shadowOffset = {
-    x: shadowBaseOffset.x - playerDistanceFromGround / 4,
-    y: shadowBaseOffset.y
+    x: shadow.baseOffset.x - playerDistanceFromGround / 4,
+    y: shadow.baseOffset.y
   };
-  shadow.moveTo(player.x + shadowOffset.x, groundLevel + shadowOffset.y);
+  shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y);
 
   // Figment Update
   var figment = gobManager.get('figment');
-  figment.moveTo(rightWall + level.spiritDistance, figment.y);
+  figment.moveTo(level.rightWall + level.spiritDistance, figment.y);
 
   // Move Obstacles
 
@@ -32164,21 +32211,7 @@ function runGame() {
 
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     // randomize type
-    var id = 'obstacle' + level.totalObstacles;
-    level.obstacleIds = [].concat(_toConsumableArray(level.obstacleIds), [id]);
-    var texture = PIXI.loader.resources['obstacle'].texture;
-    var obstacle = new _gob.Obstacle({
-      id: id,
-      stage: backgroundLayer,
-      x: 340,
-      y: groundLevel,
-      atlas: PIXI.loader.resources["spritesheet"],
-      texture: texture,
-      frames: [new PIXI.Rectangle(0, 0, 40, 40)],
-      currentFrame: 0
-    });
-    gobManager.add(obstacle);
-    level.totalObstacles += 1;
+    gobManager.createObstacle();
     level.lastSpawn = level.distanceTraveled;
   }
 
