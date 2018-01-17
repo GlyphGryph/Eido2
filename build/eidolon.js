@@ -31553,7 +31553,7 @@ var GobManager = function () {
       var id = 'obstacle' + this.nextObstacleId + '-roughacle';
       this.nextObstacleId += 1;
       var texture = this.loader.resources['obstacle'].texture;
-      this.add(new _.Obstacle({
+      this.add(new _.Roughacle({
         id: id,
         stage: this.backgroundLayer,
         x: 340,
@@ -31627,9 +31627,18 @@ Object.defineProperty(exports, 'Obstacle', {
   }
 });
 
+var _roughacle = require('./roughacle');
+
+Object.defineProperty(exports, 'Roughacle', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_roughacle).default;
+  }
+});
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./gob":172,"./gobManager":173,"./obstacle":175,"./player":176}],175:[function(require,module,exports){
+},{"./gob":172,"./gobManager":173,"./obstacle":175,"./player":176,"./roughacle":177}],175:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31883,6 +31892,72 @@ var Player = function (_Gob) {
 exports.default = Player;
 
 },{"./gob":172}],177:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _obstacle = require('./obstacle');
+
+var _obstacle2 = _interopRequireDefault(_obstacle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Roughacle = function (_Obstacle) {
+  _inherits(Roughacle, _Obstacle);
+
+  function Roughacle() {
+    _classCallCheck(this, Roughacle);
+
+    return _possibleConstructorReturn(this, (Roughacle.__proto__ || Object.getPrototypeOf(Roughacle)).apply(this, arguments));
+  }
+
+  _createClass(Roughacle, [{
+    key: 'doTheThing',
+
+    //TODO: Give this a better name
+    value: function doTheThing(player) {
+      var _this2 = this;
+
+      var level = this.manager.level;
+      if (this.active) {
+        if (this.checkCollisionWith(player)) {
+          level.velocity = level.velocity / 2;
+          this.deactivate();
+        } else if (player.attackLaunched && player.attackType == this.attackType && this.checkHitZoneCollision(player)) {
+          this.deactivate();
+        } else if (this.checkHitZoneCollision(player)) {
+          player.canHitObstacle = true;
+        }
+      }
+
+      // Clean up destroyed obstacles
+      if (!this.active) {
+        // TODO: Don't remove, just change the sprite when deactivate
+        this.manager.remove(this.id);
+        level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
+          return trackerId !== _this2.id;
+        });
+        console.log('obstacle destroyed!');
+      }
+    }
+  }]);
+
+  return Roughacle;
+}(_obstacle2.default);
+
+exports.default = Roughacle;
+
+},{"./obstacle":175}],178:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -31950,7 +32025,7 @@ var Level = exports.Level = function () {
   return Level;
 }();
 
-},{}],178:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 'use strict';
 
 var _pixi = require('pixi.js');
@@ -32337,4 +32412,4 @@ function runGame() {
 
 initialize();
 
-},{"./gob":174,"./level":177,"pixi.js":129}]},{},[178]);
+},{"./gob":174,"./level":178,"pixi.js":129}]},{},[179]);
