@@ -31557,7 +31557,7 @@ var GobManager = function () {
         id: id,
         stage: this.backgroundLayer,
         x: 340,
-        y: this.level.groundLevel + 90,
+        y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
         texture: texture,
         frames: [new PIXI.Rectangle(0, 0, 40, 40)],
@@ -31750,6 +31750,36 @@ var Obstacle = function (_Gob) {
       // Basic rectangular collision detector
       return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
     }
+
+    //TODO: Give this a better name
+
+  }, {
+    key: "doTheThing",
+    value: function doTheThing(player) {
+      var _this2 = this;
+
+      var level = this.manager.level;
+      if (this.active) {
+        if (this.checkCollisionWith(player)) {
+          level.velocity = level.velocity / 2;
+          this.deactivate();
+        } else if (player.attackLaunched && player.attackType == this.attackType && this.checkHitZoneCollision(player)) {
+          this.deactivate();
+        } else if (this.checkHitZoneCollision(player)) {
+          player.canHitObstacle = true;
+        }
+      }
+
+      // Clean up destroyed obstacles
+      if (!this.active) {
+        // TODO: Don't remove, just change the sprite when deactivate
+        this.manager.remove(this.id);
+        level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
+          return trackerId !== _this2.id;
+        });
+        console.log('obstacle destroyed!');
+      }
+    }
   }]);
 
   return Obstacle;
@@ -31803,6 +31833,8 @@ var Player = function (_Gob) {
     _this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
     _this.readyMarkerVisible = false;
     _this.buffer = 10;
+    _this.attackLaunched = false;
+    _this.canHitObstacle = false;
     _this.readyMarkerOffset = {
       x: 20,
       y: -30
@@ -31946,12 +31978,11 @@ var left = void 0,
     k = {};
 var gobManager = void 0;
 var level = void 0;
-var attackLaunched = false;
-var attackType = void 0;
 var attackTimer = void 0;
 var attackTimeout = 4;
 var jumping = false;
 var isGrounded = true;
+var nextObstacle = 'rough';
 
 var fallSpeed = 15;
 var weight = 3;
@@ -32016,6 +32047,21 @@ function loadProgressHandler(loader, resource) {
 }
 
 function setup() {
+  stage.addChild(backgroundLayer);
+  stage.addChild(mainLayer);
+  var atlas = PIXI.loader.resources["spritesheet"];
+  level = new _level.Level();
+
+  gobManager = new _gob.GobManager({
+    mainLayer: mainLayer,
+    backgroundLayer: backgroundLayer,
+    loader: PIXI.loader,
+    level: level
+  });
+
+  // Create player
+  gobManager.createPlayer();
+  var player = gobManager.get('player');
 
   //keyboard handlers
   left = keyboard(65);
@@ -32059,35 +32105,20 @@ function setup() {
   };
 
   o.press = function () {
-    attackLaunched = true;
+    player.attackLaunched = true;
     attackTimer = attackTimeout;
-    attackType = "o";
+    player.attackType = "o";
   };
 
   k.press = function () {
-    attackLaunched = true;
+    player.attackLaunched = true;
     attackTimer = attackTimeout;
-    attackType = "k";
+    player.attackType = "k";
   };
 
   q.press = function () {
     DEBUG = !DEBUG;
   };
-
-  stage.addChild(backgroundLayer);
-  stage.addChild(mainLayer);
-  var atlas = PIXI.loader.resources["spritesheet"];
-  level = new _level.Level();
-
-  gobManager = new _gob.GobManager({
-    mainLayer: mainLayer,
-    backgroundLayer: backgroundLayer,
-    loader: PIXI.loader,
-    level: level
-  });
-
-  // Create player
-  gobManager.createPlayer();
 
   // Create figment
   gobManager.createFigment();
@@ -32229,8 +32260,13 @@ function runGame() {
 
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     // randomize type
-    gobManager.createObstacle();
-    gobManager.createRoughacle();
+    if (nextObstacle === 'rough') {
+      gobManager.createRoughacle();
+      nextObstacle = 'default';
+    } else {
+      gobManager.createObstacle();
+      nextObstacle = 'rough';
+    }
     level.lastSpawn = level.distanceTraveled;
   }
 
@@ -32255,37 +32291,11 @@ function runGame() {
   if (attackTimer > 0) {
     attackTimer--;
   } else {
-    attackLaunched = false;
+    player.attackLaunched = false;
   }
 
-  var playerCanHitObstacle = false;
+  player.canHitObstacle = false;
   // Obstacle state management
-
-  var _loop2 = function _loop2(obstacleId) {
-    var obstacle = gobManager.get(obstacleId);
-
-    if (obstacle.active) {
-      if (obstacle.checkCollisionWith(player)) {
-        level.velocity = level.velocity / 2;
-        obstacle.deactivate();
-      } else if (attackLaunched && attackType == obstacle.attackType && obstacle.checkHitZoneCollision(player)) {
-        obstacle.deactivate();
-      } else if (obstacle.checkHitZoneCollision(player)) {
-        playerCanHitObstacle = true;
-      }
-    }
-
-    // Clean up destroyed obstacles
-    if (!obstacle.active) {
-      // TODO: Don't remove, just change the sprite when deactivate
-      gobManager.remove(obstacle.id);
-      level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
-        return trackerId !== obstacleId;
-      });
-      console.log('obstacle destroyed!');
-    }
-  };
-
   var _iteratorNormalCompletion2 = true;
   var _didIteratorError2 = false;
   var _iteratorError2 = undefined;
@@ -32294,7 +32304,8 @@ function runGame() {
     for (var _iterator2 = level.obstacleIds[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
       var obstacleId = _step2.value;
 
-      _loop2(obstacleId);
+      var obstacle = gobManager.get(obstacleId);
+      obstacle.doTheThing(player);
     }
   } catch (err) {
     _didIteratorError2 = true;
@@ -32311,14 +32322,14 @@ function runGame() {
     }
   }
 
-  if (playerCanHitObstacle) {
+  if (player.canHitObstacle) {
     player.showReadyMarker();
   } else {
     player.hideReadyMarker();
   }
 
   // Reset attack launched, even if we didn't destroy anything
-  attackLaunched = false;
+  player.attackLaunched = false;
 
   gobManager.update();
   renderer.render(stage);

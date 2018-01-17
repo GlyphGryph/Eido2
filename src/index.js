@@ -12,12 +12,11 @@ let playerVelocityY = 0.0
 let left,right,up,q,o,k = {}
 let gobManager
 let level
-let attackLaunched = false
-let attackType
 let attackTimer
 let attackTimeout = 4
 let jumping = false
 let isGrounded = true
+let nextObstacle = 'rough'
 
 const fallSpeed = 15
 const weight = 3
@@ -90,6 +89,21 @@ function loadProgressHandler(loader, resource) {
 }
 
 function setup(){
+  stage.addChild(backgroundLayer)
+  stage.addChild(mainLayer)
+  const atlas = PIXI.loader.resources["spritesheet"]
+  level = new Level()
+
+  gobManager = new GobManager({
+    mainLayer,
+    backgroundLayer,
+    loader: PIXI.loader,
+    level
+  })
+
+  // Create player
+  gobManager.createPlayer()
+  const player = gobManager.get('player')
 
   //keyboard handlers
   left = keyboard(65)
@@ -133,36 +147,20 @@ function setup(){
   }
 
   o.press = function(){
-    attackLaunched = true
+    player.attackLaunched = true
     attackTimer = attackTimeout
-    attackType = "o"
+    player.attackType = "o"
   }
 
   k.press = function(){
-    attackLaunched = true
+    player.attackLaunched = true
     attackTimer = attackTimeout
-    attackType = "k"
+    player.attackType = "k"
   }
 
   q.press = function(){
     DEBUG = !DEBUG
   }
-
-  stage.addChild(backgroundLayer)
-  stage.addChild(mainLayer)
-  const atlas = PIXI.loader.resources["spritesheet"]
-  level = new Level()
-
-  gobManager = new GobManager({
-    mainLayer,
-    backgroundLayer,
-    loader: PIXI.loader,
-    level
-  })
-
-
-  // Create player
-  gobManager.createPlayer()
 
   // Create figment
   gobManager.createFigment()
@@ -279,8 +277,13 @@ function runGame(){
   // Spawn obstacle
   if(level.distanceTraveled > (level.lastSpawn + level.spawnRate)){
     // randomize type
-    gobManager.createObstacle()
-    gobManager.createRoughacle()
+    if(nextObstacle === 'rough'){
+      gobManager.createRoughacle()
+      nextObstacle = 'default'
+    } else {
+      gobManager.createObstacle()
+      nextObstacle = 'rough'
+    }
     level.lastSpawn = level.distanceTraveled
   }
 
@@ -305,48 +308,25 @@ function runGame(){
   if(attackTimer > 0){
     attackTimer--
   } else {
-    attackLaunched = false
+    player.attackLaunched = false
   }
   
-  let playerCanHitObstacle = false
+  player.canHitObstacle = false
   // Obstacle state management
   for(const obstacleId of level.obstacleIds){
     let obstacle = gobManager.get(obstacleId)
-
-    if(obstacle.active){
-      if(obstacle.checkCollisionWith(player)){
-        level.velocity = level.velocity / 2
-        obstacle.deactivate()
-      }else if(
-        attackLaunched &&
-        attackType == obstacle.attackType &&
-        obstacle.checkHitZoneCollision(player)
-      ){
-        obstacle.deactivate()
-      }else if(obstacle.checkHitZoneCollision(player)){
-        playerCanHitObstacle = true
-      }
-    }
-    
-    // Clean up destroyed obstacles
-    if(!obstacle.active){
-      // TODO: Don't remove, just change the sprite when deactivate
-      gobManager.remove(obstacle.id)
-      level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
-        return trackerId !== obstacleId
-      })
-      console.log('obstacle destroyed!')
-    }
+    obstacle.doTheThing(player)
   }
-
-  if(playerCanHitObstacle){
+  if(player.canHitObstacle){
     player.showReadyMarker()
   } else {
     player.hideReadyMarker()
   }
-  
+ 
+
+ 
   // Reset attack launched, even if we didn't destroy anything
-  attackLaunched = false
+  player.attackLaunched = false
 
   gobManager.update()
   renderer.render(stage)

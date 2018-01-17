@@ -6,6 +6,8 @@ export default class Player extends Gob {
     this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
     this.readyMarkerVisible = false
     this.buffer = 10
+    this.attackLaunched = false
+    this.canHitObstacle = false
     this.readyMarkerOffset = {
       x: 20,
       y: -30
