@@ -31842,6 +31842,20 @@ var Player = function (_Gob) {
     _this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
     _this.readyMarkerVisible = false;
     _this.buffer = 10;
+    _this.standardStep = 10;
+    _this.initialJumpSpeed = 10;
+    _this.maxJumpDuration = 3;
+    _this.maxFallSpeed = 15;
+    _this.weight = 3;
+    _this.state = {
+      goLeft: false,
+      goRight: false,
+      goUp: false,
+      jumping: false,
+      grounded: true,
+      jumpTimer: 0,
+      fallSpeed: 0
+    };
     _this.attackLaunched = false;
     _this.canHitObstacle = false;
     _this.readyMarkerOffset = {
@@ -31883,6 +31897,80 @@ var Player = function (_Gob) {
       _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'moveTo', this).call(this, x, y);
       this.readyMarkerText.position.x = x + this.readyMarkerOffset.x;
       this.readyMarkerText.position.y = y + this.readyMarkerOffset.y;
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      this.handleJump();
+      this.handleFall();
+      this.handleMoveVertical();
+      this.handleMoveHorizontal();
+      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'update', this).call(this);
+    }
+  }, {
+    key: 'handleJump',
+    value: function handleJump() {
+      // If we are in the goUp state while on the ground, jump
+      if (this.state.goUp && this.state.grounded) {
+        this.state.grounded = false;
+        this.state.jumping = true;
+        this.state.jumpTimer = 0;
+        this.state.fallSpeed = -this.initialJumpSpeed;
+      }
+
+      // Stop jumping if we leave the goUp state
+      if (!this.state.goUp && this.state.jumping) {
+        this.jumping = false;
+      }
+
+      // If the player is jumping...
+      if (this.state.jumping) {
+        this.state.fallSpeed = -this.initialJumpSpeed;
+        this.state.jumpTimer += 1;
+      }
+
+      if (this.state.jumpTimer >= this.maxJumpDuration) {
+        this.state.jumping = false;
+        this.state.jumpTimer = 0;
+      }
+    }
+  }, {
+    key: 'handleFall',
+    value: function handleFall() {
+      if (!this.state.jumping && this.manager.level.groundLevel <= this.y) {
+        this.state.grounded = true;
+      }
+      if (this.state.grounded) {
+        this.state.fallSpeed = 0;
+      } else {
+        if (this.state.fallSpeed > this.maxFallSpeed) {
+          this.state.fallSpeed = this.maxFallSpeed;
+        }
+        this.fallSpeed += this.weight;
+        this.moveTo(this.x, this.y + this.state.fallSpeed);
+      }
+    }
+
+    // Handle Left/Right movement
+
+  }, {
+    key: 'handleMoveHorizontal',
+    value: function handleMoveHorizontal() {
+      if (this.state.goLeft && this.state.goRight) {
+        // Do nothing
+      } else if (this.state.goLeft) {
+        this.moveTo(this.x - this.standardStep, this.y);
+      } else if (this.state.goRight) {
+        this.moveTo(this.x + this.standardStep, this.y);
+      }
+    }
+  }, {
+    key: 'handleMoveVertical',
+    value: function handleMoveVertical() {
+      this.moveTo(this.x, this.y + this.state.fallSpeed);
+      if (this.manager.level.groundLevel < this.y) {
+        this.moveTo(this.x, this.manager.level.groundLevel);
+      }
     }
   }]);
 
@@ -32040,11 +32128,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 var renderer = new PIXI.WebGLRenderer(601, 401);
 var fps = 11;
-var velocity = 10;
 var DEBUG = true; // toggle by pressing Q
 var debugInfo = "";
-var playerVelocityX = 0;
-var playerVelocityY = 0.0;
 var left = void 0,
     right = void 0,
     up = void 0,
@@ -32055,15 +32140,8 @@ var gobManager = void 0;
 var level = void 0;
 var attackTimer = void 0;
 var attackTimeout = 4;
-var jumping = false;
-var isGrounded = true;
 var nextObstacle = 'rough';
 
-var fallSpeed = 15;
-var weight = 3;
-var initialJumpSpeed = -10.0;
-var maxJumpDuration = 3;
-var jumpDuration = 0;
 var stage = new PIXI.Container();
 var backgroundLayer = new PIXI.Container();
 var mainLayer = new PIXI.Container();
@@ -32147,36 +32225,22 @@ function setup() {
   k = keyboard(75);
 
   left.press = function () {
-    playerVelocityX = -1 * velocity;
+    player.state.goLeft = true;
   };
-
   left.release = function () {
-    if (!right.isDown) {
-      playerVelocityX = 0;
-    }
+    player.state.goLeft = false;
   };
-
   right.press = function () {
-    playerVelocityX = velocity;
+    player.state.goRight = true;
   };
-
   right.release = function () {
-    if (!left.isDown) {
-      playerVelocityX = 0;
-    }
+    player.state.goRight = false;
   };
-
   up.press = function () {
-    if (isGrounded) {
-      jumping = true;
-      playerVelocityY = initialJumpSpeed;
-      jumpDuration = 0;
-      isGrounded = false;
-    }
+    player.state.goUp = true;
   };
-
   up.release = function () {
-    jumping = false;
+    player.state.goUp = false;
   };
 
   o.press = function () {
@@ -32254,41 +32318,6 @@ function runGame() {
 
   var player = gobManager.get('player');
 
-  // Player Movement
-  player.moveTo(player.x + playerVelocityX, player.y);
-  // If the player is jumping...
-  if (jumping) {
-    playerVelocityY = initialJumpSpeed;
-    player.moveTo(player.x, player.y + playerVelocityY);
-    if (jumpDuration >= maxJumpDuration) {
-      jumping = false;
-    }
-    jumpDuration += 1;
-  }
-
-  // If the player is not in contact with the ground, then fall...
-  if (player.y < level.groundLevel) {
-    if (playerVelocityY > fallSpeed) {
-      playerVelocityY = fallSpeed;
-    }
-    console.log('moving vertically');
-    player.moveTo(player.x, player.y + playerVelocityY);
-    playerVelocityY += weight;
-  }
-  if (player.y > level.groundLevel) {
-    player.moveTo(player.x, level.groundLevel);
-  }
-  // If player still isn't in contac
-  isGrounded = player.y >= level.groundLevel;
-  // Update shadow to match player
-  var shadow = gobManager.get('playerShadow');
-  var playerDistanceFromGround = level.groundLevel - player.y;
-  var shadowOffset = {
-    x: shadow.baseOffset.x - playerDistanceFromGround / 4,
-    y: shadow.baseOffset.y
-  };
-  shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y);
-
   // Figment Update
   var figment = gobManager.get('figment');
   figment.moveTo(level.rightWall + level.spiritDistance, figment.y);
@@ -32350,8 +32379,8 @@ function runGame() {
     var debugText = "Debug info (press Q to toggle):\n";
     debugText += 'FPS: ' + fps + '\n';
     debugText += 'Position: ' + player.x + '/' + player.y + ' \n';
-    debugText += 'Is jumping?: ' + jumping + ' | Is grounded? ' + isGrounded + ' | jumpDuration: ' + jumpDuration + '\n';
-    debugText += 'Vertical velocity: ' + Math.round(playerVelocityY) + '\n';
+    debugText += 'Is jumping?: ' + player.state.jumping + ' | Is grounded? ' + player.state.grounded + ' | jumpTimer: ' + player.state.jumpTimer + '\n';
+    debugText += 'Fall speed: ' + Math.round(player.state.fallSpeed) + '\n';
     debugText += 'Game time: ' + Math.round(level.time / fps) + 's \n';
     debugText += 'Level speed: ' + Math.round(level.velocity) + '\n';
     debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.distanceTraveled) + '\n';
@@ -32407,6 +32436,15 @@ function runGame() {
   player.attackLaunched = false;
 
   gobManager.update();
+  // Update shadow to match player
+  var shadow = gobManager.get('playerShadow');
+  var playerDistanceFromGround = level.groundLevel - player.y;
+  var shadowOffset = {
+    x: shadow.baseOffset.x - playerDistanceFromGround / 4,
+    y: shadow.baseOffset.y
+  };
+  shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y);
+
   renderer.render(stage);
 }
 

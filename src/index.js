@@ -4,25 +4,15 @@ import {Level} from './level'
 
 const renderer = new PIXI.WebGLRenderer(601, 401)
 const fps = 11
-const velocity = 10
 let DEBUG = true // toggle by pressing Q
 let debugInfo = ""
-let playerVelocityX = 0
-let playerVelocityY = 0.0
 let left,right,up,q,o,k = {}
 let gobManager
 let level
 let attackTimer
 let attackTimeout = 4
-let jumping = false
-let isGrounded = true
 let nextObstacle = 'rough'
 
-const fallSpeed = 15
-const weight = 3
-const initialJumpSpeed = -10.0
-const maxJumpDuration = 3
-let jumpDuration = 0
 const stage = new PIXI.Container()
 const backgroundLayer = new PIXI.Container()
 const mainLayer = new PIXI.Container()
@@ -113,38 +103,12 @@ function setup(){
   o = keyboard(79)
   k = keyboard(75)
 
-  left.press = function(){
-    playerVelocityX = -1*velocity
-  }
-
-  left.release = function(){
-    if(!right.isDown){
-      playerVelocityX = 0
-    }
-  }
-
-  right.press = function(){
-    playerVelocityX = velocity
-  }
-
-  right.release = function(){
-    if(!left.isDown){
-      playerVelocityX = 0
-    }
-  }
-
-  up.press = function(){
-    if(isGrounded){
-      jumping = true
-      playerVelocityY = initialJumpSpeed
-      jumpDuration = 0
-      isGrounded = false
-    }
-  }
-
-  up.release = function(){
-    jumping = false
-  }
+  left.press = function(){ player.state.goLeft = true }
+  left.release = function(){ player.state.goLeft = false }
+  right.press = function(){ player.state.goRight = true }
+  right.release = function(){ player.state.goRight = false }
+  up.press = function(){ player.state.goUp = true }
+  up.release = function(){ player.state.goUp = false }
 
   o.press = function(){
     player.attackLaunched = true
@@ -220,43 +184,8 @@ function startGame(){
 function runGame(){
   const step = 1/fps
   level.update(step)
-
+  
   const player = gobManager.get('player')
-
-  // Player Movement
-  player.moveTo(player.x + playerVelocityX, player.y)
-  // If the player is jumping...
-  if(jumping){
-    playerVelocityY = initialJumpSpeed
-    player.moveTo(player.x, player.y + playerVelocityY)
-    if(jumpDuration >= maxJumpDuration){
-      jumping = false
-    }
-    jumpDuration += 1
-  }
-
-  // If the player is not in contact with the ground, then fall...
-  if(player.y < level.groundLevel){
-    if(playerVelocityY > fallSpeed){
-      playerVelocityY = fallSpeed
-    }
-    console.log('moving vertically')
-    player.moveTo(player.x, player.y + playerVelocityY)
-    playerVelocityY += weight
-  }
-  if(player.y > level.groundLevel){
-    player.moveTo(player.x, level.groundLevel)
-  }
-  // If player still isn't in contac
-  isGrounded = player.y >= level.groundLevel
-  // Update shadow to match player
-  const shadow = gobManager.get('playerShadow')
-  const playerDistanceFromGround = level.groundLevel - player.y
-  let shadowOffset = {
-    x: shadow.baseOffset.x - playerDistanceFromGround/4,
-    y: shadow.baseOffset.y,
-  }
-  shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y)
 
   // Figment Update
   const figment = gobManager.get('figment')
@@ -292,8 +221,8 @@ function runGame(){
     let debugText = "Debug info (press Q to toggle):\n"
     debugText += `FPS: ${fps}\n`
     debugText += `Position: ${player.x}/${player.y} \n`
-    debugText += `Is jumping?: ${jumping} | Is grounded? ${isGrounded} | jumpDuration: ${jumpDuration}\n`
-    debugText += `Vertical velocity: ${Math.round(playerVelocityY)}\n`
+    debugText += `Is jumping?: ${player.state.jumping} | Is grounded? ${player.state.grounded} | jumpTimer: ${player.state.jumpTimer}\n`
+    debugText += `Fall speed: ${Math.round(player.state.fallSpeed)}\n`
     debugText += `Game time: ${Math.round(level.time/fps)}s \n`
     debugText += `Level speed: ${Math.round(level.velocity)}\n`
     debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.distanceTraveled)}\n`
@@ -329,6 +258,16 @@ function runGame(){
   player.attackLaunched = false
 
   gobManager.update()
+  // Update shadow to match player
+  const shadow = gobManager.get('playerShadow')
+  const playerDistanceFromGround = level.groundLevel - player.y
+  let shadowOffset = {
+    x: shadow.baseOffset.x - playerDistanceFromGround/4,
+    y: shadow.baseOffset.y,
+  }
+  shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y)
+
+
   renderer.render(stage)
 }
 
