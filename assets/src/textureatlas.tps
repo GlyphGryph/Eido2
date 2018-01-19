@@ -213,6 +213,7 @@
             <key type="filename">keys/o_inv.png</key>
             <key type="filename">keys/w.png</key>
             <key type="filename">keys/w_inv.png</key>
+            <key type="filename">obstacles/obstacle.png</key>
             <key type="filename">oval/run/00.png</key>
             <key type="filename">oval/run/01.png</key>
             <key type="filename">oval/run/02.png</key>
@@ -226,6 +227,32 @@
                 <rect>10,10,20,20</rect>
                 <key>scale9Paddings</key>
                 <rect>10,10,20,20</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">obstacles/loostacle.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>10,4,20,8</rect>
+                <key>scale9Paddings</key>
+                <rect>10,4,20,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">obstacles/roughacle.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,4,11,8</rect>
+                <key>scale9Paddings</key>
+                <rect>6,4,11,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -251,6 +278,7 @@
             <filename>figment</filename>
             <filename>oval</filename>
             <filename>keys</filename>
+            <filename>obstacles</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
