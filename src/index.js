@@ -172,7 +172,6 @@ function startGame(){
 
 function runGame(){
   const step = 1/fps
-  level.update(step)
   
   const player = gobManager.get('player')
 
@@ -222,6 +221,29 @@ function runGame(){
     }
   }
 
+  // Obstacle state management
+  for(const obstacleId of level.obstacleIds){
+    let obstacle = gobManager.get(obstacleId)
+    obstacle.handleCollisions(player)
+  }
+  if(player.canHitObstacle){
+    player.showReadyMarker()
+  } else {
+    player.hideReadyMarker()
+  }
+ 
+  gobManager.update()
+  // Update shadow to match player
+  const shadow = gobManager.get('playerShadow')
+  const playerDistanceFromGround = level.groundLevel - player.y
+  let shadowOffset = {
+    x: shadow.baseOffset.x - playerDistanceFromGround/4,
+    y: shadow.baseOffset.y,
+  }
+  shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y)
+
+  level.update(step, player)
+
   // Debug
   if(DEBUG){
     let debugText = "Debug info (press Q to toggle):\n"
@@ -239,41 +261,6 @@ function runGame(){
   } else {
     debugInfo.text = ""
   }
-
-  // time out the attack
-  if(attackTimer > 0){
-    attackTimer--
-  } else {
-    player.attackLaunched = false
-  }
-  
-  player.canHitObstacle = false
-  // Obstacle state management
-  for(const obstacleId of level.obstacleIds){
-    let obstacle = gobManager.get(obstacleId)
-    obstacle.handleCollisions(player)
-  }
-  if(player.canHitObstacle){
-    player.showReadyMarker()
-  } else {
-    player.hideReadyMarker()
-  }
- 
-
- 
-  // Reset attack launched, even if we didn't destroy anything
-  player.attackLaunched = false
-
-  gobManager.update()
-  // Update shadow to match player
-  const shadow = gobManager.get('playerShadow')
-  const playerDistanceFromGround = level.groundLevel - player.y
-  let shadowOffset = {
-    x: shadow.baseOffset.x - playerDistanceFromGround/4,
-    y: shadow.baseOffset.y,
-  }
-  shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y)
-
 
   renderer.render(stage)
 }

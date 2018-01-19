@@ -34,12 +34,12 @@ export class Level{
   update(step){
     this.time += 1
     //update dynamic parameters
-    this.velocity = this.velocity + (step * this.acceleration)
+    this.velocity = this.velocity + this.acceleration
     if(this.velocity > this.maxVelocity){
       this.velocity = this.maxVelocity
     }
 
-    this.spiritDistance = this.spiritDistance - (step * (this.velocity - this.targetVelocity)/10)
+    this.spiritDistance = this.spiritDistance - (this.velocity - this.targetVelocity)/10
     if(this.spiritDistance < 0){
       this.spiritDistance = 0
     }

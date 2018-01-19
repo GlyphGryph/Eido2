@@ -32111,12 +32111,12 @@ var Level = exports.Level = function () {
     value: function update(step) {
       this.time += 1;
       //update dynamic parameters
-      this.velocity = this.velocity + step * this.acceleration;
-      if (this.velocity > this.axVelocity) {
+      this.velocity = this.velocity + this.acceleration;
+      if (this.velocity > this.maxVelocity) {
         this.velocity = this.maxVelocity;
       }
 
-      this.spiritDistance = this.spiritDistance - step * (this.velocity - this.targetVelocity) / 10;
+      this.spiritDistance = this.spiritDistance - (this.velocity - this.targetVelocity) / 10;
       if (this.spiritDistance < 0) {
         this.spiritDistance = 0;
       }
@@ -32321,7 +32321,6 @@ function startGame() {
 
 function runGame() {
   var step = 1 / fps;
-  level.update(step);
 
   var player = gobManager.get('player');
 
@@ -32398,32 +32397,6 @@ function runGame() {
     }
   }
 
-  // Debug
-  if (DEBUG) {
-    var debugText = "Debug info (press Q to toggle):\n";
-    debugText += 'FPS: ' + fps + '\n';
-    debugText += 'Position: ' + player.x + '/' + player.y + ' \n';
-    debugText += 'Actions: ' + mode + '\n';
-    debugText += 'Is grounded? ' + player.state.grounded + ' | jumpTimer: ' + player.state.jumpTimer + ' | Fall speed: ' + Math.round(player.state.fallSpeed) + '\n';
-    debugText += 'Power pressed?: ' + player.state.goPower + '\n';
-    debugText += 'Game time: ' + Math.round(level.time / fps) + 's \n';
-    debugText += 'Level speed: ' + Math.round(level.velocity) + '\n';
-    debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.distanceTraveled) + '\n';
-    debugText += 'Distance traveled: ' + Math.round(level.distanceTraveled) + '\n';
-    debugText += 'Distance from spirit: ' + Math.round(level.spiritDistance) + '\n';
-    debugInfo.text = debugText;
-  } else {
-    debugInfo.text = "";
-  }
-
-  // time out the attack
-  if (attackTimer > 0) {
-    attackTimer--;
-  } else {
-    player.attackLaunched = false;
-  }
-
-  player.canHitObstacle = false;
   // Obstacle state management
   var _iteratorNormalCompletion2 = true;
   var _didIteratorError2 = false;
@@ -32457,9 +32430,6 @@ function runGame() {
     player.hideReadyMarker();
   }
 
-  // Reset attack launched, even if we didn't destroy anything
-  player.attackLaunched = false;
-
   gobManager.update();
   // Update shadow to match player
   var shadow = gobManager.get('playerShadow');
@@ -32469,6 +32439,26 @@ function runGame() {
     y: shadow.baseOffset.y
   };
   shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y);
+
+  level.update(step, player);
+
+  // Debug
+  if (DEBUG) {
+    var debugText = "Debug info (press Q to toggle):\n";
+    debugText += 'FPS: ' + fps + '\n';
+    debugText += 'Position: ' + player.x + '/' + player.y + ' \n';
+    debugText += 'Actions: ' + mode + '\n';
+    debugText += 'Is grounded? ' + player.state.grounded + ' | jumpTimer: ' + player.state.jumpTimer + ' | Fall speed: ' + Math.round(player.state.fallSpeed) + '\n';
+    debugText += 'Power pressed?: ' + player.state.goPower + '\n';
+    debugText += 'Game time: ' + Math.round(level.time / fps) + 's \n';
+    debugText += 'Level speed: ' + Math.round(level.velocity) + '\n';
+    debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.distanceTraveled) + '\n';
+    debugText += 'Distance traveled: ' + Math.round(level.distanceTraveled) + '\n';
+    debugText += 'Distance from spirit: ' + Math.round(level.spiritDistance) + '\n';
+    debugInfo.text = debugText;
+  } else {
+    debugInfo.text = "";
+  }
 
   renderer.render(stage);
 }
