@@ -35,7 +35,7 @@ export class Level{
     this.time += 1
     //update dynamic parameters
     this.velocity = this.velocity + (step * this.acceleration)
-    if(this.velocity > this.axVelocity){
+    if(this.velocity > this.maxVelocity){
       this.velocity = this.maxVelocity
     }
 
