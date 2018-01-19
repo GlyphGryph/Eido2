@@ -80,8 +80,7 @@ export default class Obstacle extends Gob {
     )
   }
   
-  //TODO: Give this a better name
-  doTheThing(player){
+  handleCollisions(player){
     const level = this.manager.level
     if(this.active){
       if(this.checkCollisionWith(player)){

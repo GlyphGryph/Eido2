@@ -1,21 +1,13 @@
 import Obstacle from './obstacle'
 
 export default class Roughacle extends Obstacle {
-  //TODO: Give this a better name
-  doTheThing(player){
+  handleCollisions(player){
     const level = this.manager.level
-    if(this.active){
-      if(this.checkCollisionWith(player)){
-        level.velocity = level.velocity / 2
-        this.deactivate()
-      }else if(
-        player.attackLaunched &&
-        player.attackType == this.attackType &&
-        this.checkHitZoneCollision(player)
-      ){
-        this.deactivate()
-      }else if(this.checkHitZoneCollision(player)){
-        player.canHitObstacle = true
+    if(this.active && this.checkCollisionWith(player)){
+      if(player.state.powerMode){
+        // TODO: indicate player is powering through
+      } else {
+        level.velocity = level.velocity - level.velocity / 16
       }
     }
     

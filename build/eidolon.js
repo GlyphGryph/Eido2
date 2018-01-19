@@ -31759,12 +31759,9 @@ var Obstacle = function (_Gob) {
       // Basic rectangular collision detector
       return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
     }
-
-    //TODO: Give this a better name
-
   }, {
-    key: "doTheThing",
-    value: function doTheThing(player) {
+    key: "handleCollisions",
+    value: function handleCollisions(player) {
       var _this2 = this;
 
       var level = this.manager.level;
@@ -31851,6 +31848,8 @@ var Player = function (_Gob) {
       goLeft: false,
       goRight: false,
       goUp: false,
+      goPower: false,
+      powerMode: false,
       jumping: false,
       grounded: true,
       jumpTimer: 0,
@@ -31901,6 +31900,7 @@ var Player = function (_Gob) {
   }, {
     key: 'update',
     value: function update() {
+      this.handlePower();
       this.handleJump();
       this.handleFall();
       this.handleMoveVertical();
@@ -31908,10 +31908,32 @@ var Player = function (_Gob) {
       _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'update', this).call(this);
     }
   }, {
+    key: 'handlePower',
+    value: function handlePower() {
+      if (this.state.powerMode) {
+        if (!this.state.goPower) {
+          this.state.powerMode = false;
+        }
+      } else {
+        if (this.state.goPower) {
+          this.state.powerMode = true;
+          if (this.state.jumping) {
+            this.cancelJump();
+          }
+        }
+      }
+    }
+  }, {
+    key: 'cancelJump',
+    value: function cancelJump() {
+      this.state.jumping = false;
+      this.state.jumpTimer = 0;
+    }
+  }, {
     key: 'handleJump',
     value: function handleJump() {
       // If we are in the goUp state while on the ground, jump
-      if (this.state.goUp && this.state.grounded) {
+      if (this.state.goUp && this.state.grounded && !this.state.powerMode) {
         this.state.grounded = false;
         this.state.jumping = true;
         this.state.jumpTimer = 0;
@@ -31920,8 +31942,7 @@ var Player = function (_Gob) {
 
       // Stop jumping if we leave the goUp state
       if (!this.state.goUp && this.state.jumping) {
-        this.state.jumping = false;
-        this.state.jumpTimer = 0;
+        this.cancelJump();
       }
 
       // If the player is jumping...
@@ -31931,8 +31952,7 @@ var Player = function (_Gob) {
       }
 
       if (this.state.jumpTimer >= this.maxJumpDuration) {
-        this.state.jumping = false;
-        this.state.jumpTimer = 0;
+        this.cancelJump();
       }
     }
   }, {
@@ -32010,21 +32030,16 @@ var Roughacle = function (_Obstacle) {
   }
 
   _createClass(Roughacle, [{
-    key: 'doTheThing',
-
-    //TODO: Give this a better name
-    value: function doTheThing(player) {
+    key: 'handleCollisions',
+    value: function handleCollisions(player) {
       var _this2 = this;
 
       var level = this.manager.level;
-      if (this.active) {
-        if (this.checkCollisionWith(player)) {
-          level.velocity = level.velocity / 2;
-          this.deactivate();
-        } else if (player.attackLaunched && player.attackType == this.attackType && this.checkHitZoneCollision(player)) {
-          this.deactivate();
-        } else if (this.checkHitZoneCollision(player)) {
-          player.canHitObstacle = true;
+      if (this.active && this.checkCollisionWith(player)) {
+        if (player.state.powerMode) {
+          // TODO: indicate player is powering through
+        } else {
+          level.velocity = level.velocity - level.velocity / 16;
         }
       }
 
@@ -32134,8 +32149,7 @@ var left = void 0,
     right = void 0,
     up = void 0,
     q = void 0,
-    o = void 0,
-    k = {};
+    power = {};
 var gobManager = void 0;
 var level = void 0;
 var attackTimer = void 0;
@@ -32221,8 +32235,7 @@ function setup() {
   right = keyboard(68);
   up = keyboard(87);
   q = keyboard(81);
-  o = keyboard(79);
-  k = keyboard(75);
+  power = keyboard(79);
 
   left.press = function () {
     player.state.goLeft = true;
@@ -32242,17 +32255,11 @@ function setup() {
   up.release = function () {
     player.state.goUp = false;
   };
-
-  o.press = function () {
-    player.attackLaunched = true;
-    attackTimer = attackTimeout;
-    player.attackType = "o";
+  power.press = function () {
+    player.state.goPower = true;
   };
-
-  k.press = function () {
-    player.attackLaunched = true;
-    attackTimer = attackTimeout;
-    player.attackType = "k";
+  power.release = function () {
+    player.state.goPower = false;
   };
 
   q.press = function () {
@@ -32374,13 +32381,31 @@ function runGame() {
     level.lastSpawn = level.distanceTraveled;
   }
 
+  var mode = '';
+  if (player.state.jumping) {
+    mode += 'jumping ';
+  }
+  if (player.state.powerMode) {
+    mode += 'powerMode ';
+  }
+  if (player.state.grounded) {
+    mode += 'running ';
+  } else {
+    if (player.state.fallSpeed >= 0) {
+      mode += 'falling ';
+    } else {
+      mode += 'floating ';
+    }
+  }
+
   // Debug
   if (DEBUG) {
     var debugText = "Debug info (press Q to toggle):\n";
     debugText += 'FPS: ' + fps + '\n';
     debugText += 'Position: ' + player.x + '/' + player.y + ' \n';
-    debugText += 'Is jumping?: ' + player.state.jumping + ' | Is grounded? ' + player.state.grounded + ' | jumpTimer: ' + player.state.jumpTimer + '\n';
-    debugText += 'Fall speed: ' + Math.round(player.state.fallSpeed) + '\n';
+    debugText += 'Actions: ' + mode + '\n';
+    debugText += 'Is grounded? ' + player.state.grounded + ' | jumpTimer: ' + player.state.jumpTimer + ' | Fall speed: ' + Math.round(player.state.fallSpeed) + '\n';
+    debugText += 'Power pressed?: ' + player.state.goPower + '\n';
     debugText += 'Game time: ' + Math.round(level.time / fps) + 's \n';
     debugText += 'Level speed: ' + Math.round(level.velocity) + '\n';
     debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.distanceTraveled) + '\n';
@@ -32409,7 +32434,7 @@ function runGame() {
       var obstacleId = _step2.value;
 
       var obstacle = gobManager.get(obstacleId);
-      obstacle.doTheThing(player);
+      obstacle.handleCollisions(player);
     }
   } catch (err) {
     _didIteratorError2 = true;

@@ -15,6 +15,8 @@ export default class Player extends Gob {
       goLeft: false,
       goRight: false,
       goUp: false,
+      goPower: false,
+      powerMode: false,
       jumping: false,
       grounded: true,
       jumpTimer: 0,
@@ -57,6 +59,7 @@ export default class Player extends Gob {
   }
 
   update(){
+    this.handlePower()
     this.handleJump()
     this.handleFall()
     this.handleMoveVertical()
@@ -64,9 +67,29 @@ export default class Player extends Gob {
     super.update()
   }
 
+  handlePower(){
+    if(this.state.powerMode){
+      if(!this.state.goPower){
+        this.state.powerMode = false
+      }
+    }else{
+      if(this.state.goPower){
+        this.state.powerMode = true
+        if(this.state.jumping){
+          this.cancelJump()
+        }
+      }
+    }
+  }
+
+  cancelJump(){
+    this.state.jumping = false
+    this.state.jumpTimer = 0
+  }
+
   handleJump(){
     // If we are in the goUp state while on the ground, jump
-    if(this.state.goUp && this.state.grounded){
+    if(this.state.goUp && this.state.grounded && !this.state.powerMode){
       this.state.grounded = false
       this.state.jumping = true
       this.state.jumpTimer = 0
@@ -75,8 +98,7 @@ export default class Player extends Gob {
 
     // Stop jumping if we leave the goUp state
     if(!this.state.goUp && this.state.jumping){
-      this.state.jumping = false
-      this.state.jumpTimer = 0
+      this.cancelJump()
     }
 
     // If the player is jumping...
@@ -86,8 +108,7 @@ export default class Player extends Gob {
     }
 
     if(this.state.jumpTimer >= this.maxJumpDuration){
-      this.state.jumping = false
-      this.state.jumpTimer = 0
+      this.cancelJump()
     }
   }
   

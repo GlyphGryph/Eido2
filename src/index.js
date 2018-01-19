@@ -6,7 +6,7 @@ const renderer = new PIXI.WebGLRenderer(601, 401)
 const fps = 11
 let DEBUG = true // toggle by pressing Q
 let debugInfo = ""
-let left,right,up,q,o,k = {}
+let left,right,up,q,power = {}
 let gobManager
 let level
 let attackTimer
@@ -100,8 +100,7 @@ function setup(){
   right = keyboard(68)
   up = keyboard(87)
   q = keyboard(81)
-  o = keyboard(79)
-  k = keyboard(75)
+  power = keyboard(79)
 
   left.press = function(){ player.state.goLeft = true }
   left.release = function(){ player.state.goLeft = false }
@@ -109,18 +108,8 @@ function setup(){
   right.release = function(){ player.state.goRight = false }
   up.press = function(){ player.state.goUp = true }
   up.release = function(){ player.state.goUp = false }
-
-  o.press = function(){
-    player.attackLaunched = true
-    attackTimer = attackTimeout
-    player.attackType = "o"
-  }
-
-  k.press = function(){
-    player.attackLaunched = true
-    attackTimer = attackTimeout
-    player.attackType = "k"
-  }
+  power.press = function(){ player.state.goPower = true }
+  power.release = function(){ player.state.goPower = false }
 
   q.press = function(){
     DEBUG = !DEBUG
@@ -215,14 +204,32 @@ function runGame(){
     }
     level.lastSpawn = level.distanceTraveled
   }
+  
+  let mode = ''
+  if(player.state.jumping){
+    mode += 'jumping '
+  }
+  if(player.state.powerMode){
+    mode += 'powerMode '
+  }
+  if(player.state.grounded){
+    mode += 'running '
+  }else{
+    if(player.state.fallSpeed >= 0){
+      mode += 'falling '
+    }else{
+      mode += 'floating '
+    }
+  }
 
   // Debug
   if(DEBUG){
     let debugText = "Debug info (press Q to toggle):\n"
     debugText += `FPS: ${fps}\n`
     debugText += `Position: ${player.x}/${player.y} \n`
-    debugText += `Is jumping?: ${player.state.jumping} | Is grounded? ${player.state.grounded} | jumpTimer: ${player.state.jumpTimer}\n`
-    debugText += `Fall speed: ${Math.round(player.state.fallSpeed)}\n`
+    debugText += `Actions: ${mode}\n`
+    debugText += `Is grounded? ${player.state.grounded} | jumpTimer: ${player.state.jumpTimer} | Fall speed: ${Math.round(player.state.fallSpeed)}\n`
+    debugText += `Power pressed?: ${player.state.goPower}\n`
     debugText += `Game time: ${Math.round(level.time/fps)}s \n`
     debugText += `Level speed: ${Math.round(level.velocity)}\n`
     debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.distanceTraveled)}\n`
@@ -244,7 +251,7 @@ function runGame(){
   // Obstacle state management
   for(const obstacleId of level.obstacleIds){
     let obstacle = gobManager.get(obstacleId)
-    obstacle.doTheThing(player)
+    obstacle.handleCollisions(player)
   }
   if(player.canHitObstacle){
     player.showReadyMarker()
