@@ -31554,16 +31554,47 @@ var GobManager = function () {
       this.nextObstacleId += 1;
       var texture = this.loader.resources['obstacle'].texture;
       this.add(new _.Roughacle({
-        id: id,
+        id: id + '_1',
         stage: this.backgroundLayer,
         x: 340,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
         texture: texture,
-        frames: [new PIXI.Rectangle(0, 0, 40, 40)],
+        frames: [new PIXI.Rectangle(0, 0, 40, 20)],
         currentFrame: 0
       }));
-      this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
+      this.add(new _.Roughacle({
+        id: id + '_2',
+        stage: this.backgroundLayer,
+        x: 380,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        texture: texture,
+        frames: [new PIXI.Rectangle(0, 0, 40, 20)],
+        currentFrame: 0
+      }));
+      this.add(new _.Roughacle({
+        id: id + '_3',
+        stage: this.backgroundLayer,
+        x: 420,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        texture: texture,
+        frames: [new PIXI.Rectangle(0, 0, 40, 20)],
+        currentFrame: 0
+      }));
+      this.add(new _.Roughacle({
+        id: id + '_4',
+        stage: this.backgroundLayer,
+        x: 460,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        texture: texture,
+        frames: [new PIXI.Rectangle(0, 0, 40, 20)],
+        currentFrame: 0
+      }));
+
+      this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id + '_1', id + '_2', id + '_3', id + '_4']);
     }
 
     // Returns distance between two gobs
@@ -31639,7 +31670,7 @@ Object.defineProperty(exports, 'Roughacle', {
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 },{"./gob":172,"./gobManager":173,"./obstacle":175,"./player":176,"./roughacle":177}],175:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -31649,7 +31680,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _gob = require("./gob");
+var _gob = require('./gob');
 
 var _gob2 = _interopRequireDefault(_gob);
 
@@ -31685,51 +31716,57 @@ var Obstacle = function (_Gob) {
 
 
     _this.active = true;
-    _this.hitZoneWidth = 100;
-    _this.attackType = Math.random() > 0.5 ? "k" : "o";
-    _this.markerOffset = {
+    /*
+    this.hitZoneWidth = 100
+    this.attackType = Math.random() > 0.5 ? "k" : "o"
+    this.markerOffset = {
       x: 12,
       y: -30
-    };
-    _this.marker = new _gob2.default({
-      id: id + "Marker",
-      stage: stage,
-      x: _this.x + _this.markerOffset.x,
-      y: _this.y + _this.markerOffset.y,
-      atlas: atlas,
-      frames: ["keys/" + _this.attackType],
-      currentFrame: currentFrame
-    });
+    }
+    this.marker = new Gob({
+      id: `${id}Marker`,
+      stage,
+      x: this.x + this.markerOffset.x,
+      y: this.y + this.markerOffset.y,
+      atlas,
+      frames: [
+        `keys/${this.attackType}`
+      ],
+      currentFrame
+    }) */
     return _this;
   }
 
   _createClass(Obstacle, [{
-    key: "initialize",
+    key: 'initialize',
     value: function initialize(manager) {
-      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "initialize", this).call(this, manager);
-      this.manager.add(this.marker);
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'initialize', this).call(this, manager);
+      //this.manager.add(this.marker)
     }
   }, {
-    key: "terminate",
+    key: 'terminate',
     value: function terminate() {
-      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "terminate", this).call(this);
-      this.manager.remove(this.marker.id);
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'terminate', this).call(this);
+      //this.manager.remove(this.marker.id)
     }
   }, {
-    key: "moveTo",
+    key: 'moveTo',
     value: function moveTo(x, y) {
-      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), "moveTo", this).call(this, x, y);
-      this.marker.moveTo(x + this.markerOffset.x, y + this.markerOffset.y);
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'moveTo', this).call(this, x, y);
+      /*this.marker.moveTo(
+        x + this.markerOffset.x,
+        y + this.markerOffset.y
+      )*/
     }
+
+    //hideMarker(){
+    //  this.marker.hide()
+    //}
+
   }, {
-    key: "hideMarker",
-    value: function hideMarker() {
-      this.marker.hide();
-    }
-  }, {
-    key: "deactivate",
+    key: 'deactivate',
     value: function deactivate() {
-      this.hideMarker();
+      //this.hideMarker()
       console.log('ouch! obstacle hit');
       this.active = false;
     }
@@ -31738,7 +31775,7 @@ var Obstacle = function (_Gob) {
     // This prevents situations where players will skip through fast moving objects
 
   }, {
-    key: "getHitZoneCollisionParameters",
+    key: 'getHitZoneCollisionParameters',
     value: function getHitZoneCollisionParameters() {
       var normalCollisionParameters = this.getCollisionParameters();
       var left = normalCollisionParameters.left - this.hitZoneWidth;
@@ -31749,18 +31786,20 @@ var Obstacle = function (_Gob) {
     }
 
     // Returns whether or not a zone in front of this obstacle overlaps passed object,
+    /*checkHitZoneCollision(gob){
+      const ourParams = this.getHitZoneCollisionParameters()
+      const theirParams = gob.getCollisionParameters()
+       // Basic rectangular collision detector
+      return (
+        ourParams.left < theirParams.right &&
+        ourParams.right > theirParams.left &&
+        ourParams.top < theirParams.bottom &&
+        ourParams.bottom > theirParams.top
+      )
+    }*/
 
   }, {
-    key: "checkHitZoneCollision",
-    value: function checkHitZoneCollision(gob) {
-      var ourParams = this.getHitZoneCollisionParameters();
-      var theirParams = gob.getCollisionParameters();
-
-      // Basic rectangular collision detector
-      return ourParams.left < theirParams.right && ourParams.right > theirParams.left && ourParams.top < theirParams.bottom && ourParams.bottom > theirParams.top;
-    }
-  }, {
-    key: "handleCollisions",
+    key: 'handleCollisions',
     value: function handleCollisions(player) {
       var _this2 = this;
 
@@ -31769,10 +31808,16 @@ var Obstacle = function (_Gob) {
         if (this.checkCollisionWith(player)) {
           level.velocity = level.velocity / 2;
           this.deactivate();
-        } else if (player.attackLaunched && player.attackType == this.attackType && this.checkHitZoneCollision(player)) {
-          this.deactivate();
-        } else if (this.checkHitZoneCollision(player)) {
-          player.canHitObstacle = true;
+          /*
+          }else if(
+            player.attackLaunched &&
+            player.attackType == this.attackType &&
+            this.checkHitZoneCollision(player)
+          ){
+            this.deactivate()
+          }else if(this.checkHitZoneCollision(player)){
+            player.canHitObstacle = true
+          */
         }
       }
 

@@ -8,6 +8,7 @@ export default class Obstacle extends Gob {
     super({id, stage, x, y, texture, frames, currentFrame, xMax, xMin})
     
     this.active = true
+    /*
     this.hitZoneWidth = 100
     this.attackType = Math.random() > 0.5 ? "k" : "o"
     this.markerOffset = {
@@ -24,33 +25,33 @@ export default class Obstacle extends Gob {
         `keys/${this.attackType}`
       ],
       currentFrame
-    })
+    }) */
   }
 
   initialize(manager){
     super.initialize(manager)
-    this.manager.add(this.marker)
+    //this.manager.add(this.marker)
   }
 
   terminate(){
     super.terminate()
-    this.manager.remove(this.marker.id)
+    //this.manager.remove(this.marker.id)
   }
 
   moveTo(x, y){
     super.moveTo(x, y)
-    this.marker.moveTo(
+    /*this.marker.moveTo(
       x + this.markerOffset.x,
       y + this.markerOffset.y
-    )
+    )*/
   }
 
-  hideMarker(){
-    this.marker.hide()
-  }
+  //hideMarker(){
+  //  this.marker.hide()
+  //}
   
   deactivate(){
-    this.hideMarker()
+    //this.hideMarker()
     console.log('ouch! obstacle hit')
     this.active = false
   }
@@ -67,7 +68,7 @@ export default class Obstacle extends Gob {
   }
 
   // Returns whether or not a zone in front of this obstacle overlaps passed object,
-  checkHitZoneCollision(gob){
+  /*checkHitZoneCollision(gob){
     const ourParams = this.getHitZoneCollisionParameters()
     const theirParams = gob.getCollisionParameters()
 
@@ -78,7 +79,7 @@ export default class Obstacle extends Gob {
       ourParams.top < theirParams.bottom &&
       ourParams.bottom > theirParams.top
     )
-  }
+  }*/
   
   handleCollisions(player){
     const level = this.manager.level
@@ -86,6 +87,7 @@ export default class Obstacle extends Gob {
       if(this.checkCollisionWith(player)){
         level.velocity = level.velocity / 2
         this.deactivate()
+      /*
       }else if(
         player.attackLaunched &&
         player.attackType == this.attackType &&
@@ -94,6 +96,7 @@ export default class Obstacle extends Gob {
         this.deactivate()
       }else if(this.checkHitZoneCollision(player)){
         player.canHitObstacle = true
+      */
       }
     }
     
