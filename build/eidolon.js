@@ -31843,8 +31843,8 @@ var Player = function (_Gob) {
     _this.readyMarkerVisible = false;
     _this.buffer = 10;
     _this.standardStep = 10;
-    _this.initialJumpSpeed = 10;
-    _this.maxJumpDuration = 3;
+    _this.initialJumpSpeed = 15;
+    _this.maxJumpDuration = 6;
     _this.maxFallSpeed = 15;
     _this.weight = 3;
     _this.state = {
@@ -31920,7 +31920,8 @@ var Player = function (_Gob) {
 
       // Stop jumping if we leave the goUp state
       if (!this.state.goUp && this.state.jumping) {
-        this.jumping = false;
+        this.state.jumping = false;
+        this.state.jumpTimer = 0;
       }
 
       // If the player is jumping...
@@ -31946,8 +31947,7 @@ var Player = function (_Gob) {
         if (this.state.fallSpeed > this.maxFallSpeed) {
           this.state.fallSpeed = this.maxFallSpeed;
         }
-        this.fallSpeed += this.weight;
-        this.moveTo(this.x, this.y + this.state.fallSpeed);
+        this.state.fallSpeed += this.weight;
       }
     }
 

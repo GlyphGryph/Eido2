@@ -7,8 +7,8 @@ export default class Player extends Gob {
     this.readyMarkerVisible = false
     this.buffer = 10
     this.standardStep = 10
-    this.initialJumpSpeed = 10
-    this.maxJumpDuration = 3
+    this.initialJumpSpeed = 15
+    this.maxJumpDuration = 6
     this.maxFallSpeed = 15
     this.weight = 3
     this.state = {
@@ -75,7 +75,8 @@ export default class Player extends Gob {
 
     // Stop jumping if we leave the goUp state
     if(!this.state.goUp && this.state.jumping){
-      this.jumping = false
+      this.state.jumping = false
+      this.state.jumpTimer = 0
     }
 
     // If the player is jumping...
@@ -100,8 +101,7 @@ export default class Player extends Gob {
       if(this.state.fallSpeed > this.maxFallSpeed){
         this.state.fallSpeed = this.maxFallSpeed
       }
-      this.fallSpeed += this.weight
-      this.moveTo(this.x, this.y + this.state.fallSpeed)
+      this.state.fallSpeed += this.weight
     }
   }
   
