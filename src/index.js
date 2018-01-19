@@ -242,7 +242,7 @@ function runGame(){
   }
   shadow.moveTo(player.x + shadowOffset.x, level.groundLevel + shadowOffset.y)
 
-  level.update(step, player)
+  level.update(player)
 
   // Debug
   if(DEBUG){
@@ -253,7 +253,7 @@ function runGame(){
     debugText += `Is grounded? ${player.state.grounded} | jumpTimer: ${player.state.jumpTimer} | Fall speed: ${Math.round(player.state.fallSpeed)}\n`
     debugText += `Power pressed?: ${player.state.goPower}\n`
     debugText += `Game time: ${Math.round(level.time/fps)}s \n`
-    debugText += `Level speed: ${Math.round(level.velocity)}\n`
+    debugText += `Level speed: ${Math.round(level.velocity*100)}\n`
     debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.distanceTraveled)}\n`
     debugText += `Distance traveled: ${Math.round(level.distanceTraveled)}\n`
     debugText += `Distance from spirit: ${Math.round(level.spiritDistance)}\n`

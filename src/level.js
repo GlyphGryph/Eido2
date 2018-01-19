@@ -31,12 +31,14 @@ export class Level{
     this.leftWall = 20
   }
 
-  update(step){
+  update(player){
     this.time += 1
     //update dynamic parameters
-    this.velocity = this.velocity + this.acceleration
-    if(this.velocity > this.maxVelocity){
-      this.velocity = this.maxVelocity
+    if(player.shouldAccelerate()){
+      this.velocity = this.velocity + this.acceleration
+      if(this.velocity > this.maxVelocity){
+        this.velocity = this.maxVelocity
+      }
     }
 
     this.spiritDistance = this.spiritDistance - (this.velocity - this.targetVelocity)/10

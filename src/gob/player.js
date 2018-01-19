@@ -58,6 +58,10 @@ export default class Player extends Gob {
     this.readyMarkerText.position.y = y + this.readyMarkerOffset.y;
   }
 
+  shouldAccelerate(){
+    return this.state.grounded && !this.state.powerMode
+  }
+
   update(){
     this.handlePower()
     this.handleJump()
