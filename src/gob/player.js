@@ -132,7 +132,7 @@ export default class Player extends Gob {
   
   // Handle Left/Right movement
   handleMoveHorizontal(){
-    if(this.state.goLeft && this.state.goRight){
+    if(this.state.powerMode || (this.state.goLeft && this.state.goRight)){
       // Do nothing
     } else if(this.state.goLeft){
       this.moveTo(this.x - this.standardStep, this.y)
