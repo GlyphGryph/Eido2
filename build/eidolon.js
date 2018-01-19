@@ -31981,7 +31981,7 @@ var Player = function (_Gob) {
   }, {
     key: 'handleMoveHorizontal',
     value: function handleMoveHorizontal() {
-      if (this.state.goLeft && this.state.goRight) {
+      if (this.state.powerMode || this.state.goLeft && this.state.goRight) {
         // Do nothing
       } else if (this.state.goLeft) {
         this.moveTo(this.x - this.standardStep, this.y);
