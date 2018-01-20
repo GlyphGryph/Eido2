@@ -1,4 +1,4 @@
-import {Gob, Player, Obstacle, Roughacle} from '.'
+import {Gob, Player, Loostacle, Roughacle} from '.'
 
 export default class GobManager{
   constructor({
@@ -133,12 +133,12 @@ export default class GobManager{
     )
   }
 
-  createObstacle(){
+  createLoostacle(){
     const id = `obstacle${this.nextObstacleId}`
     this.nextObstacleId += 1
     const texture = this.loader.resources['obstacle'].texture
     this.add(
-      new Obstacle({
+      new Loostacle({
         id,
         stage: this.backgroundLayer,
         x: 340,

@@ -21,7 +21,8 @@ export default class Player extends Gob {
       grounded: true,
       jumpTimer: 0,
       fallSpeed: 0,
-      hitRoughTerrain: false
+      hitRoughTerrain: false,
+      hitLoostacle: false,
     }
     this.attackLaunched = false
     this.canHitObstacle = false
@@ -154,6 +155,10 @@ export default class Player extends Gob {
     if(this.state.hitRoughacle){
       this.manager.level.velocity = this.manager.level.velocity - this.manager.level.velocity / 16
       this.state.hitRoughacle = false
+    }
+    if(this.state.hitLoostacle){
+      this.manager.level.velocity = this.manager.level.velocity / 2
+      this.state.hitLoostacle = false
     }
   }
 }

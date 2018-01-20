@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import {Gob, GobManager, Player, Obstacle} from './gob'
+import {Gob, GobManager, Player} from './gob'
 import {Level} from './level'
 
 const renderer = new PIXI.WebGLRenderer(601, 401)
@@ -198,7 +198,7 @@ function runGame(){
       gobManager.createRoughacle()
       nextObstacle = 'default'
     } else {
-      gobManager.createObstacle()
+      gobManager.createLoostacle()
       nextObstacle = 'rough'
     }
     level.lastSpawn = level.distanceTraveled
