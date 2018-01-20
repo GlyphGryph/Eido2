@@ -1,7 +1,7 @@
 export class Level{
   constructor(){
     // Speed
-    this.initVelocity = 4
+    this.initVelocity = 8
     this.velocity = this.initVelocity
     this.maxVelocity = 50
     this.targetVelocity = 10
@@ -11,7 +11,7 @@ export class Level{
     this.lastSpawn = 0
 
     // Acceleration
-    this.acceleration = 0.1
+    this.acceleration = 0.3
 
     // Distance
     this.initSpiritDistance = 200
