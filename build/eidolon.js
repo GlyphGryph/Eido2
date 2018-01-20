@@ -31286,6 +31286,7 @@ var Gob = function () {
   }, {
     key: 'terminate',
     value: function terminate() {
+      console.log('terminated ' + this.id);
       this.stage.removeChild(this.sprite);
     }
   }, {
@@ -31562,6 +31563,22 @@ var GobManager = function () {
         this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
       }
     }
+  }, {
+    key: 'createRemnant',
+    value: function createRemnant(id, x, y, xMove, yMove, frames) {
+      this.add(new _.Remnant({
+        id: id,
+        stage: this.backgroundLayer,
+        x: x,
+        y: y,
+        xMove: xMove,
+        yMove: yMove,
+        lifetime: 10,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: frames
+      }));
+    }
 
     // Returns distance between two gobs
     // Arguments:
@@ -31606,6 +31623,15 @@ Object.defineProperty(exports, 'Gob', {
   }
 });
 
+var _remnant = require('./remnant');
+
+Object.defineProperty(exports, 'Remnant', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_remnant).default;
+  }
+});
+
 var _player = require('./player');
 
 Object.defineProperty(exports, 'Player', {
@@ -31644,7 +31670,7 @@ Object.defineProperty(exports, 'Loostacle', {
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./gob":172,"./gobManager":173,"./loostacle":175,"./obstacle":176,"./player":177,"./roughacle":178}],175:[function(require,module,exports){
+},{"./gob":172,"./gobManager":173,"./loostacle":175,"./obstacle":176,"./player":177,"./remnant":178,"./roughacle":179}],175:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -31677,24 +31703,17 @@ var Loostacle = function (_Obstacle) {
   _createClass(Loostacle, [{
     key: 'handleCollisions',
     value: function handleCollisions(player) {
-      var _this2 = this;
-
-      var level = this.manager.level;
       if (this.active && this.checkCollisionWith(player)) {
-        if (!(player.state.powerMode && player.state.goLeft)) {
+        if (player.state.powerMode && player.state.goLeft) {
+          console.log('obstacle eliminated');
+          this.manager.createRemnant(this.id + "_right_remnant", this.x, this.y, 10, -5, this.frames);
+          this.manager.createRemnant(this.id + "_left_remnant", this.x, this.y, -10, -5, this.frames);
+          this.manager.remove(this.id);
+        } else {
+          console.log('ouch! obstacle hit');
           player.state.hitLoostacle = true;
+          this.deactivate();
         }
-        this.deactivate();
-      }
-
-      // Clean up destroyed obstacles
-      if (!this.active) {
-        // TODO: Don't remove, just change the sprite when deactivate
-        this.manager.remove(this.id);
-        level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
-          return trackerId !== _this2.id;
-        });
-        console.log('obstacle destroyed!');
       }
     }
   }]);
@@ -31755,37 +31774,19 @@ var Obstacle = function (_Gob) {
   }
 
   _createClass(Obstacle, [{
-    key: 'initialize',
-    value: function initialize(manager) {
-      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'initialize', this).call(this, manager);
-      //this.manager.add(this.marker)
+    key: 'deactivate',
+    value: function deactivate() {
+      this.active = false;
     }
   }, {
     key: 'terminate',
     value: function terminate() {
+      var _this2 = this;
+
+      this.manager.level.obstacleIds = this.manager.level.obstacleIds.filter(function (trackerId) {
+        return trackerId !== _this2.id;
+      });
       _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'terminate', this).call(this);
-      //this.manager.remove(this.marker.id)
-    }
-  }, {
-    key: 'moveTo',
-    value: function moveTo(x, y) {
-      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'moveTo', this).call(this, x, y);
-      /*this.marker.moveTo(
-        x + this.markerOffset.x,
-        y + this.markerOffset.y
-      )*/
-    }
-
-    //hideMarker(){
-    //  this.marker.hide()
-    //}
-
-  }, {
-    key: 'deactivate',
-    value: function deactivate() {
-      //this.hideMarker()
-      console.log('ouch! obstacle hit');
-      this.active = false;
     }
 
     // These are calculated based on current and previous position
@@ -31801,23 +31802,11 @@ var Obstacle = function (_Gob) {
       var bottom = Math.max(this.y, this.previous.y) + this.sprite.height;
       return { left: left, right: right, top: top, bottom: bottom };
     }
-
-    // Returns whether or not a zone in front of this obstacle overlaps passed object,
-    /*checkHitZoneCollision(gob){
-      const ourParams = this.getHitZoneCollisionParameters()
-      const theirParams = gob.getCollisionParameters()
-       // Basic rectangular collision detector
-      return (
-        ourParams.left < theirParams.right &&
-        ourParams.right > theirParams.left &&
-        ourParams.top < theirParams.bottom &&
-        ourParams.bottom > theirParams.top
-      )
-    }*/
-
   }, {
     key: 'handleCollisions',
-    value: function handleCollisions(player) {}
+    value: function handleCollisions(player) {
+      // Handled by subclasses
+    }
   }]);
 
   return Obstacle;
@@ -32060,6 +32049,79 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _gob = require('./gob');
+
+var _gob2 = _interopRequireDefault(_gob);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Remnant = function (_Gob) {
+  _inherits(Remnant, _Gob);
+
+  function Remnant(_ref) {
+    var id = _ref.id,
+        stage = _ref.stage,
+        x = _ref.x,
+        y = _ref.y,
+        atlas = _ref.atlas,
+        texture = _ref.texture,
+        frames = _ref.frames,
+        currentFrame = _ref.currentFrame,
+        xMax = _ref.xMax,
+        xMin = _ref.xMin,
+        xMove = _ref.xMove,
+        yMove = _ref.yMove,
+        lifetime = _ref.lifetime;
+
+    _classCallCheck(this, Remnant);
+
+    var _this = _possibleConstructorReturn(this, (Remnant.__proto__ || Object.getPrototypeOf(Remnant)).call(this, { id: id, stage: stage, x: x, y: y, atlas: atlas, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
+    // TODO: We currently remove the atlas we pass, because our obstacles don't use it - yet!
+    // They will, and when they do this needs to be added back in
+    // The atlas is still needed by marker, though
+
+
+    _this.lifetime = lifetime;
+    _this.xMove = xMove;
+    _this.yMove = yMove;
+    return _this;
+  }
+
+  _createClass(Remnant, [{
+    key: 'update',
+    value: function update() {
+      console.log('updating remnant');
+      this.moveTo(this.x + this.xMove, this.y + this.yMove);
+      this.lifetime -= 1;
+      if (this.lifetime <= 0) {
+        this.manager.remove(this.id);
+      }
+      _get(Remnant.prototype.__proto__ || Object.getPrototypeOf(Remnant.prototype), 'update', this).call(this);
+    }
+  }]);
+
+  return Remnant;
+}(_gob2.default);
+
+exports.default = Remnant;
+
+},{"./gob":172}],179:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _obstacle = require('./obstacle');
 
 var _obstacle2 = _interopRequireDefault(_obstacle);
@@ -32084,8 +32146,6 @@ var Roughacle = function (_Obstacle) {
   _createClass(Roughacle, [{
     key: 'handleCollisions',
     value: function handleCollisions(player) {
-      var _this2 = this;
-
       var level = this.manager.level;
       if (this.active && this.checkCollisionWith(player)) {
         if (player.state.powerMode) {
@@ -32093,16 +32153,6 @@ var Roughacle = function (_Obstacle) {
         } else {
           player.state.hitRoughacle = true;
         }
-      }
-
-      // Clean up destroyed obstacles
-      if (!this.active) {
-        // TODO: Don't remove, just change the sprite when deactivate
-        this.manager.remove(this.id);
-        level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
-          return trackerId !== _this2.id;
-        });
-        console.log('obstacle destroyed!');
       }
     }
   }]);
@@ -32112,7 +32162,7 @@ var Roughacle = function (_Obstacle) {
 
 exports.default = Roughacle;
 
-},{"./obstacle":176}],179:[function(require,module,exports){
+},{"./obstacle":176}],180:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32182,7 +32232,7 @@ var Level = exports.Level = function () {
   return Level;
 }();
 
-},{}],180:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 'use strict';
 
 var _pixi = require('pixi.js');
@@ -32528,4 +32578,4 @@ function runGame() {
 
 initialize();
 
-},{"./gob":174,"./level":179,"pixi.js":129}]},{},[180]);
+},{"./gob":174,"./level":180,"pixi.js":129}]},{},[181]);

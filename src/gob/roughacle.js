@@ -10,15 +10,5 @@ export default class Roughacle extends Obstacle {
         player.state.hitRoughacle = true
       }
     }
-    
-    // Clean up destroyed obstacles
-    if(!this.active){
-      // TODO: Don't remove, just change the sprite when deactivate
-      this.manager.remove(this.id)
-      level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
-        return trackerId !== this.id
-      })
-      console.log('obstacle destroyed!')
-    }
   }
 }

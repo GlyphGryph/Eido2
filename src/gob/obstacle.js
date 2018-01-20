@@ -10,32 +10,15 @@ export default class Obstacle extends Gob {
     this.active = true
   }
 
-  initialize(manager){
-    super.initialize(manager)
-    //this.manager.add(this.marker)
+  deactivate(){
+    this.active = false
   }
 
   terminate(){
+    this.manager.level.obstacleIds = this.manager.level.obstacleIds.filter( (trackerId) =>{
+      return trackerId !== this.id
+    })
     super.terminate()
-    //this.manager.remove(this.marker.id)
-  }
-
-  moveTo(x, y){
-    super.moveTo(x, y)
-    /*this.marker.moveTo(
-      x + this.markerOffset.x,
-      y + this.markerOffset.y
-    )*/
-  }
-
-  //hideMarker(){
-  //  this.marker.hide()
-  //}
-  
-  deactivate(){
-    //this.hideMarker()
-    console.log('ouch! obstacle hit')
-    this.active = false
   }
 
   // These are calculated based on current and previous position
@@ -49,20 +32,7 @@ export default class Obstacle extends Gob {
     return {left, right, top, bottom}
   }
 
-  // Returns whether or not a zone in front of this obstacle overlaps passed object,
-  /*checkHitZoneCollision(gob){
-    const ourParams = this.getHitZoneCollisionParameters()
-    const theirParams = gob.getCollisionParameters()
-
-    // Basic rectangular collision detector
-    return (
-      ourParams.left < theirParams.right &&
-      ourParams.right > theirParams.left &&
-      ourParams.top < theirParams.bottom &&
-      ourParams.bottom > theirParams.top
-    )
-  }*/
-  
   handleCollisions(player){
+    // Handled by subclasses
   }
 }

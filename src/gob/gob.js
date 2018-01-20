@@ -51,6 +51,7 @@ export default class Gob{
   }
 
   terminate(){
+    console.log('terminated '+this.id)
     this.stage.removeChild(this.sprite)
   }
 

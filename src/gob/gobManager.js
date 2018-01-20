@@ -1,4 +1,4 @@
-import {Gob, Player, Loostacle, Roughacle} from '.'
+import {Gob, Player, Loostacle, Roughacle, Remnant} from '.'
 
 export default class GobManager{
   constructor({
@@ -173,7 +173,23 @@ export default class GobManager{
         id
       ]
     }
+  }
 
+  createRemnant(id, x, y, xMove, yMove, frames){
+    this.add(
+      new Remnant({
+        id,
+        stage: this.backgroundLayer,
+        x,
+        y,
+        xMove,
+        yMove,
+        lifetime: 10,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames,
+      })
+    )
   }
 
   // Returns distance between two gobs
