@@ -1,4 +1,4 @@
-import {Gob, Player, Loostacle, Roughacle, Remnant} from '.'
+import {Gob, Player, Loostacle, Roughacle, Barrier, Remnant} from '.'
 
 export default class GobManager{
   constructor({
@@ -145,6 +145,26 @@ export default class GobManager{
         atlas: this.spritesheet,
         currentFrame: 0,
         frames: [ "obstacles/loostacle" ],
+      })
+    )
+    this.level.obstacleIds = [
+      ...this.level.obstacleIds,
+      id
+    ]
+  }
+
+  createBarrier(){
+    const id = `obstacle${this.nextObstacleId}`
+    this.nextObstacleId += 1
+    this.add(
+      new Barrier({
+        id,
+        stage: this.backgroundLayer,
+        x: 340,
+        y: this.level.groundLevel,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: [ "obstacles/obstacle" ],
       })
     )
     this.level.obstacleIds = [

@@ -193,21 +193,22 @@ function runGame(){
   // Spawn obstacle
   if(level.distanceTraveled > (level.lastSpawn + level.spawnRate)){
     // randomize type
-    if(nextObstacle === 'rough1'){
+    if(nextObstacle === '1'){
       gobManager.createRoughacle(12)
-      nextObstacle = 'loose2'
-    }else if(nextObstacle === 'rough2'){
-      gobManager.createRoughacle(8)
-      nextObstacle = 'rough3'
-    }else if(nextObstacle === 'loose2'){
+      nextObstacle = '2'
+    }else if(nextObstacle === '2'){
+      gobManager.createBarrier()
+      nextObstacle = '3'
+    }else if(nextObstacle === '3'){
       gobManager.createLoostacle()
-      nextObstacle = 'rough2'
-    }else if(nextObstacle === 'rough3'){
-      gobManager.createRoughacle(4)
-      nextObstacle = 'loose3'
+      nextObstacle = '4'
+    }else if(nextObstacle === '4'){
+      gobManager.createBarrier()
+      nextObstacle = '5'
     }else{
+      gobManager.createRoughacle(16)
       gobManager.createLoostacle()
-      nextObstacle = 'rough1'
+      nextObstacle = '1'
     }
     level.lastSpawn = level.distanceTraveled
   }

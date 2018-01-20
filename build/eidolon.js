@@ -31211,6 +31211,59 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _obstacle = require('./obstacle');
+
+var _obstacle2 = _interopRequireDefault(_obstacle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Barrier = function (_Obstacle) {
+  _inherits(Barrier, _Obstacle);
+
+  function Barrier() {
+    _classCallCheck(this, Barrier);
+
+    return _possibleConstructorReturn(this, (Barrier.__proto__ || Object.getPrototypeOf(Barrier)).apply(this, arguments));
+  }
+
+  _createClass(Barrier, [{
+    key: 'handleCollisions',
+    value: function handleCollisions(player) {
+      if (this.active && this.checkCollisionWith(player)) {
+        if (player.state.powerMode && player.state.goRight) {
+          console.log('obstacle eliminated');
+          this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y, -10, -5, this.frames);
+          this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y, 20, 0, this.frames);
+          this.manager.remove(this.id);
+        } else {
+          console.log('ouch! obstacle hit');
+          player.state.hitLoostacle = true;
+          this.deactivate();
+        }
+      }
+    }
+  }]);
+
+  return Barrier;
+}(_obstacle2.default);
+
+exports.default = Barrier;
+
+},{"./obstacle":177}],173:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _pixi = require('pixi.js');
 
 var PIXI = _interopRequireWildcard(_pixi);
@@ -31370,7 +31423,7 @@ var Gob = function () {
 
 exports.default = Gob;
 
-},{"pixi.js":129}],173:[function(require,module,exports){
+},{"pixi.js":129}],174:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -31546,6 +31599,22 @@ var GobManager = function () {
       this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
     }
   }, {
+    key: 'createBarrier',
+    value: function createBarrier() {
+      var id = 'obstacle' + this.nextObstacleId;
+      this.nextObstacleId += 1;
+      this.add(new _.Barrier({
+        id: id,
+        stage: this.backgroundLayer,
+        x: 340,
+        y: this.level.groundLevel,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: ["obstacles/obstacle"]
+      }));
+      this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
+    }
+  }, {
     key: 'createRoughacle',
     value: function createRoughacle(length) {
       this.nextObstacleId += 1;
@@ -31598,7 +31667,7 @@ var GobManager = function () {
 
 exports.default = GobManager;
 
-},{".":174}],174:[function(require,module,exports){
+},{".":175}],175:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -31668,9 +31737,18 @@ Object.defineProperty(exports, 'Loostacle', {
   }
 });
 
+var _barrier = require('./barrier');
+
+Object.defineProperty(exports, 'Barrier', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_barrier).default;
+  }
+});
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./gob":172,"./gobManager":173,"./loostacle":175,"./obstacle":176,"./player":177,"./remnant":178,"./roughacle":179}],175:[function(require,module,exports){
+},{"./barrier":172,"./gob":173,"./gobManager":174,"./loostacle":176,"./obstacle":177,"./player":178,"./remnant":179,"./roughacle":180}],176:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -31723,7 +31801,7 @@ var Loostacle = function (_Obstacle) {
 
 exports.default = Loostacle;
 
-},{"./obstacle":176}],176:[function(require,module,exports){
+},{"./obstacle":177}],177:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -31814,7 +31892,7 @@ var Obstacle = function (_Gob) {
 
 exports.default = Obstacle;
 
-},{"./gob":172}],177:[function(require,module,exports){
+},{"./gob":173}],178:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -32040,7 +32118,7 @@ var Player = function (_Gob) {
 
 exports.default = Player;
 
-},{"./gob":172}],178:[function(require,module,exports){
+},{"./gob":173}],179:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -32113,7 +32191,7 @@ var Remnant = function (_Gob) {
 
 exports.default = Remnant;
 
-},{"./gob":172}],179:[function(require,module,exports){
+},{"./gob":173}],180:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -32162,7 +32240,7 @@ var Roughacle = function (_Obstacle) {
 
 exports.default = Roughacle;
 
-},{"./obstacle":176}],180:[function(require,module,exports){
+},{"./obstacle":177}],181:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32232,7 +32310,7 @@ var Level = exports.Level = function () {
   return Level;
 }();
 
-},{}],181:[function(require,module,exports){
+},{}],182:[function(require,module,exports){
 'use strict';
 
 var _pixi = require('pixi.js');
@@ -32474,21 +32552,22 @@ function runGame() {
 
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     // randomize type
-    if (nextObstacle === 'rough1') {
+    if (nextObstacle === '1') {
       gobManager.createRoughacle(12);
-      nextObstacle = 'loose2';
-    } else if (nextObstacle === 'rough2') {
-      gobManager.createRoughacle(8);
-      nextObstacle = 'rough3';
-    } else if (nextObstacle === 'loose2') {
+      nextObstacle = '2';
+    } else if (nextObstacle === '2') {
+      gobManager.createBarrier();
+      nextObstacle = '3';
+    } else if (nextObstacle === '3') {
       gobManager.createLoostacle();
-      nextObstacle = 'rough2';
-    } else if (nextObstacle === 'rough3') {
-      gobManager.createRoughacle(4);
-      nextObstacle = 'loose3';
+      nextObstacle = '4';
+    } else if (nextObstacle === '4') {
+      gobManager.createBarrier();
+      nextObstacle = '5';
     } else {
+      gobManager.createRoughacle(16);
       gobManager.createLoostacle();
-      nextObstacle = 'rough1';
+      nextObstacle = '1';
     }
     level.lastSpawn = level.distanceTraveled;
   }
@@ -32578,4 +32657,4 @@ function runGame() {
 
 initialize();
 
-},{"./gob":174,"./level":180,"pixi.js":129}]},{},[181]);
+},{"./gob":175,"./level":181,"pixi.js":129}]},{},[182]);
