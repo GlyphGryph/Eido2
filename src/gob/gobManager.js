@@ -136,7 +136,6 @@ export default class GobManager{
   createLoostacle(){
     const id = `obstacle${this.nextObstacleId}`
     this.nextObstacleId += 1
-    const texture = this.loader.resources['obstacle'].texture
     this.add(
       new Loostacle({
         id,
@@ -144,9 +143,8 @@ export default class GobManager{
         x: 340,
         y: this.level.groundLevel,
         atlas: this.spritesheet,
-        texture,
-        frames: [ new PIXI.Rectangle(0, 0, 40, 40) ],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: [ "obstacles/loostacle" ],
       })
     )
     this.level.obstacleIds = [
@@ -158,7 +156,6 @@ export default class GobManager{
   createRoughacle(){
     const id = `obstacle${this.nextObstacleId}-roughacle`
     this.nextObstacleId += 1
-    const texture = this.loader.resources['obstacle'].texture
     this.add(
       new Roughacle({
         id: id+'_1',
@@ -166,45 +163,85 @@ export default class GobManager{
         x: 340,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
-        texture,
-        frames: [ new PIXI.Rectangle(0, 0, 40, 20) ],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: [ "obstacles/roughacle" ],
       })
     )
     this.add(
       new Roughacle({
         id: id+'_2',
         stage: this.backgroundLayer,
-        x: 380,
+        x: 360,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
-        texture,
-        frames: [ new PIXI.Rectangle(0, 0, 40, 20) ],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: [ "obstacles/roughacle" ],
       })
     )
     this.add(
       new Roughacle({
         id: id+'_3',
         stage: this.backgroundLayer,
-        x: 420,
+        x: 380,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
-        texture,
-        frames: [ new PIXI.Rectangle(0, 0, 40, 20) ],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: [ "obstacles/roughacle" ],
       })
     )
     this.add(
       new Roughacle({
         id: id+'_4',
         stage: this.backgroundLayer,
+        x: 400,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: [ "obstacles/roughacle" ],
+      })
+    )
+    this.add(
+      new Roughacle({
+        id: id+'_5',
+        stage: this.backgroundLayer,
+        x: 420,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: [ "obstacles/roughacle" ],
+      })
+    )
+    this.add(
+      new Roughacle({
+        id: id+'_6',
+        stage: this.backgroundLayer,
+        x: 440,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: [ "obstacles/roughacle" ],
+      })
+    )
+    this.add(
+      new Roughacle({
+        id: id+'_7',
+        stage: this.backgroundLayer,
         x: 460,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
-        texture,
-        frames: [ new PIXI.Rectangle(0, 0, 40, 20) ],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: [ "obstacles/roughacle" ],
+      })
+    )
+    this.add(
+      new Roughacle({
+        id: id+'_8',
+        stage: this.backgroundLayer,
+        x: 480,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: [ "obstacles/roughacle" ],
       })
     )
 
@@ -214,6 +251,10 @@ export default class GobManager{
       id+'_2',
       id+'_3',
       id+'_4',
+      id+'_5',
+      id+'_6',
+      id+'_7',
+      id+'_8',
     ]
   }
 

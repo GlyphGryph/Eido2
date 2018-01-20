@@ -5,27 +5,9 @@ export default class Obstacle extends Gob {
     // TODO: We currently remove the atlas we pass, because our obstacles don't use it - yet!
     // They will, and when they do this needs to be added back in
     // The atlas is still needed by marker, though
-    super({id, stage, x, y, texture, frames, currentFrame, xMax, xMin})
+    super({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin})
     
     this.active = true
-    /*
-    this.hitZoneWidth = 100
-    this.attackType = Math.random() > 0.5 ? "k" : "o"
-    this.markerOffset = {
-      x: 12,
-      y: -30
-    }
-    this.marker = new Gob({
-      id: `${id}Marker`,
-      stage,
-      x: this.x + this.markerOffset.x,
-      y: this.y + this.markerOffset.y,
-      atlas,
-      frames: [
-        `keys/${this.attackType}`
-      ],
-      currentFrame
-    }) */
   }
 
   initialize(manager){

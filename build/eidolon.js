@@ -31534,16 +31534,14 @@ var GobManager = function () {
     value: function createLoostacle() {
       var id = 'obstacle' + this.nextObstacleId;
       this.nextObstacleId += 1;
-      var texture = this.loader.resources['obstacle'].texture;
       this.add(new _.Loostacle({
         id: id,
         stage: this.backgroundLayer,
         x: 340,
         y: this.level.groundLevel,
         atlas: this.spritesheet,
-        texture: texture,
-        frames: [new PIXI.Rectangle(0, 0, 40, 40)],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: ["obstacles/loostacle"]
       }));
       this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
     }
@@ -31552,49 +31550,80 @@ var GobManager = function () {
     value: function createRoughacle() {
       var id = 'obstacle' + this.nextObstacleId + '-roughacle';
       this.nextObstacleId += 1;
-      var texture = this.loader.resources['obstacle'].texture;
       this.add(new _.Roughacle({
         id: id + '_1',
         stage: this.backgroundLayer,
         x: 340,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
-        texture: texture,
-        frames: [new PIXI.Rectangle(0, 0, 40, 20)],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: ["obstacles/roughacle"]
       }));
       this.add(new _.Roughacle({
         id: id + '_2',
         stage: this.backgroundLayer,
-        x: 380,
+        x: 360,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
-        texture: texture,
-        frames: [new PIXI.Rectangle(0, 0, 40, 20)],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: ["obstacles/roughacle"]
       }));
       this.add(new _.Roughacle({
         id: id + '_3',
         stage: this.backgroundLayer,
-        x: 420,
+        x: 380,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
-        texture: texture,
-        frames: [new PIXI.Rectangle(0, 0, 40, 20)],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: ["obstacles/roughacle"]
       }));
       this.add(new _.Roughacle({
         id: id + '_4',
         stage: this.backgroundLayer,
+        x: 400,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: ["obstacles/roughacle"]
+      }));
+      this.add(new _.Roughacle({
+        id: id + '_5',
+        stage: this.backgroundLayer,
+        x: 420,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: ["obstacles/roughacle"]
+      }));
+      this.add(new _.Roughacle({
+        id: id + '_6',
+        stage: this.backgroundLayer,
+        x: 440,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: ["obstacles/roughacle"]
+      }));
+      this.add(new _.Roughacle({
+        id: id + '_7',
+        stage: this.backgroundLayer,
         x: 460,
         y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
-        texture: texture,
-        frames: [new PIXI.Rectangle(0, 0, 40, 20)],
-        currentFrame: 0
+        currentFrame: 0,
+        frames: ["obstacles/roughacle"]
+      }));
+      this.add(new _.Roughacle({
+        id: id + '_8',
+        stage: this.backgroundLayer,
+        x: 480,
+        y: this.level.groundLevel + 20,
+        atlas: this.spritesheet,
+        currentFrame: 0,
+        frames: ["obstacles/roughacle"]
       }));
 
-      this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id + '_1', id + '_2', id + '_3', id + '_4']);
+      this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id + '_1', id + '_2', id + '_3', id + '_4', id + '_5', id + '_6', id + '_7', id + '_8']);
     }
 
     // Returns distance between two gobs
@@ -31778,31 +31807,13 @@ var Obstacle = function (_Gob) {
 
     _classCallCheck(this, Obstacle);
 
-    var _this = _possibleConstructorReturn(this, (Obstacle.__proto__ || Object.getPrototypeOf(Obstacle)).call(this, { id: id, stage: stage, x: x, y: y, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
+    var _this = _possibleConstructorReturn(this, (Obstacle.__proto__ || Object.getPrototypeOf(Obstacle)).call(this, { id: id, stage: stage, x: x, y: y, atlas: atlas, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
     // TODO: We currently remove the atlas we pass, because our obstacles don't use it - yet!
     // They will, and when they do this needs to be added back in
     // The atlas is still needed by marker, though
 
 
     _this.active = true;
-    /*
-    this.hitZoneWidth = 100
-    this.attackType = Math.random() > 0.5 ? "k" : "o"
-    this.markerOffset = {
-      x: 12,
-      y: -30
-    }
-    this.marker = new Gob({
-      id: `${id}Marker`,
-      stage,
-      x: this.x + this.markerOffset.x,
-      y: this.y + this.markerOffset.y,
-      atlas,
-      frames: [
-        `keys/${this.attackType}`
-      ],
-      currentFrame
-    }) */
     return _this;
   }
 
@@ -32307,7 +32318,7 @@ function initialize() {
   //Add the elements to the html
   document.getElementById('BackgroundBox').appendChild(renderer.view);
 
-  PIXI.loader.add('spritesheet', "assets/eidolonSpritesheet.json").add('obstacle', "assets/src/obstacle.png").on("progress", loadProgressHandler).load(setup);
+  PIXI.loader.add('spritesheet', "assets/eidolonSpritesheet.json").on("progress", loadProgressHandler).load(setup);
 }
 
 function loadProgressHandler(loader, resource) {
