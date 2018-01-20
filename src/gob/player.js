@@ -21,6 +21,7 @@ export default class Player extends Gob {
       grounded: true,
       jumpTimer: 0,
       fallSpeed: 0,
+      hitRoughTerrain: false
     }
     this.attackLaunched = false
     this.canHitObstacle = false
@@ -68,6 +69,7 @@ export default class Player extends Gob {
     this.handleFall()
     this.handleMoveVertical()
     this.handleMoveHorizontal()
+    this.handleObstacles()
     super.update()
   }
 
@@ -145,6 +147,13 @@ export default class Player extends Gob {
     this.moveTo(this.x, this.y + this.state.fallSpeed)
     if(this.manager.level.groundLevel < this.y){
       this.moveTo(this.x, this.manager.level.groundLevel)
+    }
+  }
+
+  handleObstacles(){
+    if(this.state.hitRoughacle){
+      this.manager.level.velocity = this.manager.level.velocity - this.manager.level.velocity / 16
+      this.state.hitRoughacle = false
     }
   }
 }

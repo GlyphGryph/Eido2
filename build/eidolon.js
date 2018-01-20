@@ -31898,7 +31898,8 @@ var Player = function (_Gob) {
       jumping: false,
       grounded: true,
       jumpTimer: 0,
-      fallSpeed: 0
+      fallSpeed: 0,
+      hitRoughTerrain: false
     };
     _this.attackLaunched = false;
     _this.canHitObstacle = false;
@@ -31955,6 +31956,7 @@ var Player = function (_Gob) {
       this.handleFall();
       this.handleMoveVertical();
       this.handleMoveHorizontal();
+      this.handleObstacles();
       _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'update', this).call(this);
     }
   }, {
@@ -32042,6 +32044,14 @@ var Player = function (_Gob) {
         this.moveTo(this.x, this.manager.level.groundLevel);
       }
     }
+  }, {
+    key: 'handleObstacles',
+    value: function handleObstacles() {
+      if (this.state.hitRoughacle) {
+        this.manager.level.velocity = this.manager.level.velocity - this.manager.level.velocity / 16;
+        this.state.hitRoughacle = false;
+      }
+    }
   }]);
 
   return Player;
@@ -32089,7 +32099,7 @@ var Roughacle = function (_Obstacle) {
         if (player.state.powerMode) {
           // TODO: indicate player is powering through
         } else {
-          level.velocity = level.velocity - level.velocity / 16;
+          player.state.hitRoughacle = true;
         }
       }
 

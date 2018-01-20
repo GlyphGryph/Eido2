@@ -7,7 +7,7 @@ export default class Roughacle extends Obstacle {
       if(player.state.powerMode){
         // TODO: indicate player is powering through
       } else {
-        level.velocity = level.velocity - level.velocity / 16
+        player.state.hitRoughacle = true
       }
     }
     
