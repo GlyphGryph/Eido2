@@ -64,7 +64,6 @@ function initialize(){
 
   PIXI.loader
     .add('spritesheet', "assets/eidolonSpritesheet.json")
-    .add('obstacle', "assets/src/obstacle.png")
     .on("progress", loadProgressHandler)
     .load(setup)
 }
