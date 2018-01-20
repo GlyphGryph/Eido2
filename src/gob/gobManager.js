@@ -153,109 +153,27 @@ export default class GobManager{
     ]
   }
 
-  createRoughacle(){
-    const id = `obstacle${this.nextObstacleId}-roughacle`
+  createRoughacle(length){
     this.nextObstacleId += 1
-    this.add(
-      new Roughacle({
-        id: id+'_1',
-        stage: this.backgroundLayer,
-        x: 340,
-        y: this.level.groundLevel + 20,
-        atlas: this.spritesheet,
-        currentFrame: 0,
-        frames: [ "obstacles/roughacle" ],
-      })
-    )
-    this.add(
-      new Roughacle({
-        id: id+'_2',
-        stage: this.backgroundLayer,
-        x: 360,
-        y: this.level.groundLevel + 20,
-        atlas: this.spritesheet,
-        currentFrame: 0,
-        frames: [ "obstacles/roughacle" ],
-      })
-    )
-    this.add(
-      new Roughacle({
-        id: id+'_3',
-        stage: this.backgroundLayer,
-        x: 380,
-        y: this.level.groundLevel + 20,
-        atlas: this.spritesheet,
-        currentFrame: 0,
-        frames: [ "obstacles/roughacle" ],
-      })
-    )
-    this.add(
-      new Roughacle({
-        id: id+'_4',
-        stage: this.backgroundLayer,
-        x: 400,
-        y: this.level.groundLevel + 20,
-        atlas: this.spritesheet,
-        currentFrame: 0,
-        frames: [ "obstacles/roughacle" ],
-      })
-    )
-    this.add(
-      new Roughacle({
-        id: id+'_5',
-        stage: this.backgroundLayer,
-        x: 420,
-        y: this.level.groundLevel + 20,
-        atlas: this.spritesheet,
-        currentFrame: 0,
-        frames: [ "obstacles/roughacle" ],
-      })
-    )
-    this.add(
-      new Roughacle({
-        id: id+'_6',
-        stage: this.backgroundLayer,
-        x: 440,
-        y: this.level.groundLevel + 20,
-        atlas: this.spritesheet,
-        currentFrame: 0,
-        frames: [ "obstacles/roughacle" ],
-      })
-    )
-    this.add(
-      new Roughacle({
-        id: id+'_7',
-        stage: this.backgroundLayer,
-        x: 460,
-        y: this.level.groundLevel + 20,
-        atlas: this.spritesheet,
-        currentFrame: 0,
-        frames: [ "obstacles/roughacle" ],
-      })
-    )
-    this.add(
-      new Roughacle({
-        id: id+'_8',
-        stage: this.backgroundLayer,
-        x: 480,
-        y: this.level.groundLevel + 20,
-        atlas: this.spritesheet,
-        currentFrame: 0,
-        frames: [ "obstacles/roughacle" ],
-      })
-    )
+    for(let ii=0; ii < length; ii++){
+      const id = `obstacle${this.nextObstacleId}-roughacle${id}_${ii}`
+      this.add(
+        new Roughacle({
+          id,
+          stage: this.backgroundLayer,
+          x: 340+(ii*20),
+          y: this.level.groundLevel + 20,
+          atlas: this.spritesheet,
+          currentFrame: 0,
+          frames: [ "obstacles/roughacle" ],
+        })
+      )
+      this.level.obstacleIds = [
+        ...this.level.obstacleIds,
+        id
+      ]
+    }
 
-    this.level.obstacleIds = [
-      ...this.level.obstacleIds,
-      id+'_1',
-      id+'_2',
-      id+'_3',
-      id+'_4',
-      id+'_5',
-      id+'_6',
-      id+'_7',
-      id+'_8',
-    ]
   }
 
   // Returns distance between two gobs

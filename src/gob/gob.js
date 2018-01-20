@@ -11,7 +11,6 @@ import * as PIXI from 'pixi.js'
 //  - The frames are an array of atlas frame names
 export default class Gob{
   constructor({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin}){
-    console.log(`Creating gob ${id}`)
     this.id = id
     this.stage = stage
     this.x = x
