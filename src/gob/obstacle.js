@@ -35,4 +35,12 @@ export default class Obstacle extends Gob {
   handleCollisions(player){
     // Handled by subclasses
   }
+
+  update(){
+    this.moveTo(Math.round(this.x - this.manager.level.velocity), this.y)
+    if(this.x < 0){
+      this.manager.remove(this.id)
+    }
+    super.update()
+  }
 }

@@ -31591,7 +31591,7 @@ var GobManager = function () {
         id: id,
         stage: this.backgroundLayer,
         x: 340,
-        y: this.level.groundLevel,
+        y: this.level.groundLevel + 20,
         atlas: this.spritesheet,
         currentFrame: 0,
         frames: ["obstacles/loostacle"]
@@ -31785,12 +31785,14 @@ var Loostacle = function (_Obstacle) {
         if (player.state.powerMode && player.state.goLeft) {
           console.log('obstacle eliminated');
           this.manager.createRemnant(this.id + "_right_remnant", this.x, this.y, 10, -5, this.frames);
-          this.manager.createRemnant(this.id + "_left_remnant", this.x, this.y, -10, -5, this.frames);
+          this.manager.createRemnant(this.id + "_left_remnant", this.x, this.y, 0, -10, this.frames);
           this.manager.remove(this.id);
         } else {
           console.log('ouch! obstacle hit');
           player.state.hitLoostacle = true;
-          this.deactivate();
+          this.manager.createRemnant(this.id + "_left_remnant", this.x - 5, this.y + 12, 0, 0, this.frames);
+          this.manager.createRemnant(this.id + "_right_remnant", this.x + 5, this.y + 15, 0, 0, this.frames);
+          this.manager.remove(this.id);
         }
       }
     }
@@ -31884,6 +31886,15 @@ var Obstacle = function (_Gob) {
     key: 'handleCollisions',
     value: function handleCollisions(player) {
       // Handled by subclasses
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      this.moveTo(Math.round(this.x - this.manager.level.velocity), this.y);
+      if (this.x < 0) {
+        this.manager.remove(this.id);
+      }
+      _get(Obstacle.prototype.__proto__ || Object.getPrototypeOf(Obstacle.prototype), 'update', this).call(this);
     }
   }]);
 
@@ -32178,6 +32189,7 @@ var Remnant = function (_Gob) {
     value: function update() {
       console.log('updating remnant');
       this.moveTo(this.x + this.xMove, this.y + this.yMove);
+      this.moveTo(Math.round(this.x - this.manager.level.velocity), this.y);
       this.lifetime -= 1;
       if (this.lifetime <= 0) {
         this.manager.remove(this.id);
@@ -32256,17 +32268,17 @@ var Level = exports.Level = function () {
     _classCallCheck(this, Level);
 
     // Speed
-    this.initVelocity = 6;
+    this.initVelocity = 4;
     this.velocity = this.initVelocity;
     this.maxVelocity = 50;
     this.targetVelocity = 10;
 
     // Spawn
-    this.spawnRate = 300;
+    this.spawnRate = 100;
     this.lastSpawn = 0;
 
     // Acceleration
-    this.acceleration = 0.4;
+    this.acceleration = 0.1;
 
     // Distance
     this.initSpiritDistance = 200;
@@ -32510,62 +32522,22 @@ function runGame() {
   var figment = gobManager.get('figment');
   figment.moveTo(level.rightWall + level.spiritDistance, figment.y);
 
-  // Move Obstacles
-
-  var _loop = function _loop(obstacleId) {
-    var gob = gobManager.get(obstacleId);
-    gob.moveTo(Math.round(gob.x - level.velocity), gob.y);
-    if (gob.x < 0) {
-      gobManager.remove(gob.id);
-      level.obstacleIds = level.obstacleIds.filter(function (trackerId) {
-        return trackerId !== obstacleId;
-      });
-    }
-  };
-
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
-
-  try {
-    for (var _iterator = level.obstacleIds[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var obstacleId = _step.value;
-
-      _loop(obstacleId);
-    }
-
-    // Spawn obstacle
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
-  }
-
+  // Spawn obstacle
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     // randomize type
     if (nextObstacle === '1') {
-      gobManager.createRoughacle(12);
+      gobManager.createLoostacle();
       nextObstacle = '2';
     } else if (nextObstacle === '2') {
-      gobManager.createBarrier();
+      gobManager.createLoostacle();
       nextObstacle = '3';
     } else if (nextObstacle === '3') {
       gobManager.createLoostacle();
       nextObstacle = '4';
     } else if (nextObstacle === '4') {
-      gobManager.createBarrier();
+      gobManager.createLoostacle();
       nextObstacle = '5';
     } else {
-      gobManager.createRoughacle(16);
       gobManager.createLoostacle();
       nextObstacle = '1';
     }
@@ -32590,28 +32562,28 @@ function runGame() {
   }
 
   // Obstacle state management
-  var _iteratorNormalCompletion2 = true;
-  var _didIteratorError2 = false;
-  var _iteratorError2 = undefined;
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
 
   try {
-    for (var _iterator2 = level.obstacleIds[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-      var obstacleId = _step2.value;
+    for (var _iterator = level.obstacleIds[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var obstacleId = _step.value;
 
       var obstacle = gobManager.get(obstacleId);
       obstacle.handleCollisions(player);
     }
   } catch (err) {
-    _didIteratorError2 = true;
-    _iteratorError2 = err;
+    _didIteratorError = true;
+    _iteratorError = err;
   } finally {
     try {
-      if (!_iteratorNormalCompletion2 && _iterator2.return) {
-        _iterator2.return();
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
       }
     } finally {
-      if (_didIteratorError2) {
-        throw _iteratorError2;
+      if (_didIteratorError) {
+        throw _iteratorError;
       }
     }
   }

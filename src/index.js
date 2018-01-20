@@ -178,35 +178,22 @@ function runGame(){
   const figment = gobManager.get('figment')
   figment.moveTo(level.rightWall + level.spiritDistance, figment.y)
 
-  // Move Obstacles
-  for(const obstacleId of level.obstacleIds){
-    let gob = gobManager.get(obstacleId)
-    gob.moveTo(Math.round(gob.x - level.velocity), gob.y)
-    if(gob.x < 0){
-      gobManager.remove(gob.id)
-      level.obstacleIds = level.obstacleIds.filter( (trackerId) =>{
-        return trackerId !== obstacleId
-      })
-    }
-  }
-
   // Spawn obstacle
   if(level.distanceTraveled > (level.lastSpawn + level.spawnRate)){
     // randomize type
     if(nextObstacle === '1'){
-      gobManager.createRoughacle(12)
+      gobManager.createLoostacle()
       nextObstacle = '2'
     }else if(nextObstacle === '2'){
-      gobManager.createBarrier()
+      gobManager.createLoostacle()
       nextObstacle = '3'
     }else if(nextObstacle === '3'){
       gobManager.createLoostacle()
       nextObstacle = '4'
     }else if(nextObstacle === '4'){
-      gobManager.createBarrier()
+      gobManager.createLoostacle()
       nextObstacle = '5'
     }else{
-      gobManager.createRoughacle(16)
       gobManager.createLoostacle()
       nextObstacle = '1'
     }
