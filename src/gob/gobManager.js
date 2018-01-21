@@ -195,7 +195,7 @@ export default class GobManager{
     }
   }
 
-  createRemnant(id, x, y, xMove, yMove, frames){
+  createRemnant(id, x, y, xMove, yMove, rotation, frames){
     this.add(
       new Remnant({
         id,
@@ -206,6 +206,7 @@ export default class GobManager{
         yMove,
         lifetime: 10,
         atlas: this.spritesheet,
+        rotation,
         currentFrame: 0,
         frames,
       })

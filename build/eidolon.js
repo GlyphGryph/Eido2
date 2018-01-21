@@ -31238,9 +31238,9 @@ var Barrier = function (_Obstacle) {
       if (this.active && this.checkCollisionWith(player)) {
         if (player.state.powerMode && player.state.goRight) {
           console.log('obstacle eliminated');
-          this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y, -10, -5, ["obstacles/brokenBarrier/top"]);
-          this.manager.createRemnant(this.id + "_middle_remnant", this.x, this.y + 80, 20, 0, ["obstacles/brokenBarrier/middle"]);
-          this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y + 141, 0, 0, ["obstacles/brokenBarrier/base"]);
+          this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y + 40, 10, -5, 0.3, ["obstacles/brokenBarrier/top"]);
+          this.manager.createRemnant(this.id + "_middle_remnant", this.x, this.y + 110, 20, 0, -0.2, ["obstacles/brokenBarrier/middle"]);
+          this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y + 150, 0, 0, 0, ["obstacles/brokenBarrier/base"]);
           this.manager.remove(this.id);
         } else {
           console.log('ouch! obstacle hit');
@@ -31635,7 +31635,7 @@ var GobManager = function () {
     }
   }, {
     key: 'createRemnant',
-    value: function createRemnant(id, x, y, xMove, yMove, frames) {
+    value: function createRemnant(id, x, y, xMove, yMove, rotation, frames) {
       this.add(new _.Remnant({
         id: id,
         stage: this.backgroundLayer,
@@ -31645,6 +31645,7 @@ var GobManager = function () {
         yMove: yMove,
         lifetime: 10,
         atlas: this.spritesheet,
+        rotation: rotation,
         currentFrame: 0,
         frames: frames
       }));
@@ -32169,6 +32170,7 @@ var Remnant = function (_Gob) {
         xMin = _ref.xMin,
         xMove = _ref.xMove,
         yMove = _ref.yMove,
+        rotation = _ref.rotation,
         lifetime = _ref.lifetime;
 
     _classCallCheck(this, Remnant);
@@ -32180,17 +32182,20 @@ var Remnant = function (_Gob) {
 
 
     _this.lifetime = lifetime;
+    _this.rotation = rotation;
     _this.xMove = xMove;
     _this.yMove = yMove;
+    _this.sprite.anchor.set(0.5);
     return _this;
   }
 
   _createClass(Remnant, [{
     key: 'update',
     value: function update() {
-      console.log('updating remnant');
+      console.log('updating remnant, rotation ' + this.sprite.rotation);
       this.moveTo(this.x + this.xMove, this.y + this.yMove);
       this.moveTo(Math.round(this.x - this.manager.level.velocity), this.y);
+      this.sprite.rotation = this.sprite.rotation + this.rotation;
       this.lifetime -= 1;
       if (this.lifetime <= 0) {
         this.manager.remove(this.id);
