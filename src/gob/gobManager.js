@@ -161,10 +161,10 @@ export default class GobManager{
         id,
         stage: this.backgroundLayer,
         x: 340,
-        y: this.level.groundLevel,
+        y: this.level.groundLevel - 110,
         atlas: this.spritesheet,
         currentFrame: 0,
-        frames: [ "obstacles/obstacle" ],
+        frames: [ "obstacles/barrier" ],
       })
     )
     this.level.obstacleIds = [

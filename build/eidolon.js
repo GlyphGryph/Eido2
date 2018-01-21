@@ -31238,8 +31238,9 @@ var Barrier = function (_Obstacle) {
       if (this.active && this.checkCollisionWith(player)) {
         if (player.state.powerMode && player.state.goRight) {
           console.log('obstacle eliminated');
-          this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y, -10, -5, this.frames);
-          this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y, 20, 0, this.frames);
+          this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y, -10, -5, ["obstacles/brokenBarrier/top"]);
+          this.manager.createRemnant(this.id + "_middle_remnant", this.x, this.y + 80, 20, 0, ["obstacles/brokenBarrier/middle"]);
+          this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y + 141, 0, 0, ["obstacles/brokenBarrier/base"]);
           this.manager.remove(this.id);
         } else {
           console.log('ouch! obstacle hit');
@@ -31607,10 +31608,10 @@ var GobManager = function () {
         id: id,
         stage: this.backgroundLayer,
         x: 340,
-        y: this.level.groundLevel,
+        y: this.level.groundLevel - 110,
         atlas: this.spritesheet,
         currentFrame: 0,
-        frames: ["obstacles/obstacle"]
+        frames: ["obstacles/barrier"]
       }));
       this.level.obstacleIds = [].concat(_toConsumableArray(this.level.obstacleIds), [id]);
     }
@@ -32526,19 +32527,19 @@ function runGame() {
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     // randomize type
     if (nextObstacle === '1') {
-      gobManager.createLoostacle();
+      gobManager.createBarrier();
       nextObstacle = '2';
     } else if (nextObstacle === '2') {
-      gobManager.createLoostacle();
+      gobManager.createBarrier();
       nextObstacle = '3';
     } else if (nextObstacle === '3') {
-      gobManager.createLoostacle();
+      gobManager.createBarrier();
       nextObstacle = '4';
     } else if (nextObstacle === '4') {
-      gobManager.createLoostacle();
+      gobManager.createBarrier();
       nextObstacle = '5';
     } else {
-      gobManager.createLoostacle();
+      gobManager.createBarrier();
       nextObstacle = '1';
     }
     level.lastSpawn = level.distanceTraveled;
