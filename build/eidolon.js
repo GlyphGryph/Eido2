@@ -31236,7 +31236,7 @@ var Barrier = function (_Obstacle) {
     key: 'handleCollisions',
     value: function handleCollisions(player) {
       if (this.active && this.checkCollisionWith(player)) {
-        if (player.state.powerMode && player.state.goRight) {
+        if (player.shouldPowerBreak()) {
           console.log('obstacle eliminated');
           this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y, 10, 5, 0.2, ["obstacles/brokenBarrier/top"]);
           this.manager.createRemnant(this.id + "_middle_remnant", this.x, this.y + 80, 20, 0, -0.2, ["obstacles/brokenBarrier/middle"]);
@@ -31340,7 +31340,6 @@ var Gob = function () {
   }, {
     key: 'terminate',
     value: function terminate() {
-      console.log('terminated ' + this.id);
       this.stage.removeChild(this.sprite);
     }
   }, {
@@ -31378,6 +31377,14 @@ var Gob = function () {
       }
       this.previous.x = this.x;
       this.previous.y = this.y;
+    }
+  }, {
+    key: 'setFrames',
+    value: function setFrames(frames) {
+      if (this.frames !== frames) {
+        this.frames = frames;
+        this.currentFrame = 0;
+      }
     }
 
     // These are calculated based on current and previous position
@@ -31549,8 +31556,6 @@ var GobManager = function () {
         x: this.playerStartingX,
         y: this.level.groundLevel,
         atlas: this.spritesheet,
-        frames: ["oval/run/00", "oval/run/01", "oval/run/02", "oval/run/03"],
-        currentFrame: 0,
         xMax: this.level.rightWall,
         xMin: this.level.leftWall
       }));
@@ -31564,7 +31569,7 @@ var GobManager = function () {
         x: this.playerStartingX + shadowBaseOffset.x,
         y: this.level.groundLevel + shadowBaseOffset.y,
         atlas: this.spritesheet,
-        frames: ["oval/run/shadow/00", "oval/run/shadow/01", "oval/run/shadow/02", "oval/run/shadow/03"],
+        frames: ["oval/run/shadow/03"],
         currentFrame: 0
       });
       shadow.baseOffset = shadowBaseOffset;
@@ -31784,7 +31789,7 @@ var Loostacle = function (_Obstacle) {
     key: 'handleCollisions',
     value: function handleCollisions(player) {
       if (this.active && this.checkCollisionWith(player)) {
-        if (player.state.powerMode && player.state.goLeft) {
+        if (player.shouldPowerToss()) {
           console.log('obstacle eliminated');
           this.manager.createRemnant(this.id + "_right_remnant", this.x, this.y, 10, -5, 0.5, ["obstacles/brokenLoostacle/02"]);
           this.manager.createRemnant(this.id + "_left_remnant", this.x, this.y, 0, -10, -0.5, ["obstacles/brokenLoostacle/01"]);
@@ -31906,7 +31911,7 @@ var Obstacle = function (_Gob) {
 exports.default = Obstacle;
 
 },{"./gob":173}],178:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -31916,7 +31921,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _gob = require('./gob');
+var _gob = require("./gob");
 
 var _gob2 = _interopRequireDefault(_gob);
 
@@ -31938,15 +31943,21 @@ var Player = function (_Gob) {
         y = _ref.y,
         atlas = _ref.atlas,
         texture = _ref.texture,
-        frames = _ref.frames,
-        currentFrame = _ref.currentFrame,
         xMax = _ref.xMax,
-        xMin = _ref.xMin,
-        shadowFrames = _ref.shadowFrames;
+        xMin = _ref.xMin;
 
     _classCallCheck(this, Player);
 
+    var frames = ["oval/run/00", "oval/run/01", "oval/run/02", "oval/run/03"];
+    var currentFrame = 0;
+
     var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, { id: id, stage: stage, x: x, y: y, atlas: atlas, texture: texture, frames: frames, currentFrame: currentFrame, xMax: xMax, xMin: xMin }));
+
+    _this.runFrames = frames;
+    _this.powerFrames = ["oval/power/01", "oval/power/02"], _this.readyJumpFrames = ["oval/air/01"];
+    _this.jumpFrames = ["oval/air/02"];
+    _this.crestJumpFrames = ["oval/air/03"];
+    _this.fallFrames = ["oval/air/04"];
 
     _this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
     _this.readyMarkerVisible = false;
@@ -31979,17 +31990,17 @@ var Player = function (_Gob) {
   }
 
   _createClass(Player, [{
-    key: 'initialize',
+    key: "initialize",
     value: function initialize(manager) {
-      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'initialize', this).call(this, manager);
+      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "initialize", this).call(this, manager);
     }
   }, {
-    key: 'terminate',
+    key: "terminate",
     value: function terminate() {
-      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'terminate', this).call(this);
+      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "terminate", this).call(this);
     }
   }, {
-    key: 'showReadyMarker',
+    key: "showReadyMarker",
     value: function showReadyMarker() {
       if (!this.readyMarkerVisible) {
         this.readyMarkerVisible = true;
@@ -31997,7 +32008,7 @@ var Player = function (_Gob) {
       }
     }
   }, {
-    key: 'hideReadyMarker',
+    key: "hideReadyMarker",
     value: function hideReadyMarker() {
       if (this.readyMarkerVisible) {
         this.readyMarkerVisible = false;
@@ -32005,19 +32016,29 @@ var Player = function (_Gob) {
       }
     }
   }, {
-    key: 'moveTo',
+    key: "moveTo",
     value: function moveTo(x, y) {
-      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'moveTo', this).call(this, x, y);
+      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "moveTo", this).call(this, x, y);
       this.readyMarkerText.position.x = x + this.readyMarkerOffset.x;
       this.readyMarkerText.position.y = y + this.readyMarkerOffset.y;
     }
   }, {
-    key: 'shouldAccelerate',
+    key: "shouldAccelerate",
     value: function shouldAccelerate() {
       return this.state.grounded && !this.state.powerMode;
     }
   }, {
-    key: 'update',
+    key: "shouldPowerToss",
+    value: function shouldPowerToss() {
+      return this.state.powerMode && this.state.goLeft && !this.state.goRight;
+    }
+  }, {
+    key: "shouldPowerBreak",
+    value: function shouldPowerBreak() {
+      return this.state.powerMode && this.state.goRight && !this.state.goLeft;
+    }
+  }, {
+    key: "update",
     value: function update() {
       this.handlePower();
       this.handleJump();
@@ -32025,10 +32046,28 @@ var Player = function (_Gob) {
       this.handleMoveVertical();
       this.handleMoveHorizontal();
       this.handleObstacles();
-      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'update', this).call(this);
+      this.selectFrames();
+      _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "update", this).call(this);
     }
   }, {
-    key: 'handlePower',
+    key: "selectFrames",
+    value: function selectFrames() {
+      if (this.state.powerMode) {
+        this.setFrames(this.powerFrames);
+      } else if (this.state.grounded) {
+        this.setFrames(this.runFrames);
+      } else {
+        if (this.state.jumping) {
+          this.setFrames(this.jumpFrames);
+        } else if (this.state.fallSpeed <= 0) {
+          this.setFrames(this.crestJumpFrames);
+        } else {
+          this.setFrames(this.fallFrames);
+        }
+      }
+    }
+  }, {
+    key: "handlePower",
     value: function handlePower() {
       if (this.state.powerMode) {
         if (!this.state.goPower) {
@@ -32044,13 +32083,13 @@ var Player = function (_Gob) {
       }
     }
   }, {
-    key: 'cancelJump',
+    key: "cancelJump",
     value: function cancelJump() {
       this.state.jumping = false;
       this.state.jumpTimer = 0;
     }
   }, {
-    key: 'handleJump',
+    key: "handleJump",
     value: function handleJump() {
       // If we are in the goUp state while on the ground, jump
       if (this.state.goUp && this.state.grounded && !this.state.powerMode) {
@@ -32076,7 +32115,7 @@ var Player = function (_Gob) {
       }
     }
   }, {
-    key: 'handleFall',
+    key: "handleFall",
     value: function handleFall() {
       if (!this.state.jumping && this.manager.level.groundLevel <= this.y) {
         this.state.grounded = true;
@@ -32094,7 +32133,7 @@ var Player = function (_Gob) {
     // Handle Left/Right movement
 
   }, {
-    key: 'handleMoveHorizontal',
+    key: "handleMoveHorizontal",
     value: function handleMoveHorizontal() {
       if (this.state.powerMode || this.state.goLeft && this.state.goRight) {
         // Do nothing
@@ -32105,7 +32144,7 @@ var Player = function (_Gob) {
       }
     }
   }, {
-    key: 'handleMoveVertical',
+    key: "handleMoveVertical",
     value: function handleMoveVertical() {
       this.moveTo(this.x, this.y + this.state.fallSpeed);
       if (this.manager.level.groundLevel < this.y) {
@@ -32113,7 +32152,7 @@ var Player = function (_Gob) {
       }
     }
   }, {
-    key: 'handleObstacles',
+    key: "handleObstacles",
     value: function handleObstacles() {
       if (this.state.hitRoughacle) {
         this.manager.level.velocity = this.manager.level.velocity - this.manager.level.velocity / 16;
@@ -32194,7 +32233,6 @@ var Remnant = function (_Gob) {
   _createClass(Remnant, [{
     key: 'update',
     value: function update() {
-      console.log('updating remnant, rotation ' + this.sprite.rotation);
       this.moveTo(this.x + this.xMove, this.y + this.yMove);
       this.moveTo(Math.round(this.x - this.manager.level.velocity), this.y);
       this.sprite.rotation = this.sprite.rotation + this.rotation;
@@ -32621,7 +32659,7 @@ function runGame() {
     debugText += 'Position: ' + player.x + '/' + player.y + ' \n';
     debugText += 'Actions: ' + mode + '\n';
     debugText += 'Is grounded? ' + player.state.grounded + ' | jumpTimer: ' + player.state.jumpTimer + ' | Fall speed: ' + Math.round(player.state.fallSpeed) + '\n';
-    debugText += 'Power pressed?: ' + player.state.goPower + '\n';
+    debugText += 'Pressed?: Power: ' + player.state.goPower + ' | goLeft: ' + player.state.goLeft + ' | goRight: ' + player.state.goRight + ' | goUp: ' + player.state.goUp + '\n';
     debugText += 'Game time: ' + Math.round(level.time / fps) + 's \n';
     debugText += 'Level speed: ' + Math.round(level.velocity * 100) + '\n';
     debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.distanceTraveled) + '\n';

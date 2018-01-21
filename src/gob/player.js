@@ -1,8 +1,34 @@
 import Gob from './gob'
 
 export default class Player extends Gob {
-  constructor({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin, shadowFrames}){
+  constructor({id, stage, x, y, atlas, texture, xMax, xMin}){
+    const frames = [
+      "oval/run/00",
+      "oval/run/01",
+      "oval/run/02",
+      "oval/run/03",
+    ]
+    const currentFrame = 0
     super({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin})
+    
+    this.runFrames = frames
+    this.powerFrames = [
+      "oval/power/01",
+      "oval/power/02",
+    ],
+    this.readyJumpFrames = [
+      "oval/air/01",
+    ]
+    this.jumpFrames = [
+      "oval/air/02",
+    ]
+    this.crestJumpFrames = [
+      "oval/air/03",
+    ]
+    this.fallFrames = [
+      "oval/air/04",
+    ]
+
     this.readyMarkerText = new PIXI.Text('!', { font: '35px Snippet', fill: 'black', align: 'left' });
     this.readyMarkerVisible = false
     this.buffer = 10
@@ -64,6 +90,14 @@ export default class Player extends Gob {
     return this.state.grounded && !this.state.powerMode
   }
 
+  shouldPowerToss(){
+    return this.state.powerMode && this.state.goLeft && !this.state.goRight
+  }
+
+  shouldPowerBreak(){
+    return this.state.powerMode && this.state.goRight && !this.state.goLeft
+  }
+
   update(){
     this.handlePower()
     this.handleJump()
@@ -71,7 +105,24 @@ export default class Player extends Gob {
     this.handleMoveVertical()
     this.handleMoveHorizontal()
     this.handleObstacles()
+    this.selectFrames()
     super.update()
+  }
+
+  selectFrames(){
+    if(this.state.powerMode){
+      this.setFrames(this.powerFrames)
+    }else if(this.state.grounded){
+      this.setFrames(this.runFrames)
+    }else{
+      if(this.state.jumping){
+        this.setFrames(this.jumpFrames)
+      }else if(this.state.fallSpeed <= 0){
+        this.setFrames(this.crestJumpFrames)
+      }else{
+        this.setFrames(this.fallFrames)
+      }
+    }
   }
 
   handlePower(){

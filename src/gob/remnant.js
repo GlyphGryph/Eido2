@@ -16,7 +16,6 @@ export default class Remnant extends Gob {
   }
 
   update(){
-    console.log('updating remnant, rotation '+this.sprite.rotation)
     this.moveTo(this.x + this.xMove, this.y + this.yMove)
     this.moveTo(Math.round(this.x - this.manager.level.velocity), this.y)
     this.sprite.rotation = this.sprite.rotation + this.rotation

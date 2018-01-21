@@ -247,7 +247,7 @@ function runGame(){
     debugText += `Position: ${player.x}/${player.y} \n`
     debugText += `Actions: ${mode}\n`
     debugText += `Is grounded? ${player.state.grounded} | jumpTimer: ${player.state.jumpTimer} | Fall speed: ${Math.round(player.state.fallSpeed)}\n`
-    debugText += `Power pressed?: ${player.state.goPower}\n`
+    debugText += `Pressed?: Power: ${player.state.goPower} | goLeft: ${player.state.goLeft} | goRight: ${player.state.goRight} | goUp: ${player.state.goUp}\n`
     debugText += `Game time: ${Math.round(level.time/fps)}s \n`
     debugText += `Level speed: ${Math.round(level.velocity*100)}\n`
     debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.distanceTraveled)}\n`

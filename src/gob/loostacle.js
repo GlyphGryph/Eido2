@@ -3,7 +3,7 @@ import Obstacle from './obstacle'
 export default class Loostacle extends Obstacle {
   handleCollisions(player){
     if(this.active && this.checkCollisionWith(player)){
-      if(player.state.powerMode && player.state.goLeft){
+      if(player.shouldPowerToss()){
         console.log('obstacle eliminated')
         this.manager.createRemnant(this.id+"_right_remnant", this.x, this.y, 10, -5, 0.5, ["obstacles/brokenLoostacle/02"])
         this.manager.createRemnant(this.id+"_left_remnant", this.x, this.y, 0, -10, -0.5, ["obstacles/brokenLoostacle/01"])

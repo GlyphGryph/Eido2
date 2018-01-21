@@ -51,7 +51,6 @@ export default class Gob{
   }
 
   terminate(){
-    console.log('terminated '+this.id)
     this.stage.removeChild(this.sprite)
   }
 
@@ -85,6 +84,13 @@ export default class Gob{
     }
     this.previous.x = this.x
     this.previous.y = this.y
+  }
+
+  setFrames(frames){
+    if(this.frames !== frames){
+      this.frames = frames
+      this.currentFrame = 0
+    }
   }
 
   // These are calculated based on current and previous position

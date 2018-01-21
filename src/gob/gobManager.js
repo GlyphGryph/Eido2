@@ -76,13 +76,6 @@ export default class GobManager{
         x: this.playerStartingX,
         y: this.level.groundLevel,
         atlas: this.spritesheet,
-        frames: [
-          "oval/run/00",
-          "oval/run/01",
-          "oval/run/02",
-          "oval/run/03"
-        ],
-        currentFrame: 0,
         xMax: this.level.rightWall,
         xMin: this.level.leftWall
       })
@@ -98,10 +91,7 @@ export default class GobManager{
       y: this.level.groundLevel + shadowBaseOffset.y,
       atlas: this.spritesheet,
       frames: [
-        "oval/run/shadow/00",
-        "oval/run/shadow/01",
-        "oval/run/shadow/02",
-        "oval/run/shadow/03"
+        "oval/run/shadow/03",
       ],
       currentFrame: 0,
     })
