@@ -253,6 +253,7 @@ function runGame(){
     debugText += `Obstacle next spawn: ${Math.round((level.spawnRate+level.lastSpawn)-level.distanceTraveled)}\n`
     debugText += `Distance traveled: ${Math.round(level.distanceTraveled)}\n`
     debugText += `Distance from spirit: ${Math.round(level.spiritDistance)}\n`
+    debugText += `Knockback: ${player.state.knockedBack} | ${player.state.knockbackTimer}\n`
     debugInfo.text = debugText
   } else {
     debugInfo.text = ""

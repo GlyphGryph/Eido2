@@ -31244,7 +31244,7 @@ var Barrier = function (_Obstacle) {
           this.manager.remove(this.id);
         } else {
           console.log('ouch! obstacle hit');
-          player.state.hitLoostacle = true;
+          player.state.hitBarrier = true;
           this.deactivate();
         }
       }
@@ -31977,8 +31977,12 @@ var Player = function (_Gob) {
       grounded: true,
       jumpTimer: 0,
       fallSpeed: 0,
-      hitRoughTerrain: false,
-      hitLoostacle: false
+      hitRoughacle: false,
+      hitLoostacle: false,
+      hitBarrier: false,
+      wasHit: false,
+      knockedBack: false,
+      knockbackTimer: 0
     };
     _this.attackLaunched = false;
     _this.canHitObstacle = false;
@@ -32038,6 +32042,15 @@ var Player = function (_Gob) {
       return this.state.powerMode && this.state.goRight && !this.state.goLeft;
     }
   }, {
+    key: "knockback",
+    value: function knockback() {
+      this.state.knockedBack = true;
+      this.state.knockbackTimer = 4;
+      this.state.grounded = false;
+      this.cancelJump();
+      this.state.fallSpeed = -this.weight * 4;
+    }
+  }, {
     key: "update",
     value: function update() {
       this.handlePower();
@@ -32046,8 +32059,19 @@ var Player = function (_Gob) {
       this.handleMoveVertical();
       this.handleMoveHorizontal();
       this.handleObstacles();
+      this.handleKnockback();
       this.selectFrames();
       _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "update", this).call(this);
+    }
+  }, {
+    key: "handleKnockback",
+    value: function handleKnockback() {
+      if (this.state.knockedBack) {
+        this.state.knockbackTimer -= 1;
+      }
+      if (this.state.knockbackTimer <= 0) {
+        this.state.knockedBack = false;
+      }
     }
   }, {
     key: "selectFrames",
@@ -32117,7 +32141,7 @@ var Player = function (_Gob) {
   }, {
     key: "handleFall",
     value: function handleFall() {
-      if (!this.state.jumping && this.manager.level.groundLevel <= this.y) {
+      if (!this.state.jumping && this.manager.level.groundLevel <= this.y && this.state.fallSpeed >= 0) {
         this.state.grounded = true;
       }
       if (this.state.grounded) {
@@ -32135,7 +32159,9 @@ var Player = function (_Gob) {
   }, {
     key: "handleMoveHorizontal",
     value: function handleMoveHorizontal() {
-      if (this.state.powerMode || this.state.goLeft && this.state.goRight) {
+      if (this.state.knockedBack > 0) {
+        this.moveTo(this.x - this.standardStep / 2, this.y);
+      } else if (this.state.powerMode || this.state.goLeft && this.state.goRight) {
         // Do nothing
       } else if (this.state.goLeft) {
         this.moveTo(this.x - this.standardStep, this.y);
@@ -32159,8 +32185,14 @@ var Player = function (_Gob) {
         this.state.hitRoughacle = false;
       }
       if (this.state.hitLoostacle) {
+        this.knockback();
         this.manager.level.velocity = this.manager.level.velocity / 2;
         this.state.hitLoostacle = false;
+      }
+      if (this.state.hitBarrier) {
+        this.knockback();
+        this.manager.level.velocity = this.manager.level.velocity / 2;
+        this.state.hitBarrier = false;
       }
     }
   }]);
@@ -32665,6 +32697,7 @@ function runGame() {
     debugText += 'Obstacle next spawn: ' + Math.round(level.spawnRate + level.lastSpawn - level.distanceTraveled) + '\n';
     debugText += 'Distance traveled: ' + Math.round(level.distanceTraveled) + '\n';
     debugText += 'Distance from spirit: ' + Math.round(level.spiritDistance) + '\n';
+    debugText += 'Knockback: ' + player.state.knockedBack + ' | ' + player.state.knockbackTimer + '\n';
     debugInfo.text = debugText;
   } else {
     debugInfo.text = "";

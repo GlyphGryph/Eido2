@@ -47,8 +47,12 @@ export default class Player extends Gob {
       grounded: true,
       jumpTimer: 0,
       fallSpeed: 0,
-      hitRoughTerrain: false,
+      hitRoughacle: false,
       hitLoostacle: false,
+      hitBarrier: false,
+      wasHit: false,
+      knockedBack: false,
+      knockbackTimer: 0,
     }
     this.attackLaunched = false
     this.canHitObstacle = false
@@ -98,6 +102,14 @@ export default class Player extends Gob {
     return this.state.powerMode && this.state.goRight && !this.state.goLeft
   }
 
+  knockback(){
+    this.state.knockedBack = true
+    this.state.knockbackTimer = 4
+    this.state.grounded = false
+    this.cancelJump()
+    this.state.fallSpeed = -this.weight * 4
+  }
+
   update(){
     this.handlePower()
     this.handleJump()
@@ -105,8 +117,18 @@ export default class Player extends Gob {
     this.handleMoveVertical()
     this.handleMoveHorizontal()
     this.handleObstacles()
+    this.handleKnockback()
     this.selectFrames()
     super.update()
+  }
+  
+  handleKnockback(){
+    if(this.state.knockedBack){
+      this.state.knockbackTimer -= 1
+    }
+    if(this.state.knockbackTimer <= 0){
+      this.state.knockedBack = false
+    }
   }
 
   selectFrames(){
@@ -171,7 +193,7 @@ export default class Player extends Gob {
   }
   
   handleFall(){
-    if(!this.state.jumping && this.manager.level.groundLevel <= this.y){
+    if(!this.state.jumping && this.manager.level.groundLevel <= this.y && this.state.fallSpeed >= 0){
       this.state.grounded = true
     }
     if(this.state.grounded){
@@ -186,11 +208,13 @@ export default class Player extends Gob {
   
   // Handle Left/Right movement
   handleMoveHorizontal(){
-    if(this.state.powerMode || (this.state.goLeft && this.state.goRight)){
+    if(this.state.knockedBack > 0){
+      this.moveTo(this.x - this.standardStep/2, this.y)
+    }else if(this.state.powerMode || (this.state.goLeft && this.state.goRight)){
       // Do nothing
-    } else if(this.state.goLeft){
+    }else if(this.state.goLeft){
       this.moveTo(this.x - this.standardStep, this.y)
-    } else if(this.state.goRight){
+    }else if(this.state.goRight){
       this.moveTo(this.x + this.standardStep, this.y)
     }
   }
@@ -208,8 +232,14 @@ export default class Player extends Gob {
       this.state.hitRoughacle = false
     }
     if(this.state.hitLoostacle){
+      this.knockback()
       this.manager.level.velocity = this.manager.level.velocity / 2
       this.state.hitLoostacle = false
+    }
+    if(this.state.hitBarrier){
+      this.knockback()
+      this.manager.level.velocity = this.manager.level.velocity / 2
+      this.state.hitBarrier = false
     }
   }
 }

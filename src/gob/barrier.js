@@ -11,7 +11,7 @@ export default class Barrier extends Obstacle {
         this.manager.remove(this.id)
       }else{
         console.log('ouch! obstacle hit')
-        player.state.hitLoostacle = true
+        player.state.hitBarrier = true
         this.deactivate()
       }
     }
