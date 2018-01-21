@@ -11,6 +11,8 @@ export default class Remnant extends Gob {
     this.xMove = xMove
     this.yMove = yMove
     this.sprite.anchor.set(0.5)
+    this.y = this.y + this.sprite.height / 2
+    this.x = this.x + this.sprite.width / 2
   }
 
   update(){

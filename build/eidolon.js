@@ -31238,9 +31238,9 @@ var Barrier = function (_Obstacle) {
       if (this.active && this.checkCollisionWith(player)) {
         if (player.state.powerMode && player.state.goRight) {
           console.log('obstacle eliminated');
-          this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y + 40, 10, -5, 0.3, ["obstacles/brokenBarrier/top"]);
-          this.manager.createRemnant(this.id + "_middle_remnant", this.x, this.y + 110, 20, 0, -0.2, ["obstacles/brokenBarrier/middle"]);
-          this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y + 150, 0, 0, 0, ["obstacles/brokenBarrier/base"]);
+          this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y, 10, 5, 0.2, ["obstacles/brokenBarrier/top"]);
+          this.manager.createRemnant(this.id + "_middle_remnant", this.x, this.y + 80, 20, 0, -0.2, ["obstacles/brokenBarrier/middle"]);
+          this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y + 141, 0, 0, 0, ["obstacles/brokenBarrier/base"]);
           this.manager.remove(this.id);
         } else {
           console.log('ouch! obstacle hit');
@@ -31786,14 +31786,14 @@ var Loostacle = function (_Obstacle) {
       if (this.active && this.checkCollisionWith(player)) {
         if (player.state.powerMode && player.state.goLeft) {
           console.log('obstacle eliminated');
-          this.manager.createRemnant(this.id + "_right_remnant", this.x, this.y, 10, -5, ["obstacles/brokenLoostacle/02"]);
-          this.manager.createRemnant(this.id + "_left_remnant", this.x, this.y, 0, -10, ["obstacles/brokenLoostacle/01"]);
+          this.manager.createRemnant(this.id + "_right_remnant", this.x, this.y, 10, -5, 0.5, ["obstacles/brokenLoostacle/02"]);
+          this.manager.createRemnant(this.id + "_left_remnant", this.x, this.y, 0, -10, -0.5, ["obstacles/brokenLoostacle/01"]);
           this.manager.remove(this.id);
         } else {
           console.log('ouch! obstacle hit');
           player.state.hitLoostacle = true;
-          this.manager.createRemnant(this.id + "_left_remnant", this.x - 5, this.y + 12, 0, 0, ["obstacles/brokenLoostacle/01"]);
-          this.manager.createRemnant(this.id + "_right_remnant", this.x + 5, this.y + 15, 0, 0, ["obstacles/brokenLoostacle/02"]);
+          this.manager.createRemnant(this.id + "_left_remnant", this.x - 5, this.y + 12, 0, 0, 0, ["obstacles/brokenLoostacle/01"]);
+          this.manager.createRemnant(this.id + "_right_remnant", this.x + 5, this.y + 15, 0, 0, 0, ["obstacles/brokenLoostacle/02"]);
           this.manager.remove(this.id);
         }
       }
@@ -32186,6 +32186,8 @@ var Remnant = function (_Gob) {
     _this.xMove = xMove;
     _this.yMove = yMove;
     _this.sprite.anchor.set(0.5);
+    _this.y = _this.y + _this.sprite.height / 2;
+    _this.x = _this.x + _this.sprite.width / 2;
     return _this;
   }
 
@@ -32532,13 +32534,13 @@ function runGame() {
   if (level.distanceTraveled > level.lastSpawn + level.spawnRate) {
     // randomize type
     if (nextObstacle === '1') {
-      gobManager.createBarrier();
+      gobManager.createLoostacle();
       nextObstacle = '2';
     } else if (nextObstacle === '2') {
-      gobManager.createBarrier();
+      gobManager.createLoostacle();
       nextObstacle = '3';
     } else if (nextObstacle === '3') {
-      gobManager.createBarrier();
+      gobManager.createLoostacle();
       nextObstacle = '4';
     } else if (nextObstacle === '4') {
       gobManager.createBarrier();
