@@ -8,6 +8,8 @@ export default class Obstacle extends Gob {
     super({id, stage, x, y, atlas, texture, frames, currentFrame, xMax, xMin})
     
     this.active = true
+    this.destroyedByHit = false
+    this.destroyedByPower = false
   }
 
   deactivate(){
@@ -15,9 +17,6 @@ export default class Obstacle extends Gob {
   }
 
   terminate(){
-    this.manager.level.obstacleIds = this.manager.level.obstacleIds.filter( (trackerId) =>{
-      return trackerId !== this.id
-    })
     super.terminate()
   }
 

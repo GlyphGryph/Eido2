@@ -4,16 +4,27 @@ export default class Barrier extends Obstacle {
   handleCollisions(player){
     if(this.active && this.checkCollisionWith(player)){
       if(player.shouldPowerBreak()){
-        console.log('obstacle eliminated')
-        this.manager.createRemnant(this.id+"_top_remnant", this.x, this.y, 10, 5, 0.2, ["obstacles/brokenBarrier/top"])
-        this.manager.createRemnant(this.id+"_middle_remnant", this.x, this.y + 80, 20, 0, -0.2, ["obstacles/brokenBarrier/middle"])
-        this.manager.createRemnant(this.id+"_bottom_remnant", this.x, this.y + 141, 0, 0, 0, ["obstacles/brokenBarrier/base"])
-        this.manager.remove(this.id)
+        this.destroyedByPower = true
       }else{
-        console.log('ouch! obstacle hit')
-        player.state.hitBarrier = true
-        this.deactivate()
+        this.destroyedByHit = true
+        player.state.hitLoostacle = true
       }
     }
   }
+
+  update(){
+    if(this.destroyedByHit){
+      console.log(`ouch! obstacle ${this.id} hit`)
+      this.manager.remove(this.id)
+    }else if(this.destroyedByPower){
+      console.log(`obstacle ${this.id} eliminated`)
+      this.manager.createRemnant(this.id+"_top_remnant", this.x, this.y, 10, 5, 0.2, ["obstacles/brokenBarrier/top"])
+      this.manager.createRemnant(this.id+"_middle_remnant", this.x, this.y + 80, 20, 0, -0.2, ["obstacles/brokenBarrier/middle"])
+      this.manager.createRemnant(this.id+"_bottom_remnant", this.x, this.y + 141, 0, 0, 0, ["obstacles/brokenBarrier/base"])
+      this.manager.remove(this.id)
+    }else{
+      super.update()
+    }
+  }
+
 }

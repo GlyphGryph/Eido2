@@ -15,6 +15,7 @@ export default class GobManager{
     this.gobs = []
     this.playerStartingX = 100
     this.nextObstacleId = 0
+    this.obstacles = []
   }
 
   // Adds a gob from the manager
@@ -22,14 +23,18 @@ export default class GobManager{
   // gob: A Gob instance.
   //  Can't have the same id as a gob already in the manager
   add(gob){
-    this.gobs = [
-      ...this.gobs,
-      gob
-    ]
-    // Also make this gob exist. Run it's initialize logic
+    if(this.gobs.filter(function(comp){return comp.id === gob.id}).length > 0){
+      throw `Cannot add gob ${gob.id} with the same id as an already tracked object`
+    }
+    this.gobs = [...this.gobs, gob]
     gob.initialize(this)
-    // TODO: Throw error if gob has same id
     return this
+  }
+
+  addObstacle(gob){
+    this.add(gob)
+    this.obstacles = [...this.obstacles, gob]
+    this.nextObstacleId += 1
   }
 
   // Removes a gob from the manager
@@ -37,6 +42,9 @@ export default class GobManager{
   // id: Gob id
   remove(id){
     let removedGob = null
+    this.obstacles = this.obstacles.filter( (gob) => {
+      return gob.id !== id
+    })
     this.gobs = this.gobs.filter( (gob) => {
       if(gob.id === id){
         removedGob = gob
@@ -62,6 +70,9 @@ export default class GobManager{
   // Runs the update function on all gobs
   // Note: Updates should happen *after* all manipulations like moveTo are done to a sprite
   update(){
+    for(const gob of this.obstacles){
+      gob.handleCollisions(this.get('player'))
+    }
     for(const gob of this.gobs){
       gob.update()
     }
@@ -125,8 +136,7 @@ export default class GobManager{
 
   createLoostacle(){
     const id = `obstacle${this.nextObstacleId}`
-    this.nextObstacleId += 1
-    this.add(
+    this.addObstacle(
       new Loostacle({
         id,
         stage: this.backgroundLayer,
@@ -137,16 +147,11 @@ export default class GobManager{
         frames: [ "obstacles/loostacle" ],
       })
     )
-    this.level.obstacleIds = [
-      ...this.level.obstacleIds,
-      id
-    ]
   }
 
   createBarrier(){
     const id = `obstacle${this.nextObstacleId}`
-    this.nextObstacleId += 1
-    this.add(
+    this.addObstacle(
       new Barrier({
         id,
         stage: this.backgroundLayer,
@@ -157,17 +162,12 @@ export default class GobManager{
         frames: [ "obstacles/barrier" ],
       })
     )
-    this.level.obstacleIds = [
-      ...this.level.obstacleIds,
-      id
-    ]
   }
 
   createRoughacle(length){
-    this.nextObstacleId += 1
     for(let ii=0; ii < length; ii++){
       const id = `obstacle${this.nextObstacleId}-roughacle${id}_${ii}`
-      this.add(
+      this.addObstacle(
         new Roughacle({
           id,
           stage: this.backgroundLayer,
@@ -178,10 +178,6 @@ export default class GobManager{
           frames: [ "obstacles/roughacle" ],
         })
       )
-      this.level.obstacleIds = [
-        ...this.level.obstacleIds,
-        id
-      ]
     }
   }
 

@@ -217,18 +217,8 @@ function runGame(){
     }
   }
 
-  // Obstacle state management
-  for(const obstacleId of level.obstacleIds){
-    let obstacle = gobManager.get(obstacleId)
-    obstacle.handleCollisions(player)
-  }
-  if(player.canHitObstacle){
-    player.showReadyMarker()
-  } else {
-    player.hideReadyMarker()
-  }
- 
   gobManager.update()
+
   // Update shadow to match player
   const shadow = gobManager.get('playerShadow')
   const playerDistanceFromGround = level.groundLevel - player.y

@@ -7,7 +7,7 @@ export class Level{
     this.targetVelocity = 10
 
     // Spawn
-    this.spawnRate = 100
+    this.spawnRate = 500
     this.lastSpawn = 0
 
     // Acceleration
@@ -22,10 +22,6 @@ export class Level{
     this.distanceTraveled = 0
 
     // Obstacles
-    this.obstacleIds = []
-    this.totalObstacles = 0
-
-    // 
     this.groundLevel = 280
     this.rightWall = 300
     this.leftWall = 20
