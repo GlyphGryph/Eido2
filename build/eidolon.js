@@ -31203,7 +31203,7 @@ module.exports = {
 };
 
 },{}],172:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -31213,7 +31213,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _obstacle = require('./obstacle');
+var _obstacle = require("./obstacle");
 
 var _obstacle2 = _interopRequireDefault(_obstacle);
 
@@ -31235,11 +31235,9 @@ var Barrier = function (_Obstacle) {
   }
 
   _createClass(Barrier, [{
-    key: 'handleCollisions',
+    key: "handleCollisions",
     value: function handleCollisions(player) {
       if (this.active && this.checkCollisionWith(player)) {
-        console.log('hit!');
-        console.log(this);
         if (player.shouldPowerBreak()) {
           this.destroyedByPower = true;
         } else {
@@ -31249,19 +31247,22 @@ var Barrier = function (_Obstacle) {
       }
     }
   }, {
-    key: 'update',
+    key: "update",
     value: function update() {
       if (this.destroyedByHit) {
-        console.log('ouch! obstacle ' + this.id + ' hit');
+        console.log("ouch! obstacle " + this.id + " hit");
+        this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y, 0, 1, 0.03, ["obstacles/brokenBarrier/top"]);
+        this.manager.createRemnant(this.id + "_middle_remnant", this.x, this.y + 80, 0, 0.5, -0.03, ["obstacles/brokenBarrier/middle"]);
+        this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y + 141, 0, 0, 0, ["obstacles/brokenBarrier/base"]);
         this.manager.remove(this.id);
       } else if (this.destroyedByPower) {
-        console.log('obstacle ' + this.id + ' eliminated');
+        console.log("obstacle " + this.id + " eliminated");
         this.manager.createRemnant(this.id + "_top_remnant", this.x, this.y, 10, 5, 0.2, ["obstacles/brokenBarrier/top"]);
         this.manager.createRemnant(this.id + "_middle_remnant", this.x, this.y + 80, 20, 0, -0.2, ["obstacles/brokenBarrier/middle"]);
         this.manager.createRemnant(this.id + "_bottom_remnant", this.x, this.y + 141, 0, 0, 0, ["obstacles/brokenBarrier/base"]);
         this.manager.remove(this.id);
       } else {
-        _get(Barrier.prototype.__proto__ || Object.getPrototypeOf(Barrier.prototype), 'update', this).call(this);
+        _get(Barrier.prototype.__proto__ || Object.getPrototypeOf(Barrier.prototype), "update", this).call(this);
       }
     }
   }]);
@@ -31493,7 +31494,6 @@ var GobManager = function () {
       if (this.gobs.filter(function (comp) {
         return comp.id === gob.id;
       }).length > 0) {
-        console.log(this.gobs);
         throw 'Cannot add gob ' + gob.id + ' with the same id as an already tracked object';
       }
       this.gobs = [].concat(_toConsumableArray(this.gobs), [gob]);
@@ -31550,7 +31550,6 @@ var GobManager = function () {
   }, {
     key: 'update',
     value: function update() {
-      console.log(this.obstacles);
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -31806,7 +31805,7 @@ Object.defineProperty(exports, 'Barrier', {
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 },{"./barrier":172,"./gob":173,"./gobManager":174,"./loostacle":176,"./obstacle":177,"./player":178,"./remnant":179,"./roughacle":180}],176:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -31816,7 +31815,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _obstacle = require('./obstacle');
+var _obstacle = require("./obstacle");
 
 var _obstacle2 = _interopRequireDefault(_obstacle);
 
@@ -31838,11 +31837,9 @@ var Loostacle = function (_Obstacle) {
   }
 
   _createClass(Loostacle, [{
-    key: 'handleCollisions',
+    key: "handleCollisions",
     value: function handleCollisions(player) {
       if (this.active && this.checkCollisionWith(player)) {
-        console.log('hit!');
-        console.log(this);
         if (player.shouldPowerToss()) {
           this.destroyedByPower = true;
         } else {
@@ -31852,20 +31849,20 @@ var Loostacle = function (_Obstacle) {
       }
     }
   }, {
-    key: 'update',
+    key: "update",
     value: function update() {
       if (this.destroyedByHit) {
-        console.log('ouch! obstacle ' + this.id + ' hit');
+        console.log("ouch! obstacle " + this.id + " hit");
         this.manager.createRemnant(this.id + "_left_remnant", this.x - 5, this.y + 12, 0, 0, 0, ["obstacles/brokenLoostacle/01"]);
         this.manager.createRemnant(this.id + "_right_remnant", this.x + 5, this.y + 15, 0, 0, 0, ["obstacles/brokenLoostacle/02"]);
         this.manager.remove(this.id);
       } else if (this.destroyedByPower) {
-        console.log('obstacle ' + this.id + ' eliminated');
+        console.log("obstacle " + this.id + " eliminated");
         this.manager.createRemnant(this.id + "_right_remnant", this.x, this.y, 10, -5, 0.5, ["obstacles/brokenLoostacle/02"]);
         this.manager.createRemnant(this.id + "_left_remnant", this.x, this.y, 0, -10, -0.5, ["obstacles/brokenLoostacle/01"]);
         this.manager.remove(this.id);
       } else {
-        _get(Loostacle.prototype.__proto__ || Object.getPrototypeOf(Loostacle.prototype), 'update', this).call(this);
+        _get(Loostacle.prototype.__proto__ || Object.getPrototypeOf(Loostacle.prototype), "update", this).call(this);
       }
     }
   }]);

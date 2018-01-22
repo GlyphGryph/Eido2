@@ -15,6 +15,9 @@ export default class Barrier extends Obstacle {
   update(){
     if(this.destroyedByHit){
       console.log(`ouch! obstacle ${this.id} hit`)
+      this.manager.createRemnant(this.id+"_top_remnant", this.x, this.y, 0, 1, 0.03, ["obstacles/brokenBarrier/top"])
+      this.manager.createRemnant(this.id+"_middle_remnant", this.x, this.y + 80, 0, 0.5, -0.03, ["obstacles/brokenBarrier/middle"])
+      this.manager.createRemnant(this.id+"_bottom_remnant", this.x, this.y + 141, 0, 0, 0, ["obstacles/brokenBarrier/base"])
       this.manager.remove(this.id)
     }else if(this.destroyedByPower){
       console.log(`obstacle ${this.id} eliminated`)
